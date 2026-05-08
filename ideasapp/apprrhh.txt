@@ -1,0 +1,1789 @@
+================================================================================
+    📋 APLICACIÓN INTEGRAL DE SELECCIÓN Y RECLUTAMIENTO
+    ESQUEMA COMPLETO - TODAS LAS FUNCIONALIDADES
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+PARTE 1: CONFIGURACIÓN GLOBAL Y DISEÑO UI/UX
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ SISTEMA DE AUDIO AMBIENTE                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+UBICACIÓN: Esquina superior derecha (icono pequeño 🔊)
+
+OPCIONES DE AUDIO:
+├── [  ] Silencio (opción por defecto)
+├── [ 🌊 ] Mar y gaviotas - Ambiente relajante
+│   └── Loop continuo de olas suaves y gaviotas lejanas (10-15 min)
+└── [ ⌨️ ] Teclado Blade Runner - Synthwave/Cyberpunk
+    └── Ambiente electrónico futurista tipo Blade Runner
+
+CONTROLES:
+├── Selector de ambiente (radio buttons)
+├── Slider de volumen (0-100)
+├── Botón mute/unmute rápido
+├── Indicador visual de audio activo (pulsación)
+└── Persistencia de preferencia (guarda en localStorage)
+
+IMPLEMENTACIÓN TÉCNICA:
+├── Archivos MP3 optimizados para web
+├── Precarga de audio para evitar lag
+├── Fade in/out suave al cambiar (1 segundo)
+├── Loop seamless sin cortes perceptibles
+└── No autoplay (requiere click del usuario - UX best practice)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EFECTOS LUMINOSOS Y SOMRBEADO EN ELEMENTOS INTERACTIVOS                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ NAVEGACIÓN PRINCIPAL                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+BARRA SUPERIOR (Top Bar) - Fixed, height: 60px:
+├── Logo empresa (izquierda, clickeable → dashboard)
+├── Título sección actual (centro-izquierda)
+├── Buscador global (centro, expandible)
+└── Iconos derecha:
+    ├── 🔔 Notificaciones (badge con número)
+    ├── ✅ Tareas pendientes
+    ├── 🔊 Control audio (desplegable)
+    ├── 🌓 Toggle Modo Oscuro/Claro
+    ├── ⚙️ Configuración
+    └── 👤 Usuario (menú desplegable: perfil/logout)
+
+MENÚ LATERAL (Sidebar) - Colapsable:
+├── Hamburguesa icon para colapsar/expandir
+├── Expandido: 250px | Colapsado: 60px (solo iconos)
+│
+├── Menú items:
+│   ├── 🏠 Dashboard / Inicio
+│   ├── 👥 Base de Datos Candidatos
+│   ├── 💼 Posiciones/Vacantes
+│   ├── 📊 Evaluaciones
+│   ├── 🔄 Comparador de Candidatos
+│   ├── ❓ Preguntas de Entrevista
+│   ├── 🚀 Metodologías Ágiles
+│   ├── 📋 Convenios
+│   ├── 📜 Estatuto de los Trabajadores
+│   ├── 🏢 Mi Empresa
+│   ├── 📁 Perfiles IT/Telecom
+│   ├── 📖 Glosario de Términos
+│   ├── 📖 Anotaciones
+│   └── ⚙️ Configuración
+└── Footer: versión app + ayuda
+
+BREADCRUMBS (debajo de top bar):
+└── Inicio > Candidatos > Juan Pérez González
+    (clickeable para navegación rápida)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PARTE 2: MÓDULOS FUNCIONALES PRINCIPALES
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 1: DASHBOARD / INICIO                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+LAYOUT: Grid responsive de 2-3 columnas con widgets
+
+KPIs DESTACADOS (Cards con iconos y gráficos):
+├── 💼 Posiciones Abiertas: 24 (↑ +5 vs mes anterior)
+├── 👥 Candidatos en Proceso: 156
+├── 📅 Entrevistas esta semana: 18
+├── ⏱️ Tiempo medio contratación: 28 días (objetivo: 30)
+├── ✅ Tasa de éxito: 85%
+└── 🎯 Contrataciones este mes: 7 | Este año: 42
+
+GRÁFICOS:
+├── Embudo de Conversión (funnel chart):
+│   └── CV recibidos → Screening → Entrevista → Técnica → Final → Contratado
+├── Evolución Mensual (line chart):
+│   └── Últimos 12 meses: posiciones abiertas vs cerradas
+├── Posiciones por Departamento (donut chart):
+│   └── IT 45% | Marketing 20% | Sales 15% | Otros 20%
+└── Fuentes de Captación (bar chart):
+    └── LinkedIn, InfoJobs, Referidos, Web corp., Headhunting
+
+TAREAS PENDIENTES (Lista interactiva):
+├── Tipos de tareas:
+│   ├── 📞 Entrevistas por realizar
+│   ├── 📄 CVs por revisar
+│   ├── 💬 Feedback pendiente
+│   ├── 📧 Ofertas por enviar
+│   └── ☎️ Referencias por contactar
+│
+├── Cada tarea muestra:
+│   ├── Checkbox para completar
+│   ├── Prioridad (🔴 Alta, 🟡 Media, 🟢 Baja)
+│   ├── Título y descripción
+│   ├── Candidato/posición asociada (link)
+│   ├── Fecha/hora
+│   └── Acciones: editar, eliminar
+│
+└── Funciones:
+    ├── + Nueva tarea
+    ├── Filtrar: Todas/Hoy/Esta semana/Vencidas
+    ├── Ordenar: Por prioridad/fecha/tipo
+    └── Ver historial de completadas
+
+ALERTAS:
+├── 🚨 Procesos sin actividad >7 días
+├── ⏳ Candidatos esperando respuesta >3 días
+├── 📅 Entrevistas próximas (24h)
+└── 📑 Contratos por vencer (30 días)
+
+ACCESOS RÁPIDOS (botones grandes):
+├── ➕ Nuevo Candidato
+├── 💼 Nueva Posición
+├── 📅 Programar Entrevista
+└── 🔍 Buscar en DB
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 2: BASE DE DATOS DE CANDIDATOS                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+BÚSQUEDA Y FILTROS:
+├── Buscador inteligente (nombre, email, skills)
+└── Filtros laterales:
+    ├── Estado (Activo/En proceso/Descartado/Contratado/Blacklist)
+    ├── Disponibilidad
+    ├── Años experiencia (slider 0-20+)
+    ├── Formación (checkboxes)
+    ├── Stack tecnológico (multi-select)
+    ├── Idiomas (nivel mínimo)
+    ├── Rango salarial (slider)
+    ├── Modalidad (Remoto/Híbrido/Presencial)
+    ├── Ubicación
+    ├── Fecha registro
+    ├── Puntuación mínima
+    └── Guardar búsqueda
+
+VISTA LISTA (Tabla customizable):
+├── Columnas:
+│   ├── [✓] Selección
+│   ├── Foto
+│   ├── Nombre (ordenable)
+│   ├── Email
+│   ├── Teléfono
+│   ├── Puesto
+│   ├── Experiencia (años)
+│   ├── Stack (badges)
+│   ├── Estado (badge color)
+│   ├── Puntuación (★★★★☆ + número)
+│   ├── Última actualización
+│   └── Acciones (👁️ Ver | ✏️ Editar | 📧 Contactar)
+│
+├── Funciones:
+│   ├── Ordenar por columna (click header)
+│   ├── Filtro rápido por columna
+│   ├── Personalizar columnas visibles
+│   ├── Selección múltiple (acciones en lote)
+│   ├── Paginación (10/25/50/100 por página)
+│   └── Exportar (Excel/CSV/PDF)
+│
+└── Vista alternativa: Cards (grid responsive)
+
+FICHA COMPLETA DE CANDIDATO (pestañas):
+├── 📋 Información General:
+│   ├── Datos personales (nombre, email, teléfono, DNI, etc.)
+│   ├── LinkedIn, GitHub, Portfolio
+│   ├── Ubicación y movilidad
+│   ├── Situación laboral actual
+│   └── Disponibilidad de incorporación
+│
+├── 🎓 Formación e Idiomas:
+│   ├── Estudios (título, centro, año, calificación)
+│   ├── Certificaciones (nombre, entidad, fecha, ID)
+│   ├── Cursos (nombre, plataforma, duración, certificado)
+│   └── Idiomas (idioma, nivel oral/escrito, certificación)
+│
+├── 💼 Experiencia Profesional:
+│   ├── Lista de empleos (empresa, puesto, fechas, duración)
+│   ├── Responsabilidades y logros
+│   ├── Tecnologías utilizadas
+│   ├── Motivo de salida
+│   └── Años totales de experiencia (calculado auto)
+│
+├── 🛠️ Skills Técnicas:
+│   ├── Stack completo categorizado:
+│   │   ├── Lenguajes (cada uno con nivel: Junior/Mid/Senior/Expert)
+│   │   ├── Frameworks
+│   │   ├── Bases de datos
+│   │   ├── Cloud & DevOps
+│   │   └── Herramientas
+│   ├── Años de experiencia por tecnología
+│   ├── Gráfico radar de competencias
+│   ├── Proyectos destacados
+│   └── Especialización (Frontend/Backend/Fullstack/DevOps/etc.)
+│
+├── 💡 Skills Blandas (evaluación 1-10):
+│   ├── Comunicación
+│   ├── Trabajo en equipo
+│   ├── Liderazgo
+│   ├── Proactividad
+│   ├── Adaptabilidad
+│   ├── Gestión del tiempo
+│   ├── Resolución de problemas
+│   └── Gráfico radar
+│
+├── 📊 Evaluaciones:
+│   ├── Histórico de evaluaciones
+│   ├── Puntuación total actual
+│   ├── Desglose (Técnica/Soft/Cultural/Otros)
+│   ├── Evolución en el tiempo (gráfico)
+│   └── Comentarios de evaluadores
+│
+├── 📅 Historial Entrevistas:
+│   ├── Lista de entrevistas (fecha, tipo, entrevistador)
+│   ├── Puntuación por entrevista
+│   ├── Comentarios
+│   ├── Fortalezas/áreas de mejora
+│   └── Decisión y siguiente paso
+│
+├── 📎 Documentos:
+│   ├── CV (PDF/DOC)
+│   ├── Carta de presentación
+│   ├── Portfolio
+│   ├── Certificados
+│   ├── Referencias
+│   └── Otros (upload múltiple)
+│
+├── 🔄 Procesos Asociados:
+│   ├── Histórico de posiciones aplicadas
+│   ├── Estado en cada proceso
+│   ├── Fases completadas
+│   ├── Resultado final
+│   └── Notas del proceso
+│
+└── 📝 Notas y Timeline:
+    ├── Notas internas (privadas)
+    ├── Timeline de actividad (emails, llamadas, cambios)
+    └── Añadir nueva nota
+
+PREFERENCIAS LABORALES:
+├── Rango salarial deseado (min-objetivo)
+├── Tipo de contrato preferido
+├── Modalidad (remoto/híbrido/presencial)
+├── Jornada (completa/parcial)
+├── Sectores de interés
+└── Beneficios valorados
+
+REFERENCIAS LABORALES:
+├── Nombre del referente
+├── Empresa y cargo
+├── Contacto
+├── Validación (✅/❌/⏳)
+└── Comentarios recibidos
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 3: GESTIÓN DE POSICIONES/VACANTES                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+VISTA GENERAL:
+├── Tablero Kanban por estado:
+│   ├── Borrador
+│   ├── Aprobación pendiente
+│   ├── Publicada/Abierta
+│   ├── En proceso
+│   ├── Finalistas identificados
+│   ├── Oferta enviada
+│   ├── Cerrada (con contratación)
+│   └── Cancelada
+│
+└── Vistas alternativas:
+    ├── Lista (tabla)
+    └── Calendario (por fechas de cierre)
+
+FILTROS:
+├── Departamento
+├── Ubicación
+├── Prioridad (Crítica/Alta/Media/Baja)
+├── Estado
+├── Responsable
+└── Rango fechas
+
+FICHA DE POSICIÓN (completa):
+
+├── INFORMACIÓN BÁSICA:
+│   ├── ID y código interno
+│   ├── Título del puesto
+│   ├── Departamento
+│   ├── Ubicación
+│   ├── Modalidad (Remoto/Híbrido/Presencial)
+│   ├── Nivel (Junior/Mid/Senior/Lead/Manager)
+│   ├── Tipo (Nueva necesidad/Reemplazo/Ampliación/Temporal)
+│   ├── Número de vacantes
+│   ├── Prioridad
+│   └── Estado
+│
+├── DESCRIPCIÓN:
+│   ├── Resumen del puesto
+│   ├── Misión
+│   ├── Responsabilidades principales
+│   ├── Funciones día a día
+│   ├── Reporta a (nombre, cargo)
+│   ├── Equipo (tamaño, estructura)
+│   ├── Proyectos principales
+│   ├── Objetivos (primeros 6 meses)
+│   └── KPIs esperados
+│
+├── REQUISITOS:
+│   ├── OBLIGATORIOS:
+│   │   ├── Formación académica
+│   │   ├── Años de experiencia (total/similar/sector)
+│   │   ├── Stack tecnológico OBLIGATORIO (con nivel)
+│   │   ├── Competencias técnicas imprescindibles
+│   │   ├── Idiomas (nivel mínimo)
+│   │   └── Certificaciones obligatorias
+│   │
+│   └── DESEABLES:
+│       ├── Stack DESEABLE
+│       ├── Experiencia sectores específicos
+│       ├── Metodologías (Agile, Scrum)
+│       ├── Idiomas adicionales
+│       └── Certificaciones valorables
+│
+├── COMPETENCIAS BLANDAS:
+│   ├── Trabajo en equipo (nivel importancia)
+│   ├── Liderazgo
+│   ├── Comunicación
+│   ├── Resolución problemas
+│   └── Otras específicas
+│
+├── CONDICIONES OFRECIDAS:
+│   ├── SALARIO:
+│   │   ├── Banda salarial (min-max)
+│   │   ├── Salario objetivo
+│   │   └── Periodicidad (bruto anual)
+│   │
+│   ├── CONTRATO:
+│   │   ├── Tipo (Indefinido/Temporal/Proyecto/Prácticas)
+│   │   ├── Duración (si temporal)
+│   │   ├── Jornada (Completa/Parcial/Intensiva)
+│   │   ├── Horario (Fijo/Flexible/Objetivos)
+│   │   └── Periodo prueba (días)
+│   │
+│   ├── BENEFICIOS SOCIALES:
+│   │   ├── Seguro médico (% cobertura)
+│   │   ├── Ticket restaurant (€/día)
+│   │   ├── Seguro de vida
+│   │   ├── Plan pensiones
+│   │   └── Guardería
+│   │
+│   ├── OTROS BENEFICIOS:
+│   │   ├── Formación continua (presupuesto)
+│   │   ├── Bonus objetivos (% variable)
+│   │   ├── Stock options/RSUs
+│   │   ├── Días vacaciones (adicionales a legal)
+│   │   ├── Viernes intensivos
+│   │   ├── Día cumpleaños libre
+│   │   ├── Retribución flexible
+│   │   ├── Budget home office
+│   │   ├── Equipamiento (laptop, móvil)
+│   │   └── Otros
+│   │
+│   └── PLAN DE CARRERA:
+│       ├── Posibilidades crecimiento
+│       ├── Timeline promoción
+│       └── Rutas de desarrollo
+│
+├── PROCESO DE SELECCIÓN:
+│   ├── Fecha apertura
+│   ├── Fecha límite candidaturas
+│   ├── Fecha estimada incorporación
+│   ├── Duración estimada proceso (días)
+│   │
+│   ├── FASES (ordenadas):
+│   │   ├── Screening CV (responsable, duración, criterios)
+│   │   ├── Entrevista telefónica (responsable, guión)
+│   │   ├── Prueba técnica (tipo, duración, evaluación, archivo)
+│   │   ├── Entrevista técnica (responsables, áreas evaluar)
+│   │   ├── Entrevista cultural (responsables, guión)
+│   │   └── Entrevista final (responsables, decisión)
+│   │
+│   ├── EQUIPO INVOLUCRADO:
+│   │   ├── Responsable principal selección
+│   │   ├── Responsable departamento
+│   │   ├── Tech leads (evaluación técnica)
+│   │   ├── RRHH
+│   │   └── Otros stakeholders
+│   │
+│   └── APROBACIONES:
+│       ├── Aprobación presupuesto
+│       ├── Aprobación contratación
+│       └── Firmantes necesarios
+│
+├── CANDIDATOS EN PROCESO:
+│   ├── Estadísticas:
+│   │   ├── Total recibidos
+│   │   ├── Por fuente (desglose)
+│   │   └── Ratio aplicación/calidad
+│   │
+│   ├── Por fase:
+│   │   ├── En screening
+│   │   ├── Pendientes prueba técnica
+│   │   ├── En entrevistas
+│   │   ├── Finalistas
+│   │   ├── Oferta enviada
+│   │   └── Descartados (con motivo)
+│   │
+│   └── Embudo conversión visual
+│
+├── MÉTRICAS Y ANALYTICS:
+│   ├── Tiempo medio por fase
+│   ├── Tiempo total contratación
+│   ├── Tasa conversión por fase (%)
+│   ├── Tasa aceptación ofertas
+│   ├── Coste por contratación
+│   ├── Calidad media candidatos
+│   └── Time to fill vs target
+│
+└── DOCUMENTOS:
+    ├── Job description (PDF/DOC)
+    ├── Anuncio oferta
+    ├── Tests/pruebas técnicas
+    ├── Guión entrevista (por fase)
+    ├── Checklist evaluación
+    ├── Plantillas email
+    └── Onboarding plan
+
+ACCIONES:
+├── Crear nueva posición
+├── Duplicar posición
+├── Editar
+├── Publicar oferta
+├── Añadir candidatos
+├── Programar entrevistas
+├── Generar informes
+├── Cerrar/Reabrir
+└── Archivar
+
+PLANTILLAS:
+└── Guardar/usar plantillas por departamento/nivel/familia
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 4: SISTEMA DE EVALUACIÓN AUTOMÁTICA                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONFIGURACIÓN DE PESOS (personalizable):
+├── Técnico: 40% (default)
+├── Soft Skills: 30%
+├── Cultural: 20%
+└── Otros factores: 10%
+
+EVALUACIÓN TÉCNICA (1-10 cada criterio):
+├── Conocimientos stack requerido
+├── Experiencia relevante (años)
+├── Calidad código/portfolio
+├── Capacidad resolución problemas
+├── Conocimientos arquitectura
+├── Buenas prácticas
+├── Testing y calidad
+└── Dominio herramientas
+
+EVALUACIÓN SOFT SKILLS (1-10):
+├── Comunicación
+├── Trabajo en equipo
+├── Liderazgo
+├── Proactividad
+├── Adaptabilidad
+├── Gestión tiempo
+├── Resolución conflictos
+└── Mentalidad crecimiento
+
+EVALUACIÓN FIT CULTURAL (1-10):
+├── Alineación valores empresa
+├── Motivación por puesto
+├── Motivación por empresa
+├── Expectativas alineadas
+├── Potencial retención
+└── Encaje con equipo
+
+OTROS FACTORES (1-10):
+├── Disponibilidad incorporación
+├── Flexibilidad salarial
+├── Estabilidad laboral previa
+├── Referencias positivas
+└── Idiomas requeridos
+
+═══════════════════════════════════════════════════════════════════════════════
+CÁLCULO AUTOMÁTICO DE PUNTUACIÓN TOTAL:
+═══════════════════════════════════════════════════════════════════════════════
+
+FÓRMULA:
+├── P_Técnica = (Σ 8 criterios técnicos / 8) × 40
+├── P_Soft = (Σ 8 criterios soft / 8) × 30
+├── P_Cultural = (Σ 6 criterios cultural / 6) × 20
+├── P_Otros = (Σ 5 criterios otros / 5) × 10
+│
+└── PUNTUACIÓN TOTAL = P_Técnica + P_Soft + P_Cultural + P_Otros
+    
+    MÁXIMO: 100 puntos
+
+CLASIFICACIÓN AUTOMÁTICA:
+├── 90-100 puntos: ⭐⭐⭐⭐⭐ EXCELENTE (A+) [Verde brillante]
+├── 80-89 puntos: ⭐⭐⭐⭐ MUY BUENO (A) [Verde]
+├── 70-79 puntos: ⭐⭐⭐ BUENO (B) [Amarillo]
+├── 60-69 puntos: ⭐⭐ ACEPTABLE (C) [Naranja]
+├── 50-59 puntos: ⭐ JUSTO (D) [Rojo claro]
+└── 0-49 puntos: INSUFICIENTE (E) [Rojo]
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FORMULARIO DE EVALUACIÓN:
+├── Interface con sliders para cada criterio
+├── Tooltips explicativos
+├── Campos de comentarios por sección
+├── Evidencias/ejemplos
+├── Cálculo en tiempo real
+├── Gráfico radar visual
+└── Auto-save
+
+HISTORIAL:
+├── Todas las evaluaciones del candidato
+├── Evolución temporal (gráfico)
+└── Comparación entre evaluaciones
+
+PLANTILLAS:
+└── Por tipo posición/departamento/nivel
+
+REPORTE:
+├── Resumen ejecutivo
+├── Top 3 fortalezas
+├── Top 3 áreas mejora
+├── Recomendación final:
+│   ├── Contratar (strongly recommend)
+│   ├── Contratar con reservas
+│   ├── Pasar siguiente fase
+│   ├── Candidato en reserva
+│   └── No contratar
+└── Exportar PDF
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 5: COMPARADOR MÚLTIPLE DE CANDIDATOS                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SELECCIÓN:
+├── Búsqueda inteligente
+├── Filtros (posición, estado, puntuación)
+├── Selección múltiple ILIMITADA
+└── Guardar comparaciones
+
+VISTA COMPARATIVA (tabla lado a lado):
+
+INFORMACIÓN BÁSICA:
+├── Foto/avatar
+├── Nombre
+├── Email, teléfono
+├── LinkedIn
+├── Ubicación
+└── Disponibilidad
+
+FORMACIÓN:
+├── Nivel estudios
+├── Titulación
+├── Universidad
+├── Certificaciones (número)
+└── Idiomas y niveles
+
+EXPERIENCIA:
+├── Años totales
+├── Años puesto similar
+├── Nº empresas
+├── Empresa actual
+├── Puesto actual
+└── Estabilidad media
+
+STACK TÉCNICO:
+├── Lenguajes principales
+├── Frameworks principales
+├── Bases de datos
+├── Cloud/DevOps
+├── Coincidencias con requisitos (%)
+└── Tecnologías únicas
+
+PREFERENCIAS:
+├── Salario deseado
+├── Modalidad preferida
+├── Disponibilidad
+└── Tipo contrato
+
+PUNTUACIONES (gráficos comparativos):
+├── Técnica (barra)
+├── Soft Skills (barra)
+├── Cultural (barra)
+├── Otros (barra)
+├── TOTAL (barra destacada)
+└── Radar superpuesto
+
+═══════════════════════════════════════════════════════════════════════════════
+RANKING AUTOMÁTICO:
+═══════════════════════════════════════════════════════════════════════════════
+├── Ordenado por puntuación total (descendente)
+├── Posición: #1 🥇 | #2 🥈 | #3 🥉 | #4...
+├── Diferencia de puntos con siguiente
+└── Top 3 destacado visualmente
+═══════════════════════════════════════════════════════════════════════════════
+
+ANÁLISIS DE DIFERENCIAS (destacado con colores):
+├── 🟢 Verde: Mejor que los demás
+├── 🔴 Rojo: Peor que los demás
+├── 🟡 Amarillo: En promedio
+└── 🔵 Azul: Único/diferenciador
+
+MATRIZ FORTALEZAS/DEBILIDADES:
+├── Top 3 fortalezas vs demás
+├── Top 3 debilidades vs demás
+├── Factores diferenciadores únicos
+└── Riesgos identificados
+
+GAPS TÉCNICOS:
+├── Tecnologías requeridas que faltan
+├── Nivel insuficiente en tech críticas
+├── Facilidad cubrir gaps
+└── Código color (🔴 crítico, 🟡 deseable)
+
+COMPARACIÓN POR ÁREAS:
+
+STACK (vista matriz):
+├── Tabla: tecnologías vs candidatos
+├── Nivel de cada uno
+├── Años experiencia
+├── Quien tiene mejor nivel (destacado)
+└── Cobertura requisitos (%)
+
+EXPERIENCIA:
+├── Timeline comparado
+├── Sectores trabajados
+├── Tamaño empresas
+└── Gaps laborales
+
+SOFT SKILLS:
+├── Radar múltiple
+├── Tabla puntuaciones
+└── Mejor en cada skill
+
+CULTURAL:
+├── Alineación valores
+├── Motivación
+└── Potencial retención
+
+MATRIZ DE DECISIÓN (personalizable):
+├── Ajustar pesos en tiempo real
+├── Añadir criterios custom
+├── Recalcular ranking
+├── Escenarios "qué pasaría si...":
+│   ├── Priorizando experiencia
+│   ├── Priorizando fit cultural
+│   ├── Priorizando ajuste salarial
+│   └── Priorizando disponibilidad
+└── Guardar matriz
+
+RECOMENDACIÓN INTELIGENTE:
+├── Candidato #1 recomendado (justificación)
+├── Alternativas (#2, #3)
+└── Candidatos en reserva
+
+ACCIONES:
+├── Enviar comparativa por email
+├── Compartir con stakeholders
+├── Programar reunión decisión
+├── Marcar finalistas
+├── Descartar candidatos
+└── Acceder fichas individuales
+
+EXPORTACIÓN:
+├── PDF comparativo
+├── Informe ejecutivo (1 página)
+├── Informe detallado
+├── Presentación (PPT)
+├── Excel con datos
+└── Link compartible
+
+
+═══════════════════════════════════════════════════════════════════════════════
+PARTE 3: BANCO DE PREGUNTAS, METODOLOGÍAS Y DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 6: BANCO DE PREGUNTAS DE ENTREVISTA                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ORGANIZACIÓN:
+├── Categorización:
+│   ├── Por tipo (General/Técnica/Cultural/Comportamiento)
+│   ├── Por área técnica
+│   ├── Por competencia
+│   ├── Por nivel (Junior/Mid/Senior)
+│   └── Custom
+│
+├── Sistema etiquetas (tags)
+├── Búsqueda avanzada
+├── Favoritos
+└── Más utilizadas (estadística)
+
+═══════════════════════════════════════════════════════════════════════════════
+CATEGORÍAS PRINCIPALES DE PREGUNTAS:
+═══════════════════════════════════════════════════════════════════════════════
+
+1. PREGUNTAS GENERALES
+   ├── Presentación:
+   │   ├── Cuéntame sobre ti
+   │   ├── ¿Por qué quieres trabajar aquí?
+   │   ├── ¿Qué sabes de nuestra empresa?
+   │   ├── ¿Dónde te ves en 5 años?
+   │   └── ¿Por qué deberíamos contratarte?
+   │
+   ├── Experiencia:
+   │   ├── Proyecto más desafiante
+   │   ├── Mayor logro profesional
+   │   ├── Error/fracaso y aprendizaje
+   │   ├── Cómo gestionas presión
+   │   └── Entorno trabajo ideal
+   │
+   └── Motivación:
+       ├── Qué te motiva
+       ├── Expectativas salariales
+       ├── Tipo de proyectos que buscas
+       └── Qué esperas de esta posición
+
+2. PREGUNTAS TÉCNICAS (por área):
+
+   ├── FRONTEND:
+   │   ├── JavaScript/TypeScript:
+   │   │   ├── Closures y scope
+   │   │   ├── var, let, const diferencias
+   │   │   ├── Event loop
+   │   │   ├── Promesas vs async/await
+   │   │   ├── Optimización rendimiento
+   │   │   ├── "this" en JavaScript
+   │   │   └── Prototipos
+   │   │
+   │   ├── React:
+   │   │   ├── Ciclo de vida componentes
+   │   │   ├── Hooks (useState, useEffect, custom)
+   │   │   ├── Virtual DOM
+   │   │   ├── Context vs Redux
+   │   │   ├── Optimización renders
+   │   │   └── Testing (Jest, RTL)
+   │   │
+   │   ├── Angular/Vue:
+   │   │   ├── Arquitectura
+   │   │   ├── Dependency Injection
+   │   │   ├── RxJS/Observables
+   │   │   └── Lifecycle hooks
+   │   │
+   │   └── CSS:
+   │       ├── Metodologías (BEM, SMACSS)
+   │       ├── Flexbox vs Grid
+   │       ├── Responsive design
+   │       ├── Accesibilidad
+   │       └── Performance
+   │
+   ├── BACKEND:
+   │   ├── General:
+   │   │   ├── Monolito vs Microservicios
+   │   │   ├── RESTful vs GraphQL
+   │   │   ├── Autenticación (JWT, OAuth)
+   │   │   ├── Escalabilidad
+   │   │   └── Patrones diseño
+   │   │
+   │   ├── Java/Spring:
+   │   │   ├── Spring Boot vs Framework
+   │   │   ├── IoC y DI
+   │   │   ├── JPA/Hibernate
+   │   │   ├── Spring Security
+   │   │   └── Microservicios
+   │   │
+   │   ├── Python:
+   │   │   ├── Django vs Flask
+   │   │   ├── ORM
+   │   │   ├── Decoradores
+   │   │   ├── Async/await
+   │   │   └── Testing
+   │   │
+   │   └── Node.js:
+   │       ├── Event-driven
+   │       ├── Express middleware
+   │       ├── Async patterns
+   │       └── Clustering
+   │
+   ├── BASES DE DATOS:
+   │   ├── SQL:
+   │   │   ├── Normalización
+   │   │   ├── Índices
+   │   │   ├── Joins
+   │   │   ├── ACID
+   │   │   └── Optimización queries
+   │   │
+   │   └── NoSQL:
+   │       ├── CAP theorem
+   │       ├── Cuándo usar NoSQL
+   │       ├── MongoDB (documentos)
+   │       ├── Redis (key-value, casos uso)
+   │       └── Modelado datos
+   │
+   ├── DEVOPS/SRE:
+   │   ├── CI/CD:
+   │   │   ├── Integración continua
+   │   │   ├── Deployment strategies
+   │   │   ├── Jenkins/GitLab CI/GitHub Actions
+   │   │   └── Rollback strategies
+   │   │
+   │   ├── Contenedores:
+   │   │   ├── Docker (Dockerfile best practices)
+   │   │   ├── Kubernetes (Pods, Services, Deployments)
+   │   │   ├── Helm charts
+   │   │   └── Auto-scaling
+   │   │
+   │   ├── Cloud:
+   │   │   ├── AWS/Azure/GCP servicios
+   │   │   ├── IaC (Terraform, CloudFormation)
+   │   │   ├── Serverless
+   │   │   └── Costes y optimización
+   │   │
+   │   └── Monitoring:
+   │       ├── Prometheus/Grafana
+   │       ├── ELK Stack
+   │       ├── Alerting
+   │       └── SLIs/SLOs/SLAs
+   │
+   ├── QA/TESTING:
+   │   ├── Tipos testing
+   │   ├── Automatización
+   │   ├── Herramientas (Selenium, Cypress, JMeter)
+   │   └── Métricas calidad
+   │
+   ├── DATA:
+   │   ├── Machine Learning
+   │   ├── Algoritmos
+   │   ├── Feature engineering
+   │   ├── Herramientas (pandas, scikit-learn)
+   │   └── Big Data (Spark, Hadoop)
+   │
+   └── ARQUITECTURA:
+       ├── Diseño sistemas
+       ├── Escalabilidad
+       ├── Patrones arquitectónicos
+       ├── DDD
+       └── Liderazgo técnico
+
+3. PREGUNTAS CULTURALES/COMPORTAMIENTO (STAR):
+   
+   ├── Trabajo en equipo:
+   │   ├── Cómo trabajas en equipo
+   │   ├── Conflicto con compañero
+   │   ├── Desacuerdos técnicos
+   │   └── Equipo ideal
+   │
+   ├── Liderazgo:
+   │   ├── Cuándo lideraste proyecto
+   │   ├── Cómo motivas
+   │   ├── Gestión bajo rendimiento
+   │   └── Estilo liderazgo
+   │
+   ├── Resolución problemas:
+   │   ├── Problema complejo resuelto
+   │   ├── Priorización múltiples urgencias
+   │   ├── Aprender rápido
+   │   └── Manejo ambigüedad
+   │
+   ├── Adaptabilidad:
+   │   ├── Cambio importante afrontado
+   │   ├── Adaptación nuevas tecnologías
+   │   ├── Fuera zona confort
+   │   └── Cambio prioridades
+   │
+   └── Comunicación:
+       ├── Explicar técnico a no técnico
+       ├── Presentación importante
+       ├── Gestión feedback negativo
+       └── Mantener informado equipo
+
+4. PREGUNTAS POR ROL ESPECÍFICO:
+   
+   ├── Product Manager:
+   │   ├── Priorización roadmap
+   │   ├── Discovery producto
+   │   ├── Gestión stakeholders
+   │   └── Métricas producto
+   │
+   ├── Scrum Master:
+   │   ├── Facilitar retrospectiva
+   │   ├── Gestión impediments
+   │   ├── Métricas ágiles
+   │   └── Resistencia a Agile
+   │
+   ├── UX/UI Designer:
+   │   ├── Proceso diseño
+   │   ├── User research
+   │   ├── Testing diseños
+   │   └── Design systems
+   │
+   └── Project Manager:
+       ├── Metodologías gestión
+       ├── Gestión riesgos
+       ├── Stakeholders
+       └── Scope creep
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ESTRUCTURA DE CADA PREGUNTA:
+├── ID único
+├── Texto pregunta
+├── Categoría/tipo
+├── Etiquetas (tags)
+├── Nivel dificultad
+├── Competencia que evalúa
+├── Tiempo estimado respuesta
+├── Respuesta esperada (guía)
+├── Criterios evaluación
+├── Red flags
+├── Follow-up questions
+├── Notas entrevistador
+└── Ejemplos buenas/malas respuestas
+
+FUNCIONALIDADES:
+├── Crear nueva pregunta
+├── Editar pregunta
+├── Categorizar y etiquetar
+├── Buscar y filtrar
+├── Generar set para entrevista
+├── Plantillas por rol
+├── Exportar (PDF/Word)
+├── Compartir equipo
+├── Marcar favorita
+├── Estadísticas uso
+└── Importar archivo
+
+GENERADOR GUIONES:
+├── Seleccionar rol
+├── Tipo entrevista
+├── Duración estimada
+├── Generación automática set
+├── Personalizar orden
+├── Añadir/quitar preguntas
+├── Agregar notas
+├── Exportar guión
+└── Compartir entrevistador
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 7: METODOLOGÍAS ÁGILES                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTENIDO DOCUMENTADO:
+
+1. SCRUM:
+   ├── Teoría y Pilares:
+   │   ├── Transparencia
+   │   ├── Inspección
+   │   └── Adaptación
+   │
+   ├── Valores:
+   │   ├── Compromiso
+   │   ├── Coraje
+   │   ├── Foco
+   │   ├── Apertura
+   │   └── Respeto
+   │
+   ├── Roles:
+   │   ├── Product Owner (responsabilidades, skills)
+   │   ├── Scrum Master (facilitador, coach)
+   │   └── Development Team (auto-organizados, cross-funcionales)
+   │
+   ├── Eventos:
+   │   ├── Sprint (1-4 semanas, timebox fijo)
+   │   ├── Sprint Planning (QUÉ + CÓMO, máx 8h)
+   │   ├── Daily Scrum (15 min sincronización)
+   │   ├── Sprint Review (inspección incremento, máx 4h)
+   │   └── Sprint Retrospective (mejora proceso, máx 3h)
+   │
+   ├── Artefactos:
+   │   ├── Product Backlog (ordenado por valor)
+   │   ├── Sprint Backlog (plan del sprint)
+   │   └── Increment (incremento "Done")
+   │
+   └── Definición de "Done"
+
+2. KANBAN:
+   ├── Principios:
+   │   ├── Visualizar flujo
+   │   ├── Limitar WIP (Work In Progress)
+   │   ├── Gestionar flujo
+   │   └── Mejora continua
+   │
+   ├── Tablero Kanban:
+   │   ├── Columnas (To Do/In Progress/Done)
+   │   ├── Límites WIP
+   │   └── Políticas explícitas
+   │
+   └── Métricas:
+       ├── Lead Time
+       ├── Cycle Time
+       └── Throughput
+
+3. EXTREME PROGRAMMING (XP):
+   ├── Valores:
+   │   ├── Comunicación
+   │   ├── Simplicidad
+   │   ├── Feedback
+   │   ├── Coraje
+   │   └── Respeto
+   │
+   └── Prácticas:
+       ├── TDD (Test-Driven Development)
+       ├── Pair Programming
+       ├── Refactoring continuo
+       ├── Integración continua
+       └── Releases frecuentes
+
+4. SAFe (Scaled Agile Framework):
+   ├── Niveles:
+   │   ├── Team Level
+   │   ├── Program Level (ART)
+   │   ├── Large Solution
+   │   └── Portfolio
+   │
+   └── Eventos:
+       ├── PI Planning
+       ├── Scrum of Scrums
+       └── System Demo
+
+5. LEAN:
+   ├── Principios:
+   │   ├── Eliminar desperdicios
+   │   ├── Amplificar aprendizaje
+   │   ├── Decidir lo más tarde posible
+   │   ├── Entregar rápido
+   │   ├── Empoderar equipo
+   │   ├── Construir integridad
+   │   └── Ver el todo
+   │
+   └── 7 Desperdicios:
+       ├── Sobreproducción
+       ├── Espera
+       ├── Transporte
+       ├── Sobreprocesamiento
+       ├── Inventario
+       ├── Movimiento
+       └── Defectos
+
+FORMATO:
+├── Documentación completa con ejemplos
+├── Diagramas explicativos
+├── Plantillas descargables
+├── Casos de uso reales
+├── Comparativas entre metodologías
+└── Cuándo usar cada una
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 8: CONVENIO COLECTIVO OFICINAS Y DESPACHOS DE MADRID                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTENIDO:
+├── Texto completo del convenio (actualizado)
+├── Búsqueda por artículo
+├── Categorías profesionales y salarios
+├── Jornada laboral
+├── Vacaciones
+├── Permisos y licencias
+├── Condiciones económicas
+├── Tabla salarial actualizada
+├── Complementos
+├── Calculadora de salarios
+└── Versión PDF descargable
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 9: ESTATUTO DE LOS TRABAJADORES                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTENIDO:
+├── Texto completo actualizado
+├── Búsqueda por artículo/palabra clave
+├── Índice navegable:
+│   ├── Título I: Relación individual
+│   ├── Título II: Derechos y deberes
+│   ├── Título III: Contrato de trabajo
+│   ├── Título IV: Representación
+│   └── Título V: Convenios colectivos
+│
+├── Artículos más consultados destacados
+├── Actualizaciones legislativas
+├── Casos de uso y ejemplos
+└── Versión PDF descargable
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 10: MI EMPRESA                                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+SECCIONES:
+
+INFORMACIÓN CORPORATIVA:
+├── Nombre y logo
+├── Misión, Visión, Valores
+├── Historia de la empresa
+├── Cultura corporativa
+├── Organigrama
+├── Oficinas y ubicaciones
+└── Datos de contacto
+
+BENEFICIOS Y VENTAJAS:
+├── Salario competitivo
+├── Seguro médico
+├── Formación continua
+├── Flexibilidad horaria
+├── Teletrabajo
+├── Retribución flexible
+├── Eventos de equipo
+└── Plan de carrera
+
+PRESENTACIÓN PARA CANDIDATOS:
+├── ¿Por qué trabajar aquí?
+├── Testimonio
+================================================================================
+    📋 APLICACIÓN RECLUTAMIENTO - PARTE 2
+    Módulos Complementarios y Especificaciones Técnicas
+================================================================================
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 10: MI EMPRESA (continuación)                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TESTIMONIOS DE EMPLEADOS:
+├── Fotos y nombres
+├── Puesto y departamento
+├── Quote destacado
+└── Historia personal
+
+DEPARTAMENTOS:
+├── IT/Tecnología
+├── Marketing
+├── Sales
+├── Operations
+├── RRHH
+├── Finanzas
+└── Cada uno con descripción y equipo
+
+PROYECTOS DESTACADOS:
+├── Nombre del proyecto
+├── Descripción
+├── Tecnologías utilizadas
+├── Equipo involucrado
+├── Resultados/impacto
+└── Imágenes
+
+PROCESO DE ONBOARDING:
+├── Bienvenida
+├── Primera semana
+├── Primer mes
+├── Formación inicial
+├── Mentorización
+└── Integración en equipo
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 11: PERFILES IT/TELECOM HABITUALES                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Para cada perfil se incluye:
+├── Descripción del puesto
+├── Responsabilidades principales
+├── Stack tecnológico típico
+├── Nivel de experiencia (Junior/Mid/Senior)
+├── Salario orientativo (rangos)
+├── Competencias técnicas clave
+├── Competencias blandas importantes
+├── Formación recomendada
+├── Certificaciones valoradas
+└── Evolución/carrera profesional
+
+═══════════════════════════════════════════════════════════════════════════════
+LISTA DE PERFILES DOCUMENTADOS:
+═══════════════════════════════════════════════════════════════════════════════
+
+DESARROLLO FRONTEND:
+├── Frontend Developer (Junior/Mid/Senior)
+│   ├── React Developer
+│   ├── Angular Developer
+│   ├── Vue Developer
+│   └── Mobile Developer (React Native/Flutter)
+│
+└── UI/UX Designer
+    ├── UX Researcher
+    ├── UI Designer
+    └── Product Designer
+
+DESARROLLO BACKEND:
+├── Backend Developer (Junior/Mid/Senior)
+│   ├── Java/Spring Developer
+│   ├── Python Developer (Django/Flask)
+│   ├── Node.js Developer
+│   ├── .NET Developer
+│   └── Go Developer
+│
+└── API Developer
+
+FULLSTACK:
+└── Fullstack Developer (Junior/Mid/Senior)
+    ├── MERN Stack (MongoDB, Express, React, Node)
+    ├── MEAN Stack (MongoDB, Express, Angular, Node)
+    └── Full Java Stack (Java + Angular/React)
+
+DEVOPS & CLOUD:
+├── DevOps Engineer (Junior/Mid/Senior)
+├── SRE (Site Reliability Engineer)
+├── Cloud Engineer (AWS/Azure/GCP)
+├── Cloud Architect
+└── Platform Engineer
+
+DATOS:
+├── Data Engineer
+├── Data Analyst
+├── Data Scientist
+├── ML Engineer
+├── BI Developer
+└── Big Data Engineer
+
+QA & TESTING:
+├── QA Engineer (Manual)
+├── QA Automation Engineer
+├── SDET (Software Development Engineer in Test)
+└── Performance Engineer
+
+ARQUITECTURA & LIDERAZGO:
+├── Solutions Architect
+├── Software Architect
+├── Tech Lead
+├── Engineering Manager
+└── CTO
+
+SEGURIDAD:
+├── Security Engineer
+├── Cybersecurity Analyst
+├── Security Architect
+└── Pentester
+
+BASES DE DATOS:
+├── Database Administrator (DBA)
+├── Database Developer
+└── Data Modeler
+
+REDES & TELECOMUNICACIONES:
+├── Network Engineer
+├── Systems Engineer
+├── Telecommunications Engineer
+├── VoIP Engineer
+└── Network Architect
+
+GESTIÓN DE PROYECTOS:
+├── Project Manager (IT)
+├── Scrum Master
+├── Agile Coach
+├── Product Owner
+└── Program Manager
+
+OTROS ROLES IT:
+├── Systems Administrator (SysAdmin)
+├── IT Support Engineer
+├── Technical Writer
+├── Business Analyst
+└── IT Trainer
+
+═══════════════════════════════════════════════════════════════════════════════
+
+EJEMPLO DE FICHA DE PERFIL (Frontend Developer Senior):
+
+FRONTEND DEVELOPER SENIOR
+─────────────────────────────────────────────────────────────────────────────
+
+DESCRIPCIÓN:
+Desarrollador con más de 5 años de experiencia en creación de interfaces web
+modernas, responsivas y accesibles. Lidera proyectos frontend, mentoriza
+juniors y toma decisiones técnicas de arquitectura.
+
+RESPONSABILIDADES:
+├── Desarrollar aplicaciones web complejas y escalables
+├── Diseñar arquitectura frontend de proyectos
+├── Liderar equipo de developers junior/mid
+├── Code review y mentorización
+├── Optimización de rendimiento
+├── Garantizar accesibilidad y mejores prácticas
+├── Colaboración con backend, UX y producto
+└── Actualización tecnológica continua
+
+STACK TECNOLÓGICO TÍPICO:
+├── Lenguajes:
+│   ├── JavaScript (Expert)
+│   ├── TypeScript (Expert)
+│   └── HTML5/CSS3 (Expert)
+│
+├── Frameworks/Librerías:
+│   ├── React + Hooks (Expert) o
+│   ├── Angular (Expert) o
+│   ├── Vue 3 (Expert)
+│   └── Next.js / Nuxt.js (Avanzado)
+│
+├── State Management:
+│   ├── Redux / Zustand / Recoil
+│   ├── RxJS (para Angular)
+│   └── Vuex (para Vue)
+│
+├── Styling:
+│   ├── CSS Modules / Styled-Components / Emotion
+│   ├── Sass/SCSS
+│   ├── Tailwind CSS
+│   └── CSS-in-JS
+│
+├── Testing:
+│   ├── Jest
+│   ├── React Testing Library
+│   ├── Cypress / Playwright
+│   └── Storybook
+│
+├── Build Tools:
+│   ├── Webpack / Vite
+│   ├── Babel
+│   └── npm/yarn/pnpm
+│
+└── Otros:
+    ├── Git (avanzado)
+    ├── REST APIs / GraphQL
+    ├── Responsive Design
+    ├── Accesibilidad (WCAG)
+    └── Performance optimization
+
+SALARIO ORIENTATIVO (Madrid, 2026):
+├── Banda salarial: 45.000€ - 65.000€ bruto/año
+├── Promedio: 55.000€
+└── Variable según empresa y beneficios
+
+COMPETENCIAS TÉCNICAS CLAVE:
+├── Dominio avanzado de JavaScript/TypeScript
+├── Experto en al menos un framework moderno (React/Angular/Vue)
+├── Arquitectura de aplicaciones frontend
+├── Testing automatizado
+├── Optimización de rendimiento
+├── Responsive design y accesibilidad
+├── Git workflow (gitflow, trunk-based)
+└── CI/CD básico
+
+COMPETENCIAS BLANDAS:
+├── Liderazgo técnico
+├── Mentoría y enseñanza
+├── Comunicación efectiva
+├── Trabajo en equipo
+├── Gestión del tiempo
+├── Resolución de problemas
+└── Aprendizaje continuo
+
+FORMACIÓN RECOMENDADA:
+├── Grado en Ingeniería Informática / Software
+├── FP Superior en Desarrollo Aplicaciones Web
+└── Bootcamps intensivos + experiencia demostrable
+
+CERTIFICACIONES VALORADAS:
+├── Meta Front-End Developer
+├── Google UX Design
+├── AWS Certified Developer (Associate)
+└── Cursos especializados (React, Angular, Vue)
+
+EVOLUCIÓN PROFESIONAL:
+├── Origen: Junior Frontend Developer (0-2 años)
+├── Siguiente: Mid Frontend Developer (2-4 años)
+├── Actual: Senior Frontend Developer (5+ años)
+├── Futuro: Tech Lead Frontend
+└── Futuro: Frontend Architect / Engineering Manager
+
+─────────────────────────────────────────────────────────────────────────────
+
+[Se repite esta estructura para CADA perfil de la lista]
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MÓDULO 12: GLOSARIO DE TÉRMINOS                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Diccionario completo de términos técnicos, metodológicos y de RRHH.
+
+ORGANIZACIÓN:
+├── Alfabético (A-Z)
+├── Por categoría:
+│   ├── Términos técnicos IT
+│   ├── Metodologías ágiles
+│   ├── RRHH y selección
+│   ├── Términos contractuales
+│   └── Acrónimos comunes
+│
+└── Búsqueda inteligente
+
+FORMATO DE CADA TÉRMINO:
+├── Término
+├── Acrónimo (si aplica)
+├── Categoría
+├── Definición clara y concisa
+├── Ejemplo de uso
+├── Términos relacionados (enlaces)
+└── Fuentes/referencias
+
+═══════════════════════════════════════════════════════════════════════════════
+EJEMPLOS DE TÉRMINOS INCLUIDOS:
+═══════════════════════════════════════════════════════════════════════════════
+
+TÉCNICOS:
+├── API (Application Programming Interface)
+├── Backend
+├── CI/CD (Continuous Integration/Continuous Deployment)
+├── DevOps
+├── Framework
+├── Frontend
+├── Git
+├── IDE (Integrated Development Environment)
+├── Microservices
+├── REST (Representational State Transfer)
+├── SDK (Software Development Kit)
+└── [+500 términos técnicos]
+
+METODOLOGÍAS:
+├── Agile
+├── Backlog
+├── Daily Scrum / Stand-up
+├── Definition of Done (DoD)
+├── Epic
+├── Kanban
+├── Product Owner
+├── Retrospective
+├── Scrum Master
+├── Sprint
+├── User Story
+└── [+100 términos de metodologías]
+
+RRHH:
+├── ATS (Applicant Tracking System)
+├── Candidate Experience
+├── Employer Branding
+├── Headhunting
+├── Onboarding
+├── Outplacement
+├── Reskilling
+├── Soft Skills
+├── Talent Acquisition
+├── Time to Hire
+├── Upskilling
+└── [+80 términos RRHH]
+
+CONTRACTUALES:
+├── Banda salarial
+├── Convenio colectivo
+├── Contrato indefinido
+├── Periodo de prueba
+├── Preaviso
+├── Retribución flexible
+├── RSU (Restricted Stock Units)
+├── Stock Options
+└── [+50 términos contractuales]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ESPECIFICACIONES TÉCNICAS DE IMPLEMENTACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STACK TECNOLÓGICO RECOMENDADO                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+FRONTEND:
+├── Framework: React 18+ con TypeScript
+├── State Management: Redux Toolkit o Zustand
+├── Routing: React Router v6
+├── UI Components:
+│   ├── Material-UI (MUI) o Ant Design
+│   ├── Tailwind CSS para estilos custom
+│   └── Framer Motion para animaciones
+│
+├── Forms: React Hook Form + Yup/Zod
+├── Data Fetching: React Query (TanStack Query)
+├── Charts: Recharts o Chart.js
+├── Tables: TanStack Table (React Table)
+├── Date/Time: date-fns o Day.js
+├── PDF Generation: jsPDF + html2canvas
+├── Excel Export: SheetJS (xlsx)
+└── Audio: Howler.js
+
+BACKEND:
+├── Node.js + Express o
+├── Python + Django/FastAPI o
+├── Java + Spring Boot
+│
+├── Base de datos:
+│   ├── PostgreSQL (principal)
+│   ├── MongoDB (documentos)
+│   └── Redis (caché)
+│
+├── ORM: Prisma (Node) / Django ORM / JPA
+├── Autenticación: JWT + Refresh Tokens
+├── File Storage: AWS S3 o Azure Blob
+└── Email: SendGrid o AWS SES
+
+INFRAESTRUCTURA:
+├── Hosting: AWS / Azure / Google Cloud
+├── Containerización: Docker
+├── Orquestación: Kubernetes (opcional)
+├── CI/CD: GitHub Actions / GitLab CI
+├── Monitoring: DataDog / New Relic
+└── CDN: CloudFlare
+
+HERRAMIENTAS DE DESARROLLO:
+├── Version Control: Git + GitHub/GitLab
+├── IDE: VS Code
+├── API Testing: Postman
+├── Design: Figma
+└── Project Management: Jira/Linear
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ARQUITECTURA DE LA APLICACIÓN                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+PATRÓN: Arquitectura de 3 capas + Microservicios (opcional)
+
+CAPA DE PRESENTACIÓN (Frontend):
+├── React SPA (Single Page Application)
+├── Componentes reutilizables
+├── Lazy loading de rutas
+├── PWA (Progressive Web App) - opcional
+└── Responsive design (mobile-first)
+
+CAPA DE LÓGICA DE NEGOCIO (Backend):
+├── API RESTful
+├── Autenticación y autorización
+├── Validación de datos
+├── Lógica de cálculo (evaluaciones)
+└── Gestión de archivos
+
+CAPA DE DATOS:
+├── Base de datos relacional (PostgreSQL)
+├── Esquema normalizado
+├── Índices optimizados
+├── Backups automáticos
+└── Encriptación de datos sensibles
+
+SERVICIOS ADICIONALES:
+├── Servicio de emails (transaccionales)
+├── Servicio de notificaciones (push)
+├── Servicio de generación PDFs
+├── Servicio de cálculo de puntuaciones
+└── Servicio de búsqueda (Elasticsearch - opcional)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ MODELO DE DATOS PRINCIPAL                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TABLAS PRINCIPALES:
+
+Users (Usuarios de la aplicación)
+├── id (PK)
+├── email
+├── password_hash
+├── full_name
+├── role (admin/recruiter/viewer)
+├── preferences (JSON)
+└── timestamps
+
+Candidates (Candidatos)
+├── id (PK)
+├── personal_info (JSON)
+├── status
+├── source
+├── overall_score
+├── created_by (FK → Users)
+└── timestamps
+
+Candidate_Education (Formación)
+├── id (PK)
+├── candidate_id (FK → Candidates)
+├── level
+├── degree
+├── institution
+├── start_date
+├── end_date
+└── details (JSON)
+
+Candidate_Experience (Experiencia)
+├── id (PK)
+├── candidate_id (FK → Candidates)
+├── company
+├── position
+├── start_date
+├── end_date
+├── responsibilities (JSON)
+├── technologies (JSON)
+└── achievements (JSON)
+
+Candidate_Skills (Skills)
+├── id (PK)
+├── candidate_id (FK → Candidates)
+├── skill_category
+├── skill_name
+├── level (1-10 o Junior/Mid/Senior/Expert)
+└── years_experience
+
+Positions (Posiciones/Vacantes)
+├── id (PK)
+├── title
+├── department
+├── location
+├── status
+├── priority
+├── job_description (JSON)
+├── requirements (JSON)
+├── conditions (JSON)
+├── created_by (FK → Users)
+└── timestamps
+
+Position_Process (Proceso de selección)
+├── id (PK)
+├── position_id (FK → Positions)
+├── candidate_id (FK → Candidates)
+├── current_phase
+├── status
+├── notes (JSON)
+└── timestamps
+
+Evaluations (Evaluaciones)
+├── id (PK)
+├── candidate_id (FK → Candidates)
+├── position_id (FK → Positions - nullable)
+├── evaluator_id (FK → Users)
+├── technical_score
+├── soft_skills_score
+├── cultural_score
+├── other_score
+├── total_score (calculado)
+├── detailed_scores (JSON)
+├── comments
+└── timestamps
+
+Interviews (Entrevistas)
+├── id (PK)
+├── candidate_id (FK → Candidates)
+├── position_id (FK → Positions)
+├── interviewer_id (FK → Users)
+├── type
+├── scheduled_date
+├── duration
+├── score
+├── feedback
+└── timestamps
+
+Questions_Bank (Banco de preguntas)
+├── id (PK)
+├── question_text
+├── category
+├── type
+├── level
+├── competency
+├── expected_answer
+├── evaluation_criteria (JSON)
+├── tags (JSON)
+└── created_by (FK → Users)
+
+Documents (Documentos)
+├── id (PK)
+├── related_to (candidate/position)
+├── related_id
+├── file_name
+├── file_path
+├── file_type
+├── uploaded_by (FK → Users)
+└── timestamps
+
+Tasks (Tareas)
+├── id (PK)
+├── title
+├── description
+├── type
+├── priority
+├── status
+├── due_date
+├── assigned_to (FK → Users)
+├── related_candidate (FK → Candidates - nullable)
+├── related_position (FK → Positions - nullable)
+└── timestamps
+
+Notifications (Notificaciones)
+├── id (PK)
+├── user_id (FK → Users)
+├── type
+├── message
+├── read
+├── link
+└── timestamps
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FUNCIONALIDADES AVANZADAS                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+BÚSQUEDA INTELIGENTE:
+├── Búsqueda full-text en candidatos
+├── Filtros combinados avanzados
+├── Búsqueda por similitud (fuzzy)
+├── Sugerencias automáticas
+└── Búsquedas guardadas
+
+NOTIFICACIONES:
+├── En tiempo real (WebSockets)
+├── Email automáticos (eventos importantes)
+├── Push notifications (PWA)
+└── Recordatorios programados
+
+REPORTES Y ANALYTICS:
+├── Dashboard personalizable
+├── Exportación de datos (Excel, PDF, CSV)
+├── Gráficos interactivos
+├── Métricas en tiempo real
+└── Históricos y tendencias
+
+PERMISOS Y ROLES:
+├── Admin: acceso total
+├── Recruiter: gestión completa candidatos/posiciones
+├── Hiring Manager: solo sus posiciones
+├── Viewer: solo lectura
+└── Permisos granulares por módulo
+
+INTEGRACIONES:
+├── LinkedIn (importar perfiles)
+├── Google Calendar (sincronizar entrevistas)
+├── Email (Gmail, Outlook)
+├── Portales de empleo (InfoJobs, Indeed)
+└── Slack (notificaciones)
+
+SEGURIDAD:
+├── HTTPS obligatorio
+├── Autenticación JWT
+├── Refresh tokens
+├── Rate limiting
+├── Encriptación datos sensibles
+├── Backup automático diario
+├── GDPR compliant
+└── Logs de auditoría
+
+
+═══════════════════════════════════════════════════════════════════════════════
+FIN DEL DOCUMENTO
+
+═══════════════════════════════════════════════════════════════════════════════
