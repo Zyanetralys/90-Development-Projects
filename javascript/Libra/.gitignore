@@ -1,0 +1,10 @@
+node_modules
+/src/assets.json
+/public/app.html
+/public/fullscreen.html
+/public/js/*.bundle.js
+/public/js/*.bundle.js*
+/public/img/map/tilesets/*.tmx
+/public/img/map/extruded_tilesets/*.png
+/nw/*
+!/nw/public

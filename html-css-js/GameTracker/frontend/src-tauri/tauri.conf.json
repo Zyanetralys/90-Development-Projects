@@ -1,0 +1,9 @@
+{
+  "package": { "productName": "GameTracker", "version": "1.0.0" },
+  "tauri": {
+    "allowlist": { "all": false },
+    "bundle": { "active": true, "targets": ["deb", "appimage", "msi"], "identifier": "com.zyane.gt" },
+    "windows": [{ "title": "GameTracker", "width": 920, "height": 620, "resizable": true }]
+  },
+  "build": { "beforeDevCommand": "npm run dev", "beforeBuildCommand": "npm run build", "devPath": "http://localhost:5173", "distDir": "../dist" }
+}

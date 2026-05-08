@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test BDSM - Nivel Investigación</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="intro">
+        <h1>Test de Roles BDSM</h1>
+        <p>Este test está diseñado para evaluar tu perfil dentro de los roles principales del BDSM. Sé honesto/a y responde según tu inclinación natural.</p>
+        <button id="startBtn">Comenzar Test</button>
+    </div>
+
+    <div id="test" class="hidden">
+        <h2 id="question-text"></h2>
+        <input type="range" min="1" max="5" value="3" id="slider">
+        <div id="progress">[0/0]</div>
+        <div id="buttons">
+            <button id="prevBtn">Atrás</button>
+            <button id="nextBtn">Siguiente</button>
+            <button id="restartBtn">Reiniciar</button>
+            <button id="exitBtn">Salir</button>
+        </div>
+    </div>
+
+    <div id="result" class="hidden">
+        <h2>Resultado</h2>
+        <pre id="output"></pre>
+        <canvas id="chart" width="400" height="400"></canvas>
+        <button id="restartResult">Reiniciar Test</button>
+        <button id="exitResult">Salir</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

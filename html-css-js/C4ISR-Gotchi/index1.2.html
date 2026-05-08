@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>c4isrgotchi v10.0 - TACTICAL COMPANION UNIT</title>
+<style>
+/* ==========================================
+   CONFIGURACION GLOBAL Y VARIABLES CSS
+   ========================================== */
+:root {
+  --bg-primary: #080c14;
+  --bg-secondary: #0f1623;
+  --bg-panel: #141c2b;
+  --border: #1e293b;
+  --text-primary: #c2d1e6;
+  --text-secondary: #6b7f9e;
+  --accent: #00b4d8;
+  --accent-glow: rgba(0, 180, 216, 0.3);
+  --success: #00ff9d;
+  --warning: #ff6b35;
+  --danger: #ff2e63;
+  --font-mono: 'Courier New', 'Consolas', monospace;
+}
+
+/* Reset y estilos base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+}
+
+/* ==========================================
+   HEADER CON ESTADISTICAS
+   ========================================== */
+header {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+h1 {
+  font-size: 16px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+
+.stat-item {
+  background: var(--bg-panel);
+  padding: 4px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.stat-value { color: var(--success); font-weight: bold; }
+
+/* ==========================================
+   AREA PRINCIPAL DE VISUALIZACION
+   ========================================== */
+main {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 16px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+}
+
+/* Panel de visualizacion del soldado */
+.viz-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 300px;
+}
+
+/* Indicador de estado */
+.status-indicator {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+}
+
+.status-indicator.idle { border-color: var(--success); color: var(--success); }
+.status-indicator.mission { border-color: var(--danger); color: var(--danger); animation: pulse 1s infinite; }
+.status-indicator.rest { border-color: var(--accent); color: var(--accent); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ==========================================
+   SOLDADO PIXEL ART CON CSS
+   ========================================== */
+.soldier-container {
+  width: 140px;
+  height: 180px;
+  position: relative;
+  margin: 20px 0;
+}
+
+.soldier-pixel {
+  width: 6px;
+  height: 6px;
+  background: transparent;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Pixel art del soldado usando box-shadow */
+  box-shadow:
+    /* Casco militar */
+    24px -30px 0 #2d4a3e, 30px -30px 0 #2d4a3e, 36px -30px 0 #2d4a3e, 42px -30px 0 #2d4a3e,
+    18px -24px 0 #2d4a3e, 24px -24px 0 #1a2f26, 30px -24px 0 #1a2f26, 36px -24px 0 #1a2f26, 42px -24px 0 #1a2f26, 48px -24px 0 #2d4a3e,
+    /* Cara */
+    24px -18px 0 #e8b89d, 30px -18px 0 #e8b89d, 36px -18px 0 #e8b89d, 42px -18px 0 #e8b89d,
+    24px -12px 0 #e8b89d, 30px -12px 0 #e8b89d, 36px -12px 0 #e8b89d, 42px -12px 0 #e8b89d,
+    /* Ojos */
+    27px -15px 0 #1a1a2e, 39px -15px 0 #1a1a2e,
+    /* Cuerpo/Chaleco tactico */
+    18px -6px 0 #3a5a4a, 24px -6px 0 #3a5a4a, 30px -6px 0 #3a5a4a, 36px -6px 0 #3a5a4a, 42px -6px 0 #3a5a4a, 48px -6px 0 #3a5a4a,
+    18px 0px 0 #3a5a4a, 24px 0px 0 #2d4a3e, 30px 0px 0 #2d4a3e, 36px 0px 0 #2d4a3e, 42px 0px 0 #2d4a3e, 48px 0px 0 #3a5a4a,
+    18px 6px 0 #3a5a4a, 24px 6px 0 #3a5a4a, 30px 6px 0 #3a5a4a, 36px 6px 0 #3a5a4a, 42px 6px 0 #3a5a4a, 48px 6px 0 #3a5a4a,
+    /* Brazos */
+    12px -6px 0 #1a2f26, 12px 0px 0 #1a2f26, 12px 6px 0 #1a2f26,
+    54px -6px 0 #1a2f26, 54px 0px 0 #1a2f26, 54px 6px 0 #1a2f26,
+    /* Arma */
+    54px -3px 0 #4a4a5a, 60px -3px 0 #4a4a5a, 66px -3px 0 #4a4a5a,
+    54px 3px 0 #4a4a5a, 60px 3px 0 #4a4a5a, 66px 3px 0 #4a4a5a,
+    /* Piernas */
+    24px 12px 0 #1a2f26, 30px 12px 0 #1a2f26, 36px 12px 0 #1a2f26, 42px 12px 0 #1a2f26,
+    24px 18px 0 #1a2f26, 30px 18px 0 #1a2f26, 36px 18px 0 #1a2f26, 42px 18px 0 #1a2f26,
+    24px 24px 0 #1a2f26, 30px 24px 0 #1a2f26, 36px 24px 0 #1a2f26, 42px 24px 0 #1a2f26,
+    /* Botas */
+    24px 30px 0 #2a1a1a, 30px 30px 0 #2a1a1a, 36px 30px 0 #2a1a1a,
+    42px 30px 0 #2a1a1a, 48px 30px 0 #2a1a1a, 54px 30px 0 #2a1a1a
+  ;
+  animation: idle-breathe 2.5s ease-in-out infinite;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Animaciones de estados del soldado */
+.soldier-pixel.idle { animation: idle-breathe 2.5s ease-in-out infinite; }
+.soldier-pixel.mission { animation: mission-alert 0.4s ease-in-out infinite; filter: hue-rotate(340deg) saturate(1.5); }
+.soldier-pixel.rest { animation: rest-relax 3s ease-in-out infinite; opacity: 0.85; }
+.soldier-pixel.sleep { animation: sleep-cycle 4s ease-in-out infinite; opacity: 0.7; transform: translate(-50%, -50%) rotate(-90deg); }
+
+@keyframes idle-breathe {
+  0%, 100% { transform: translate(-50%, -50%) scaleY(1); }
+  50% { transform: translate(-50%, -50%) scaleY(1.03); }
+}
+
+@keyframes mission-alert {
+  0%, 100% { transform: translate(-50%, -50%) translateX(-2px); }
+  50% { transform: translate(-50%, -50%) translateX(2px); }
+}
+
+@keyframes rest-relax {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+@keyframes sleep-cycle {
+  0%, 100% { transform: translate(-50%, -50%) rotate(-90deg) scale(1); }
+  50% { transform: translate(-50%, -50%) rotate(-90deg) scale(0.98); }
+}
+
+/* Burbuja de dialogo */
+.dialogue-box {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 11px;
+  min-height: 50px;
+  text-align: center;
+  margin-top: 15px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ==========================================
+   PANEL DE CONTROL Y PESTANAS
+   ========================================== */
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.tab-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  border-radius: 3px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tab-button:hover { border-color: var(--accent); color: var(--text-primary); }
+.tab-button.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+
+/* Contenido de las pestañas */
+.tab-content {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tab-content.active { display: block; }
+
+/* Grid de acciones */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.action-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  padding: 12px;
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.2s;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.action-card:hover {
+  border-color: var(--accent);
+  background: var(--bg-secondary);
+  transform: translateY(-2px);
+}
+
+.action-card:active { transform: scale(0.98); }
+.action-card.locked { opacity: 0.3; pointer-events: none; }
+
+.action-title { color: var(--accent); font-weight: bold; margin-bottom: 4px; font-size: 11px; }
+.action-desc { color: var(--text-secondary); font-size: 9px; }
+.action-cost { color: var(--warning); font-size: 9px; margin-top: 4px; }
+
+/* ==========================================
+   LOG DE EVENTOS
+   ========================================== */
+.event-log {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  height: 120px;
+  overflow-y: auto;
+  font-size: 10px;
+}
+
+.log-entry {
+  padding: 2px 0;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+  margin-bottom: 4px;
+}
+
+.log-entry.success { border-color: var(--success); color: var(--success); }
+.log-entry.warning { border-color: var(--warning); color: var(--warning); }
+.log-entry.danger { border-color: var(--danger); color: var(--danger); }
+.log-entry.info { border-color: var(--accent); color: var(--accent); }
+
+/* ==========================================
+   MODALES Y UTILIDADES
+   ========================================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  max-width: 400px;
+  width: 90%;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  color: var(--accent);
+  font-size: 14px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.modal-input {
+  width: 100%;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px;
+  margin: 8px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-radius: 3px;
+}
+
+.modal-button {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border-radius: 3px;
+  margin: 4px;
+  transition: opacity 0.2s;
+}
+
+.modal-button:hover { opacity: 0.8; }
+.modal-button.secondary { background: var(--bg-panel); color: var(--text-primary); border: 1px solid var(--border); }
+
+/* Notificaciones toast */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent);
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-size: 11px;
+  z-index: 2000;
+  transform: translateX(120%);
+  transition: transform 0.3s;
+}
+
+.toast-notification.show { transform: translateX(0); }
+.toast-notification.success { border-color: var(--success); }
+.toast-notification.warning { border-color: var(--warning); }
+</style>
+</head>
+<body>
+
+<!-- ==========================================
+     HEADER CON INFORMACION DEL JUEGO
+     ========================================== -->
+<header>
+  <h1>c4isrgotchi v10.0</h1>
+  <div class="stats-bar">
+    <div class="stat-item">NIVEL <span class="stat-value" id="stat-level">1</span></div>
+    <div class="stat-item">XP <span class="stat-value" id="stat-xp">0</span></div>
+    <div class="stat-item">CR <span class="stat-value" id="stat-cr">500</span></div>
+    <div class="stat-item">HP <span class="stat-value" id="stat-hp">100</span></div>
+    <div class="stat-item">STA <span class="stat-value" id="stat-sta">100</span></div>
+    <div class="stat-item">MOR <span class="stat-value" id="stat-mor">80</span></div>
+    <div class="stat-item">DISC <span class="stat-value" id="stat-disc">50</span></div>
+  </div>
+</header>
+
+<!-- ==========================================
+     AREA PRINCIPAL DEL JUEGO
+     ========================================== -->
+<main>
+  <!-- Panel de visualizacion -->
+  <div class="viz-panel">
+    <div class="status-indicator idle" id="status-display">IDLE</div>
+    <div class="soldier-container">
+      <div class="soldier-pixel idle" id="soldier-sprite"></div>
+    </div>
+    <div class="dialogue-box" id="dialogue-text">
+      Unidad tactica lista para operaciones, comandante.
+    </div>
+  </div>
+
+  <!-- Panel de control -->
+  <div class="control-panel">
+    <!-- Barra de pestañas -->
+    <div class="tab-bar">
+      <button class="tab-button active" data-tab="commands">COMANDOS</button>
+      <button class="tab-button" data-tab="missions">MISIONES</button>
+      <button class="tab-button" data-tab="equipment">EQUIPO</button>
+      <button class="tab-button" data-tab="research">INVESTIGACION</button>
+      <button class="tab-button" data-tab="system">SISTEMA</button>
+    </div>
+
+    <!-- PESTANA: COMANDOS -->
+    <div class="tab-content active" id="tab-commands">
+      <div class="action-grid">
+        <div class="action-card" onclick="Game.actions.feed()">
+          <div class="action-title">RACIONES</div>
+          <div class="action-desc">Recupera stamina</div>
+        </div>
+        <div class="action-card" onclick="Game.actions.medkit()">
+          <div class="action-title">MEDKIT</div>
+          <div class="action-desc">Recupera HP</div>
+        </div>
+        <div class="action-card" onclick="Game.actions.train()">
+          <div class="action-title">ENTRENAR</div>
+          <div class="action-desc">+DISC, -STA</div>
+        </div>
+        <div class="action-card" onclick="Game.actions.patrol()">
+          <div class="action-title">PATRULLA</div>
+          <div class="action-desc">+MOR, -STA</div>
+        </div>
+        <div class="action-card" onclick="Game.actions.rest()">
+          <div class="action-title">DESCANSO TACTICO</div>
+          <div class="action-desc">Recupera HP/STA</div>
+        </div>
+        <div class="action-card" onclick="Game.actions.sleep()">
+          <div class="action-title">CICLO DE SUEÑO</div>
+          <div class="action-desc">Recuperacion completa</div>
+        </div>
+        <div class="action-card" onclick="Game.actions.debrief()">
+          <div class="action-title">DEBRIEFING</div>
+          <div class="action-desc">Reduce estres</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTANA: MISIONES -->
+    <div class="tab-content" id="tab-missions">
+      <div class="action-grid">
+        <div class="action-card" onclick="Game.missions.deploy('recon')">
+          <div class="action-title">RECONOCIMIENTO</div>
+          <div class="action-desc">5s | +50 XP | +100 CR</div>
+          <div class="action-cost">REQ: STA 20</div>
+        </div>
+        <div class="action-card" onclick="Game.missions.deploy('strike')">
+          <div class="action-title">OPERACION STRIKE</div>
+          <div class="action-desc">10s | +100 XP | +200 CR</div>
+          <div class="action-cost">REQ: STA 40</div>
+        </div>
+        <div class="action-card" onclick="Game.missions.deploy('intel')">
+          <div class="action-title">EXTRACCION INTEL</div>
+          <div class="action-desc">15s | +150 XP | +300 CR</div>
+          <div class="action-cost">REQ: STA 30, DISC 40</div>
+        </div>
+        <div class="action-card" onclick="Game.missions.deploy('black')">
+          <div class="action-title">BLACK OPS</div>
+          <div class="action-desc">20s | +250 XP | +500 CR</div>
+          <div class="action-cost">REQ: STA 50, DISC 60</div>
+        </div>
+        <div class="action-card" onclick="Game.missions.deploy('cyber')">
+          <div class="action-title">CIBER-ASALTO</div>
+          <div class="action-desc">12s | +180 XP | +350 CR</div>
+          <div class="action-cost">REQ: STA 25, DISC 50</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTANA: EQUIPO -->
+    <div class="tab-content" id="tab-equipment">
+      <div class="action-grid">
+        <div class="action-card" onclick="Game.shop.buy('weapon', 200)">
+          <div class="action-title">ARMA TACTICA</div>
+          <div class="action-desc">Mejora daño y precision</div>
+          <div class="action-cost">200 CR</div>
+        </div>
+        <div class="action-card" onclick="Game.shop.buy('armor', 250)">
+          <div class="action-title">ARMADURA COMPUESTA</div>
+          <div class="action-desc">Reduce daño recibido</div>
+          <div class="action-cost">250 CR</div>
+        </div>
+        <div class="action-card" onclick="Game.shop.buy('medkit', 100)">
+          <div class="action-title">SUMINISTRO MEDICO</div>
+          <div class="action-desc">3 medkits adicionales</div>
+          <div class="action-cost">100 CR</div>
+        </div>
+        <div class="action-card" onclick="Game.shop.buy('implant', 500)">
+          <div class="action-title">IMPLANTE NEURAL</div>
+          <div class="action-desc">Mejora capacidades</div>
+          <div class="action-cost">500 CR</div>
+        </div>
+        <div class="action-card" onclick="Game.shop.buy('drone', 400)">
+          <div class="action-title">MICRO-DRONE</div>
+          <div class="action-desc">Reconocimiento aereo</div>
+          <div class="action-cost">400 CR</div>
+        </div>
+        <div class="action-card" onclick="Game.shop.buy('k9', 350)">
+          <div class="action-title">UNIDAD K-9</div>
+          <div class="action-desc">Companero canino</div>
+          <div class="action-cost">350 CR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTANA: INVESTIGACION -->
+    <div class="tab-content" id="tab-research">
+      <div class="action-grid">
+        <div class="action-card" onclick="Game.research.start('stealth')">
+          <div class="action-title">TECNOLOGIA STEALTH</div>
+          <div class="action-desc">Mejora sigilo en misiones</div>
+          <div class="action-cost">600 CR | 30s</div>
+        </div>
+        <div class="action-card" onclick="Game.research.start('cyberwar')">
+          <div class="action-title">CIBER-GUERRA</div>
+          <div class="action-desc">Desbloquea ciber-asalto</div>
+          <div class="action-cost">800 CR | 45s</div>
+        </div>
+        <div class="action-card" onclick="Game.research.start('medbay')">
+          <div class="action-title">MEDBAY AVANZADO</div>
+          <div class="action-desc">Curacion pasiva mejorada</div>
+          <div class="action-cost">700 CR | 40s</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PESTANA: SISTEMA -->
+    <div class="tab-content" id="tab-system">
+      <div class="action-grid">
+        <div class="action-card" onclick="Game.system.exportSave()">
+          <div class="action-title">EXPORTAR SAVE</div>
+          <div class="action-desc">Copia al portapapeles</div>
+        </div>
+        <div class="action-card" onclick="Game.system.importSave()">
+          <div class="action-title">IMPORTAR SAVE</div>
+          <div class="action-desc">Carga progreso</div>
+        </div>
+        <div class="action-card" onclick="Game.system.showStats()">
+          <div class="action-title">ESTADISTICAS</div>
+          <div class="action-desc">Ver detalles</div>
+        </div>
+        <div class="action-card" onclick="Game.system.toggleAudio()">
+          <div class="action-title">AUDIO ON/OFF</div>
+          <div class="action-desc">Activar/desactivar</div>
+        </div>
+        <div class="action-card" onclick="Game.system.resetGame()">
+          <div class="action-title">REINICIAR JUEGO</div>
+          <div class="action-desc">Borrar todo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ==========================================
+     LOG DE EVENTOS INFERIOR
+     ========================================== -->
+<div class="event-log" id="game-log"></div>
+
+<!-- ==========================================
+     MODAL PARA INTERACCIONES
+     ========================================== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" id="modal-content">
+    <div class="modal-title" id="modal-title">SISTEMA</div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ==========================================
+     NOTIFICACION TOAST
+     ========================================== -->
+<div class="toast-notification" id="toast"></div>
+
+<script>
+/**
+ * ==========================================
+ * c4isrgotchi v10.0 - MOTOR PRINCIPAL
+ * ==========================================
+ * 
+ * Arquitectura del juego:
+ * - Game.state: Estado actual del juego
+ * - Game.config: Configuraciones y constantes
+ * - Game.audio: Sistema de audio WebAudio
+ * - Game.actions: Acciones del jugador
+ * - Game.missions: Sistema de misiones
+ * - Game.shop: Tienda de equipo
+ * - Game.research: Sistema de investigacion
+ * - Game.system: Funciones de sistema
+ * - Game.ui: Actualizacion de interfaz
+ * - Game.log: Sistema de logs
+ */
+
+const Game = {
+  // ==========================================
+  // ESTADO DEL JUEGO
+  // ==========================================
+  state: {
+    level: 1,
+    xp: 0,
+    credits: 500,
+    hp: 100,
+    maxHp: 100,
+    stamina: 100,
+    maxStamina: 100,
+    morale: 80,
+    discipline: 50,
+    stress: 0,
+    inventory: {
+      weapon: 0,
+      armor: 0,
+      medkits: 3,
+      implants: 0,
+      drones: 0,
+      k9: 0
+    },
+    research: {
+      stealth: false,
+      cyberwar: false,
+      medbay: false
+    },
+    researchProgress: {},
+    activeMission: null,
+    unitState: 'idle', // idle, mission, rest, sleep
+    lastSave: Date.now(),
+    stats: {
+      missionsCompleted: 0,
+      missionsFailed: 0,
+      totalXpEarned: 0,
+      totalCreditsEarned: 0,
+      playTime: 0
+    }
+  },
+
+  // ==========================================
+  // CONFIGURACIONES Y CONSTANTES
+  // ==========================================
+  config: {
+    saveKey: 'c4isrgotchi_v10_save',
+    autoSaveInterval: 15000, // 15 segundos
+    xpPerLevel: 200,
+    missionSuccessRate: 0.75,
+    logMaxEntries: 50
+  },
+
+  // ==========================================
+  // SISTEMA DE AUDIO
+  // ==========================================
+  audio: {
+    enabled: true,
+    context: null,
+
+    /**
+     * Inicializa el contexto de audio
+     * Se llama en la primera interaccion del usuario
+     */
+    init() {
+      if (!this.context) {
+        this.context = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    },
+
+    /**
+     * Reproduce un tono simple
+     * @param {number} frequency - Frecuencia en Hz
+     * @param {number} duration - Duracion en segundos
+     * @param {string} type - Tipo de onda (sine, square, etc)
+     */
+    playTone(frequency, duration, type = 'sine') {
+      if (!this.enabled || !this.context) return;
+
+      const oscillator = this.context.createOscillator();
+      const gainNode = this.context.createGain();
+
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, this.context.currentTime);
+
+      gainNode.gain.setValueAtTime(0.1, this.context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(this.context.destination);
+
+      oscillator.start();
+      oscillator.stop(this.context.currentTime + duration);
+    },
+
+    /** Sonidos predefinidos */
+    sounds: {
+      success: () => Game.audio.playTone(880, 0.15),
+      warning: () => Game.audio.playTone(440, 0.2, 'square'),
+      danger: () => Game.audio.playTone(220, 0.3, 'sawtooth'),
+      click: () => Game.audio.playTone(1200, 0.05),
+      levelup: () => {
+        Game.audio.playTone(523, 0.1);
+        setTimeout(() => Game.audio.playTone(659, 0.1), 100);
+        setTimeout(() => Game.audio.playTone(784, 0.15), 200);
+      }
+    }
+  },
+
+  // ==========================================
+  // SISTEMA DE ACCIONES
+  // ==========================================
+  actions: {
+    /**
+     * Consume raciones para recuperar stamina
+     */
+    feed() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      Game.state.stamina = Math.min(Game.state.maxStamina, Game.state.stamina + 30);
+      Game.log.add('Raciones consumidas. STA +30', 'success');
+      Game.ui.say('Energia restaurada, comandante.');
+      Game.audio.sounds.success();
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Usa un medkit para recuperar HP
+     */
+    medkit() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      if (Game.state.inventory.medkits <= 0) {
+        Game.log.add('Sin suministros medicos disponibles.', 'warning');
+        Game.ui.say('Necesitamos suministros medicos.');
+        return;
+      }
+
+      Game.state.inventory.medkits--;
+      Game.state.hp = Math.min(Game.state.maxHp, Game.state.hp + 40);
+      Game.log.add('Medkit aplicado. HP +40', 'success');
+      Game.ui.say('Heridas curadas. Lista para combatir.');
+      Game.audio.sounds.success();
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Entrena para aumentar disciplina
+     */
+    train() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      if (Game.state.stamina < 20) {
+        Game.log.add('Stamina insuficiente para entrenar (min 20).', 'warning');
+        Game.ui.say('Necesito descansar antes de entrenar.');
+        return;
+      }
+
+      Game.state.stamina -= 20;
+      Game.state.discipline = Math.min(100, Game.state.discipline + 15);
+      Game.state.xp += 20;
+      Game.state.stress = Math.min(100, Game.state.stress + 5);
+
+      Game.log.add('Entrenamiento completado. DISC +15, XP +20', 'success');
+      Game.ui.say('Disciplina y tacticas mejoradas.');
+      Game.audio.sounds.success();
+      Game.system.checkLevelUp();
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Realiza una patrulla para mejorar moral
+     */
+    patrol() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      if (Game.state.stamina < 15) {
+        Game.log.add('Stamina insuficiente para patrullar (min 15).', 'warning');
+        return;
+      }
+
+      Game.state.stamina -= 15;
+      Game.state.morale = Math.min(100, Game.state.morale + 20);
+      Game.state.xp += 10;
+
+      Game.state.unitState = 'mission';
+      Game.ui.setSoldierState('mission');
+      Game.ui.setStatus('PATRULLA', 'mission');
+      Game.log.add('Patrulla iniciada. MOR +20', 'success');
+      Game.ui.say('Perimetro asegurado. Sin amenazas detectadas.');
+      Game.audio.sounds.click();
+
+      setTimeout(() => {
+        Game.state.unitState = 'idle';
+        Game.ui.setSoldierState('idle');
+        Game.ui.setStatus('IDLE', 'idle');
+        Game.system.save();
+        Game.ui.update();
+      }, 4000);
+
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Descanso tactico para recuperar HP y STA
+     */
+    rest() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      Game.state.hp = Math.min(Game.state.maxHp, Game.state.hp + 25);
+      Game.state.stamina = Math.min(Game.state.maxStamina, Game.state.stamina + 25);
+      Game.state.stress = Math.max(0, Game.state.stress - 10);
+
+      Game.state.unitState = 'rest';
+      Game.ui.setSoldierState('rest');
+      Game.ui.setStatus('DESCANSO', 'rest');
+      Game.log.add('Descanso tactico iniciado. HP/STA +25', 'success');
+      Game.ui.say('Recuperando parametros...');
+
+      setTimeout(() => {
+        Game.state.unitState = 'idle';
+        Game.ui.setSoldierState('idle');
+        Game.ui.setStatus('IDLE', 'idle');
+        Game.system.save();
+        Game.ui.update();
+      }, 5000);
+
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Ciclo de sueño para recuperacion completa
+     */
+    sleep() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      Game.state.hp = Math.min(Game.state.maxHp, Game.state.hp + 50);
+      Game.state.stamina = Math.min(Game.state.maxStamina, Game.state.stamina + 50);
+      Game.state.stress = Math.max(0, Game.state.stress - 20);
+
+      Game.state.unitState = 'sleep';
+      Game.ui.setSoldierState('sleep');
+      Game.ui.setStatus('SUEÑO', 'rest');
+      Game.log.add('Ciclo de sueño iniciado. Recuperacion completa', 'success');
+      Game.ui.say('Sistemas recargados al maximo.');
+
+      setTimeout(() => {
+        Game.state.unitState = 'idle';
+        Game.ui.setSoldierState('idle');
+        Game.ui.setStatus('IDLE', 'idle');
+        Game.system.save();
+        Game.ui.update();
+      }, 6000);
+
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Debriefing para reducir estres
+     */
+    debrief() {
+      if (Game.state.unitState !== 'idle') {
+        Game.log.add('La unidad esta ocupada.', 'warning');
+        return;
+      }
+
+      if (Game.state.credits < 50) {
+        Game.log.add('Creditos insuficientes (min 50).', 'warning');
+        return;
+      }
+
+      Game.state.credits -= 50;
+      Game.state.stress = Math.max(0, Game.state.stress - 25);
+      Game.state.morale = Math.min(100, Game.state.morale + 10);
+
+      Game.log.add('Debriefing completado. Estres -25, MOR +10, CR -50', 'success');
+      Game.ui.say('Informe procesado. Moral estabilizada.');
+      Game.audio.sounds.success();
+      Game.system.save();
+      Game.ui.update();
+    }
+  },
+
+  // ==========================================
+  // SISTEMA DE MISIONES
+  // ==========================================
+  missions: {
+    /**
+     * Configuraciones de misiones disponibles
+     */
+    types: {
+      recon: {
+        name: 'Reconocimiento',
+        duration: 5000,
+        xp: 50,
+        credits: 100,
+        req: { stamina: 20, discipline: 0 }
+      },
+      strike: {
+        name: 'Operacion Strike',
+        duration: 10000,
+        xp: 100,
+        credits: 200,
+        req: { stamina: 40, discipline: 0 }
+      },
+      intel: {
+        name: 'Extraccion Intel',
+        duration: 15000,
+        xp: 150,
+        credits: 300,
+        req: { stamina: 30, discipline: 40 }
+      },
+      black: {
+        name: 'Black Ops',
+        duration: 20000,
+        xp: 250,
+        credits: 500,
+        req: { stamina: 50, discipline: 60 }
+      },
+      cyber: {
+        name: 'Ciber-Asalto',
+        duration: 12000,
+        xp: 180,
+        credits: 350,
+        req: { stamina: 25, discipline: 50 }
+      }
+    },
+
+    /**
+     * Despliega una mision
+     * @param {string} type - Tipo de mision
+     */
+    deploy(type) {
+      if (Game.state.activeMission) {
+        Game.log.add('Mision ya en curso.', 'warning');
+        return;
+      }
+
+      const mission = this.types[type];
+      if (!mission) {
+        Game.log.add('Tipo de mision invalido.', 'warning');
+        return;
+      }
+
+      // Verificar requisitos
+      if (Game.state.stamina < mission.req.stamina || Game.state.discipline < mission.req.discipline) {
+        Game.log.add(`Requisitos insuficientes. STA: ${Game.state.stamina}/${mission.req.stamina}, DISC: ${Game.state.discipline}/${mission.req.discipline}`, 'warning');
+        Game.ui.say('Necesito mas preparacion para esta operacion.');
+        return;
+      }
+
+      // Aplicar bonificaciones por equipo
+      let successChance = Game.config.missionSuccessRate;
+      if (Game.state.inventory.weapon > 0) successChance += 0.05;
+      if (Game.state.inventory.armor > 0) successChance += 0.05;
+      if (Game.state.inventory.drones > 0 && type === 'recon') successChance += 0.1;
+      if (Game.state.inventory.k9 > 0) successChance += 0.03;
+      if (Game.state.research.stealth && type === 'black') successChance += 0.1;
+
+      // Iniciar mision
+      Game.state.stamina -= mission.req.stamina;
+      Game.state.activeMission = {
+        type: type,
+        startTime: Date.now(),
+        duration: mission.duration,
+        successChance: successChance
+      };
+      Game.state.unitState = 'mission';
+      Game.ui.setSoldierState('mission');
+      Game.ui.setStatus('MISION', 'mission');
+
+      Game.log.add(`Mision ${mission.name} iniciada. ETA: ${mission.duration / 1000}s`, 'info');
+      Game.ui.say(`Desplegando en operacion ${mission.name}...`);
+      Game.audio.sounds.click();
+
+      // Programar finalizacion
+      setTimeout(() => this.resolve(type, successChance), mission.duration);
+
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Resuelve el resultado de una mision
+     * @param {string} type - Tipo de mision
+     * @param {number} successChance - Probabilidad de exito
+     */
+    resolve(type, successChance) {
+      const mission = this.types[type];
+      const success = Math.random() < successChance;
+
+      Game.state.activeMission = null;
+      Game.state.unitState = 'idle';
+      Game.ui.setSoldierState('idle');
+      Game.ui.setStatus('IDLE', 'idle');
+
+      if (success) {
+        // Calculo de recompensas con multiplicadores
+        let xpGain = mission.xp;
+        let creditGain = mission.credits;
+
+        // Bonus por disciplina alta
+        if (Game.state.discipline > 70) {
+          xpGain = Math.floor(xpGain * 1.2);
+          creditGain = Math.floor(creditGain * 1.1);
+        }
+
+        // Bonus por implantes
+        xpGain += Game.state.inventory.implants * 10;
+
+        Game.state.xp += xpGain;
+        Game.state.credits += creditGain;
+        Game.state.morale = Math.min(100, Game.state.morale + 10);
+        Game.state.stats.missionsCompleted++;
+        Game.state.stats.totalXpEarned += xpGain;
+        Game.state.stats.totalCreditsEarned += creditGain;
+
+        Game.log.add(`MISION EXITOSA: XP +${xpGain} | CR +${creditGain}`, 'success');
+        Game.ui.say('Mision completada con exito. Regresando a base.');
+        Game.audio.sounds.success();
+
+        // Verificar subida de nivel
+        Game.system.checkLevelUp();
+      } else {
+        // Penalizaciones por fallo
+        let hpLoss = 15;
+        let moraleLoss = 15;
+
+        // Reduccion por armadura
+        hpLoss -= Game.state.inventory.armor * 5;
+        hpLoss = Math.max(5, hpLoss);
+
+        Game.state.hp = Math.max(0, Game.state.hp - hpLoss);
+        Game.state.morale = Math.max(0, Game.state.morale - moraleLoss);
+        Game.state.stress = Math.min(100, Game.state.stress + 10);
+        Game.state.stats.missionsFailed++;
+
+        Game.log.add(`MISION FALLIDA: HP -${hpLoss} | MOR -${moraleLoss}`, 'danger');
+        Game.ui.say('Mision comprometida. Regresando con bajas...');
+        Game.audio.sounds.danger();
+      }
+
+      Game.system.save();
+      Game.ui.update();
+    }
+  },
+
+  // ==========================================
+  // SISTEMA DE TIENDA
+  // ==========================================
+  shop: {
+    /**
+     * Compra un item de la tienda
+     * @param {string} item - Tipo de item
+     * @param {number} cost - Costo en creditos
+     */
+    buy(item, cost) {
+      if (Game.state.credits < cost) {
+        Game.log.add(`Creditos insuficientes. Necesitas ${cost} CR.`, 'warning');
+        Game.ui.say('Fondos insuficientes para esta compra.');
+        Game.audio.sounds.warning();
+        return;
+      }
+
+      Game.state.credits -= cost;
+
+      switch (item) {
+        case 'weapon':
+          Game.state.inventory.weapon++;
+          Game.log.add('Arma tactica adquirida.', 'success');
+          Game.ui.say('Armamento recibido y verificado.');
+          break;
+        case 'armor':
+          Game.state.inventory.armor++;
+          Game.log.add('Armadura compuesta adquirida.', 'success');
+          Game.ui.say('Proteccion adicional instalada.');
+          break;
+        case 'medkit':
+          Game.state.inventory.medkits += 3;
+          Game.log.add('Suministro medico x3 adquirido.', 'success');
+          Game.ui.say('Suministros medicos en inventario.');
+          break;
+        case 'implant':
+          Game.state.inventory.implants++;
+          Game.log.add('Implante neural instalado.', 'success');
+          Game.ui.say('Capacidades cognitivas mejoradas.');
+          break;
+        case 'drone':
+          Game.state.inventory.drones++;
+          Game.log.add('Micro-drone adquirido.', 'success');
+          Game.ui.say('Sistema de reconocimiento aereo activo.');
+          break;
+        case 'k9':
+          Game.state.inventory.k9++;
+          Game.log.add('Unidad K-9 adquirida.', 'success');
+          Game.ui.say('Companero canino listo para operaciones.');
+          break;
+      }
+
+      Game.audio.sounds.success();
+      Game.system.save();
+      Game.ui.update();
+    }
+  },
+
+  // ==========================================
+  // SISTEMA DE INVESTIGACION
+  // ==========================================
+  research: {
+    /**
+     * Inicia una investigacion
+     * @param {string} type - Tipo de investigacion
+     */
+    start(type) {
+      const costs = { stealth: 600, cyberwar: 800, medbay: 700 };
+      const durations = { stealth: 30000, cyberwar: 45000, medbay: 40000 };
+
+      if (Game.state.research[type]) {
+        Game.log.add('Investigacion ya completada.', 'warning');
+        return;
+      }
+
+      if (Game.state.researchProgress[type]) {
+        Game.log.add('Investigacion ya en progreso.', 'warning');
+        return;
+      }
+
+      if (Game.state.credits < costs[type]) {
+        Game.log.add(`Creditos insuficientes. Necesitas ${costs[type]} CR.`, 'warning');
+        return;
+      }
+
+      Game.state.credits -= costs[type];
+      Game.state.researchProgress[type] = {
+        startTime: Date.now(),
+        duration: durations[type]
+      };
+
+      Game.log.add(`Investigacion ${type} iniciada.`, 'info');
+      Game.ui.say(`Investigacion de ${type} comenzada.`);
+      Game.audio.sounds.click();
+
+      // Programar finalizacion
+      setTimeout(() => this.complete(type), durations[type]);
+
+      Game.system.save();
+      Game.ui.update();
+    },
+
+    /**
+     * Completa una investigacion
+     * @param {string} type - Tipo de investigacion
+     */
+    complete(type) {
+      Game.state.research[type] = true;
+      delete Game.state.researchProgress[type];
+
+      Game.log.add(`Investigacion ${type} completada.`, 'success');
+      Game.ui.say(`Tecnologia ${type} desbloqueada.`);
+      Game.audio.sounds.levelup();
+
+      Game.system.save();
+      Game.ui.update();
+    }
+  },
+
+  // ==========================================
+  // SISTEMA DE INTERFAZ DE USUARIO
+  // ==========================================
+  ui: {
+    /**
+     * Actualiza todos los elementos de la UI
+     */
+    update() {
+      document.getElementById('stat-level').textContent = Game.state.level;
+      document.getElementById('stat-xp').textContent = Game.state.xp;
+      document.getElementById('stat-cr').textContent = Game.state.credits;
+      document.getElementById('stat-hp').textContent = Math.floor(Game.state.hp);
+      document.getElementById('stat-sta').textContent = Math.floor(Game.state.stamina);
+      document.getElementById('stat-mor').textContent = Math.floor(Game.state.morale);
+      document.getElementById('stat-disc').textContent = Math.floor(Game.state.discipline);
+    },
+
+    /**
+     * Cambia el estado visual del soldado
+     * @param {string} state - Estado (idle, mission, rest, sleep)
+     */
+    setSoldierState(state) {
+      const sprite = document.getElementById('soldier-sprite');
+      sprite.className = `soldier-pixel ${state}`;
+    },
+
+    /**
+     * Actualiza el indicador de estado
+     * @param {string} text - Texto a mostrar
+     * @param {string} type - Tipo de estado (idle, mission, rest)
+     */
+    setStatus(text, type) {
+      const indicator = document.getElementById('status-display');
+      indicator.textContent = text;
+      indicator.className = `status-indicator ${type}`;
+    },
+
+    /**
+     * Muestra un mensaje en la burbuja de dialogo
+     * @param {string} text - Mensaje a mostrar
+     */
+    say(text) {
+      const dialogue = document.getElementById('dialogue-text');
+      dialogue.textContent = text;
+
+      setTimeout(() => {
+        if (Game.state.unitState === 'idle') {
+          dialogue.textContent = 'Unidad tactica lista para operaciones, comandante.';
+        }
+      }, 4000);
+    }
+  },
+
+  // ==========================================
+  // SISTEMA DE LOGS
+  // ==========================================
+  log: {
+    /**
+     * Añade una entrada al log
+     * @param {string} message - Mensaje
+     * @param {string} type - Tipo (success, warning, danger, info)
+     */
+    add(message, type = 'info') {
+      const logContainer = document.getElementById('game-log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+
+      logContainer.prepend(entry);
+
+      // Limitar numero de entradas
+      while (logContainer.children.length > Game.config.logMaxEntries) {
+        logContainer.removeChild(logContainer.lastChild);
+      }
+    }
+  },
+
+  // ==========================================
+  // SISTEMA GENERAL Y UTILIDADES
+  // ==========================================
+  system: {
+    /**
+     * Verifica y aplica subida de nivel
+     */
+    checkLevelUp() {
+      const xpNeeded = Game.state.level * Game.config.xpPerLevel;
+
+      if (Game.state.xp >= xpNeeded) {
+        Game.state.level++;
+        Game.state.xp -= xpNeeded;
+        Game.state.maxHp += 10;
+        Game.state.maxStamina += 10;
+        Game.state.hp = Game.state.maxHp;
+        Game.state.stamina = Game.state.maxStamina;
+
+        Game.log.add(`NIVEL ${Game.state.level} ALCANZADO. Stats restaurados.`, 'success');
+        Game.ui.say(`Ascendido a nivel ${Game.state.level}. Capacidades mejoradas.`);
+        Game.audio.sounds.levelup();
+        Game.system.showToast(`Nivel ${Game.state.level} alcanzado`, 'success');
+      }
+    },
+
+    /**
+     * Guarda el estado del juego
+     */
+    save() {
+      Game.state.lastSave = Date.now();
+      try {
+        localStorage.setItem(Game.config.saveKey, JSON.stringify(Game.state));
+      } catch (e) {
+        console.error('Error al guardar:', e);
+      }
+    },
+
+    /**
+     * Carga el estado del juego
+     */
+    load() {
+      try {
+        const saved = localStorage.getItem(Game.config.saveKey);
+        if (saved) {
+          const loaded = JSON.parse(saved);
+          // Fusionar con estado por defecto para compatibilidad
+          Game.state = { ...Game.state, ...loaded };
+          Game.log.add('Progreso cargado correctamente.', 'info');
+        }
+      } catch (e) {
+        console.error('Error al cargar:', e);
+        Game.log.add('Error al cargar progreso.', 'warning');
+      }
+    },
+
+    /**
+     * Exporta el save al portapapeles
+     */
+    exportSave() {
+      try {
+        const data = btoa(JSON.stringify(Game.state));
+        navigator.clipboard.writeText(data).then(() => {
+          Game.log.add('Save exportado al portapapeles.', 'success');
+          Game.system.showToast('Save copiado al portapapeles', 'success');
+        });
+      } catch (e) {
+        Game.log.add('Error al exportar save.', 'warning');
+      }
+    },
+
+    /**
+     * Importa un save desde el portapapeles
+     */
+    importSave() {
+      const code = prompt('Pega tu codigo de save:');
+      if (code) {
+        try {
+          const data = JSON.parse(atob(code));
+          Game.state = { ...Game.state, ...data };
+          Game.system.save();
+          Game.ui.update();
+          Game.log.add('Save importado correctamente.', 'success');
+          Game.system.showToast('Save importado', 'success');
+        } catch (e) {
+          Game.log.add('Codigo de save invalido.', 'warning');
+        }
+      }
+    },
+
+    /**
+     * Muestra estadisticas detalladas
+     */
+    showStats() {
+      const modal = document.getElementById('modal-overlay');
+      const body = document.getElementById('modal-body');
+      const title = document.getElementById('modal-title');
+
+      title.textContent = 'ESTADISTICAS DE UNIDAD';
+      body.innerHTML = `
+        <p>Nivel: ${Game.state.level}</p>
+        <p>XP Actual: ${Game.state.xp} / ${Game.state.level * Game.config.xpPerLevel}</p>
+        <p>Misiones Completadas: ${Game.state.stats.missionsCompleted}</p>
+        <p>Misiones Fallidas: ${Game.state.stats.missionsFailed}</p>
+        <p>Tasa de Exito: ${Game.state.stats.missionsCompleted + Game.state.stats.missionsFailed > 0 ? Math.round((Game.state.stats.missionsCompleted / (Game.state.stats.missionsCompleted + Game.state.stats.missionsFailed)) * 100) : 0}%</p>
+        <p>XP Total Ganada: ${Game.state.stats.totalXpEarned}</p>
+        <p>CR Total Ganado: ${Game.state.stats.totalCreditsEarned}</p>
+        <p>Estres Actual: ${Game.state.stress}</p>
+        <button class="modal-button" onclick="document.getElementById('modal-overlay').classList.remove('active')">Cerrar</button>
+      `;
+
+      modal.classList.add('active');
+    },
+
+    /**
+     * Alterna el audio
+     */
+    toggleAudio() {
+      Game.audio.enabled = !Game.audio.enabled;
+      Game.log.add(`Audio ${Game.audio.enabled ? 'activado' : 'desactivado'}.`, 'info');
+      Game.system.showToast(`Audio ${Game.audio.enabled ? 'ON' : 'OFF'}`, 'info');
+    },
+
+    /**
+     * Reinicia el juego
+     */
+    resetGame() {
+      if (confirm('¿Estas seguro de reiniciar el juego? Se perdera todo el progreso.')) {
+        localStorage.removeItem(Game.config.saveKey);
+        location.reload();
+      }
+    },
+
+    /**
+     * Muestra una notificacion toast
+     * @param {string} message - Mensaje
+     * @param {string} type - Tipo (success, warning, info)
+     */
+    showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `toast-notification ${type} show`;
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  },
+
+  // ==========================================
+  // INICIALIZACION
+  // ==========================================
+  init() {
+    // Cargar estado guardado
+    this.system.load();
+
+    // Configurar pestañas
+    document.querySelectorAll('.tab-button').forEach(button => {
+      button.addEventListener('click', () => {
+        this.audio.init(); // Inicializar audio en primera interaccion
+
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+        button.classList.add('active');
+        const tabId = `tab-${button.dataset.tab}`;
+        document.getElementById(tabId).classList.add('active');
+
+        this.audio.sounds.click();
+      });
+    });
+
+    // Guardado automatico
+    setInterval(() => this.system.save(), this.config.autoSaveInterval);
+
+    // Actualizar UI inicial
+    this.ui.update();
+    this.log.add('c4isrgotchi v10.0 inicializado. Unidad lista.', 'info');
+    this.log.add('Haz clic en cualquier pestaña para activar el audio.', 'info');
+  }
+};
+
+// Iniciar el juego cuando el DOM este listo
+document.addEventListener('DOMContentLoaded', () => Game.init());
+</script>
+</body>
+</html>

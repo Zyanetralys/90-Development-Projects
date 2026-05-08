@@ -1,0 +1,601 @@
+================================================================================
+ESQUEMA COMPLETO - APP CONTROL HORARIO (PYTHON/DJANGO) - CUMPLIMIENTO RD 8/2019
+================================================================================
+
+================================================================================
+1. ESTRUCTURA DE PROYECTO
+================================================================================
+
+timenet_clone/
+├── core/                  # Configuración principal, settings, urls
+├── accounts/             # Autenticación, perfiles, permisos
+├── employees/            # Gestión trabajadores y grupos
+├── schedules/            # Calendarios, tipos jornada, festivos CC.AA.
+├── timeclock/            # Marcajes, validaciones, geolocalización
+├── absences/             # Vacaciones, bajas, permisos
+├── reports/              # Reportes legales, exportación nómina
+├── compliance/           # Módulo cumplimiento RD 8/2019 + RGPD
+├── api/                  # API REST v1 (integraciones nómina/ERP)
+└── static/
+    ├── admin/            # React admin panel (build)
+    └── pwa/              # PWA punto marcaje (offline-first)
+
+================================================================================
+2. MODELOS DE DATOS (DJANGO ORM)
+================================================================================
+
+EMPRESA
+-------
+id (PK)
+nombre (str, max 200)
+cif_nif (str, unique)
+direccion (str)
+ciudad (str)
+codigo_postal (str, 5 chars)
+comunidad_autonoma (enum: 17 CC.AA. + Ceuta/Melilla)
+municipio (str)
+telefono (str, optional)
+email (email)
+suscripcion_activa (bool, default=True)
+fecha_inicio_suscripcion (date)
+calendario_base (FK -> Calendario)
+created_at (datetime)
+updated_at (datetime)
+
+TRABAJADOR
+----------
+id (PK)
+empresa (FK -> Empresa)
+nombre_completo (str, max 200)
+nif (str, unique per empresa)
+email (email, optional)
+telefono (str, optional)
+pin (str, 4-6 digits, encrypted)
+pin_temporal (str, optional, expires 24h)
+calendario_personal (FK -> Calendario, null=True)
+grupo (str, optional: departamento/equipo)
+fecha_alta (date)
+fecha_baja (date, null=True)
+dias_vacaciones_anuales (decimal, default=22.0)
+dias_vacaciones_acumulados (decimal, default=0.0)
+dias_vacaciones_usados (decimal, default=0.0)
+estado (enum: ACTIVO, BAJA_TEMPORAL, BAJA_DEFINITIVA, ELIMINADO)
+consentimiento_geoloc (bool, default=False)
+consentimiento_geoloc_fecha (datetime, null=True)
+created_at (datetime)
+updated_at (datetime)
+
+TIPO_JORNADA
+------------
+id (PK)
+empresa (FK -> Empresa)
+nombre (str: "Entrada", "Salida", "Comida", "Almuerzo", "Médico", "Festivo", "Vacaciones")
+codigo (str, unique per empresa: ENTRADA, SALIDA, PAUSA_COMIDA, etc.)
+color_hex (str, 7 chars incl #)
+tipo_control (enum):
+    - CON_HORARIO: entrada/salida fijas
+    - HORARIO_FLEXIBLE: franjas entrada/salida
+    - SIN_HORARIO: horas totales sin horario definido
+    - NO_LABORABLE: festivo/vacaciones/permiso
+hora_entrada (time, optional)
+hora_salida (time, optional)
+franja_entrada_inicio (time, optional)
+franja_entrada_fin (time, optional)
+franja_salida_inicio (time, optional)
+franja_salida_fin (time, optional)
+horas_totales_previstas (decimal, max 24.0, optional)
+minimo_descanso_intrajornada (int, minutes, default=15)
+laborable (bool, default=True)
+permite_solicitudes_cambio (bool, default=False)
+grupo_tipo (enum: LABORAL, PERMISO, VACACIONES, FESTIVO)
+created_at (datetime)
+
+CALENDARIO
+----------
+id (PK)
+nombre (str: "Calendario Empresa 2024", "Calendario María García 2024")
+empresa (FK -> Empresa)
+trabajador (FK -> Trabajador, null=True)  # null = calendario empresa
+anio (int, 4 digits)
+created_at (datetime)
+
+DIA_CALENDARIO
+--------------
+id (PK)
+calendario (FK -> Calendario)
+fecha (date)
+tipo_jornada (FK -> TipoJornada)
+horas_previstas (decimal, max 24.0)
+observaciones (text, optional)
+created_at (datetime)
+
+MARCAJE
+-------
+id (PK)
+trabajador (FK -> Trabajador)
+fecha_hora (datetime, timezone aware)
+tipo (enum: ENTRADA, SALIDA, PAUSA_INICIO, PAUSA_FIN, MEDICO, AUSENCIA)
+tipo_jornada_asociado (FK -> TipoJornada)
+geoloc_lat (decimal, 9.6, optional)
+geoloc_lon (decimal, 9.6, optional)
+geoloc_precision (int, meters, optional)
+ip_origen (str, max 45)
+dispositivo_user_agent (text)
+dispositivo_tipo (enum: MOBILE, DESKTOP, TABLET, UNKNOWN)
+creado_por (FK -> User, null=True)  # null = trabajador, else = admin
+modificado_manualmente (bool, default=False)
+justificacion_modificacion (text, optional)
+audit_timestamp (datetime)
+deleted (bool, default=False)  # soft delete
+
+AUSENCIA
+--------
+id (PK)
+trabajador (FK -> Trabajador)
+fecha_inicio (date)
+fecha_fin (date)
+tipo (enum: VACACIONES, BAJA_MEDICA, PERMISO_RETRIBUIDO, ASUNTOS_PROPIOS, LUTO)
+horas_solicitadas (decimal, optional)
+aprobado (bool, null=True)  # null=pending, True=aceptado, False=rechazado
+justificacion (text)
+documento_adjunto (file, optional)
+created_by (FK -> User)
+created_at (datetime)
+
+AUDITORIA
+---------
+id (PK)
+usuario (FK -> User)
+accion (enum: CREAR, MODIFICAR, ELIMINAR, EXPORTAR, ACCESO_INSPECCION)
+entidad_tipo (str: "marcaje", "trabajador", "calendario", etc.)
+entidad_id (int)
+datos_anteriores (jsonb, optional)
+datos_nuevos (jsonb, optional)
+ip_origen (str)
+timestamp (datetime)
+justificacion (text, optional)
+
+================================================================================
+3. FLUJOS DE TRABAJO CRITICOS
+================================================================================
+
+FLUJO A: ENVIO ENLACE PUNTO DE MARCAJE
+--------------------------------------
+1. Admin selecciona trabajador(es) en panel
+2. Sistema genera token_unico (UUID4) + registra en TokenAcceso:
+   - token (UUID4)
+   - trabajador (FK)
+   - creado_en (datetime)
+   - expira_en (datetime + 7 dias)
+   - usado (bool, default=False)
+3. Envio email/SMS con enlace: https://app.com/marcar?token={uuid}
+4. Trabajador accede → token validado → redirige a pantalla PIN
+5. Token marcado como usado tras primer acceso exitoso
+
+FLUJO B: MARCAJE TRABAJADOR (PWA)
+---------------------------------
+1. Acceso PWA → Pantalla PIN (input numérico)
+2. Validación PIN:
+   - 3 intentos fallidos → bloqueo 2 min
+   - 10 intentos fallidos → alerta admin + bloqueo cuenta
+3. PIN correcto → Muestra: "Hola [Nombre] - [Empresa]"
+4. Selección tipo marcaje (botones grandes táctiles):
+   - ENTRADA
+   - SALIDA
+   - PAUSA COMIDA
+   - PAUSA ALMUERZO
+   - MÉDICO
+5. Registro marcaje:
+   - Captura timestamp servidor (no cliente)
+   - Si consentimiento_geoloc=True → captura coords (una sola vez)
+   - Valida reglas:
+     * No permite ENTRADA si última acción fue ENTRADA sin SALIDA intermedia
+     * Alerta si <12h desde última SALIDA (descanso interjornada)
+     * Alerta si jornada >6h sin PAUSA registrada (descanso intrajornada)
+6. Confirmación visual + vibración (mobile) → Vuelve a pantalla PIN tras 2s
+
+FLUJO C: VALIDACION HORAS EXTRAORDINARIAS (RD 8/2019 Art.35)
+------------------------------------------------------------
+1. Al registrar SALIDA, sistema calcula:
+   - horas_trabajadas_dia = suma(marcas entrada/salida/pausas)
+   - horas_extra_dia = max(0, horas_trabajadas_dia - horas_previstas_jornada)
+2. Acumula horas_extra_mes (reset cada 1er día mes)
+3. Alertas:
+   - Nivel 1 (amarillo): >40h semanales
+   - Nivel 2 (rojo): >80h anuales acumuladas → bloqueo automático nuevas HE
+4. Registro HE requiere justificación obligatoria (campo texto)
+
+FLUJO D: CORRECCION MARCAJE POR ADMIN
+-------------------------------------
+1. Admin accede a Control Marcajes → busca marcaje
+2. Click "Modificar" → sistema muestra modal
+3. Validaciones:
+   - No permite modificación >72h sin justificación extensa
+   - Si >30 días → requiere rol "INSPECTOR" + doble autorización
+4. Al guardar:
+   - marcaje.modificado_manualmente = True
+   - marcaje.justificacion_modificacion = texto
+   - Crea registro en Auditoria con datos_anteriores/datos_nuevos
+5. Notificación email al trabajador (opcional configurable)
+
+================================================================================
+4. PANEL ADMINISTRATIVO - VISTAS PRINCIPALES
+================================================================================
+
+DASHBOARD
+---------
+- Resumen empresa (CIF, dirección, estado suscripción)
+- Métricas tiempo real:
+  * Presentes ahora: X/Y trabajadores
+  * Retrasos hoy: X trabajadores (>15 min entrada)
+  * Días sin marcaje completo: X días últimos 7 días
+- Calendario mini (vista mes) con colores por tipo jornada
+- Alertas pendientes (horas extra >80h, descansos incumplidos)
+- Botón "Abrir Punto de Marcaje" (abre en nueva pestaña)
+
+TRABAJADORES
+------------
+- Listado con columnas: Nombre, NIF, Grupo, Estado, Último marcaje
+- Filtros: Grupo, Estado, Rango fechas último marcaje
+- Acciones por fila:
+  * Ver ficha (marcajes últimos 30 días)
+  * Ver calendario personal
+  * Resetear PIN (genera temporal 24h)
+  * Editar datos básicos
+  * Dar de baja (soft delete)
+- Acción masiva: Exportar seleccionados (CSV/PDF)
+
+CALENDARIOS
+-----------
+- Selector año + selector calendario (empresa o trabajador)
+- Vista mes con días coloreados según tipo jornada
+- Click día → modal:
+  * Para calendario empresa: asignar tipo jornada a todos
+  * Para calendario trabajador: asignar tipo jornada individual
+- Panel "Tipos de Jornada" (crear/editar tipos personalizados)
+- Botón "Copiar calendario" (empresa → trabajador o trabajador → trabajador)
+
+CONTROL MARCAJES
+----------------
+- Filtros superiores:
+  * Rango fechas (inicio/fin)
+  * Trabajadores (multiselect)
+  * Agrupación (por trabajador, por día)
+  * Mostrar solo días laborables (checkbox)
+- Tabla resultados:
+  * Columnas: Fecha, Trabajador, Previsto (horas), Realizado, Diferencia, Estado
+  * Estado: OK (verde), Incompleto (naranja), Error (rojo)
+- Click fila → detalle marcajes del día + botón "Modificar"
+- Botones exportación: CSV, PDF, XML Inspección
+
+VACACIONES
+----------
+- Panel gestión días:
+  * Días totales año: X
+  * Días usados: Y
+  * Días pendientes: Z
+- Calendario visual con superposición:
+  * Color base: tipo jornada
+  * Overlay rojo: número coincidencias vacaciones ese día
+  * Hover día → lista nombres trabajadores de vacaciones
+- Acción masiva: Asignar vacaciones a grupo/rango fechas
+
+CONFIGURACION
+-------------
+- Datos empresa (editable)
+- Administradores secundarios (crear/revocar)
+- Puntos de marcaje (geolocalización obligatoria):
+  * Nombre punto (ej: "Oficina Principal")
+  * Coords lat/lon + radio metros (ej: 50m)
+  * Trabajadores asignados (multiselect)
+- API tokens (crear/revocar tokens para integraciones)
+- RGPD: Registro actividades tratamiento + botón "Derecho al olvido"
+
+================================================================================
+5. PUNTO DE MARCAJE (PWA - OFFLINE FIRST)
+================================================================================
+
+TECNOLOGIA
+----------
+- HTML5 + CSS3 + Vanilla JS (sin frameworks pesados)
+- Service Worker con estrategia "Network First":
+  * Online: envía marcaje + sincroniza cola offline
+  * Offline: almacena en IndexedDB + sincroniza al reconnect
+- Manifest.json:
+  * name: "TimeNet Marcaje"
+  * short_name: "Marcaje"
+  * display: standalone
+  * theme_color: #2c3e50
+  * background_color: #ffffff
+  * icons: 192x192, 512x512 (PNG)
+
+PANTALLAS
+---------
+1. splash.html (2s máximo):
+   - Logo empresa + "Cargando..."
+   - Registra device info + IP
+
+2. pin.html:
+   - Input numérico grande (font-size: 48px)
+   - Teclado virtual táctil (botones 0-9 + borrar)
+   - Botón "Entrar" deshabilitado hasta 4 dígitos
+   - Mensaje error: "PIN incorrecto (X/3 intentos)"
+
+3. confirmacion.html:
+   - "Hola [Nombre Trabajador]"
+   - Empresa: [Nombre Empresa]
+   - Último marcaje: [tipo] a las [hora] (si existe hoy)
+   - Botones grandes (min 60px alto):
+     * ENTRADA (verde)
+     * SALIDA (rojo)
+     * PAUSA COMIDA (azul)
+     * PAUSA ALMUERZO (azul claro)
+     * MÉDICO (naranja)
+
+4. exito.html:
+   - Icono check verde grande
+   - "Marcaje registrado correctamente"
+   - Tipo: [ENTRADA] a las [14:32]
+   - "Volviendo en 2 segundos..." → redirect a pin.html
+
+5. error.html:
+   - Icono X rojo
+   - Mensaje: "Error de red. Marcaje guardado para enviar cuando haya conexión"
+   - Botón "Volver"
+
+OFFLINE
+-------
+- Almacenamiento local: IndexedDB (tabla: pending_marks)
+- Estructura registro offline:
+  {
+    id: uuid,
+    pin_hash: sha256(pin),  // sin guardar PIN en claro
+    tipo: "ENTRADA",
+    timestamp_local: ISOString,
+    geoloc: {lat, lon} (opcional),
+    synced: false
+  }
+- Al reconnect: envía cola pendiente + marca synced=true
+- Límite cola: 50 marcajes (evita saturación)
+
+================================================================================
+6. REPORTING LEGAL (RD 8/2019 + INSPECCION TRABAJO)
+================================================================================
+
+REPORTE 1: REGISTRO DIARIO INDIVIDUAL
+-------------------------------------
+Formato: PDF descargable por trabajador
+Contenido:
+  - Cabecera: Empresa, CIF, dirección
+  - Trabajador: Nombre, NIF
+  - Fecha: DD/MM/YYYY
+  - Tabla marcajes:
+    Hora        Tipo          Observaciones
+    09:02       Entrada
+    14:05       Pausa comida
+    15:10       Regreso comida
+    18:03       Salida
+  - Total horas trabajadas: 8h 06m
+  - Horas extraordinarias: 0h 06m
+  - Firma digital empresa (QR + hash SHA256)
+
+REPORTE 2: RESUMEN MENSUAL EMPRESA
+----------------------------------
+Formato: PDF/CSV/Excel
+Contenido:
+  - Resumen por trabajador:
+    * Días trabajados
+    * Horas ordinarias
+    * Horas extraordinarias
+    * Ausencias justificadas/no justificadas
+    * Incumplimientos descansos
+  - Totales empresa
+  - Gráfico tendencia horas extra mensuales
+
+REPORTE 3: EXPORTACION INSPECCION TRABAJO (OBLIGATORIO)
+-------------------------------------------------------
+Endpoint: /api/v1/compliance/inspeccion/export
+Parámetros: fecha_inicio, fecha_fin, trabajadores (opcional)
+Formato: XML validado según schema Ministerio Trabajo
+Estructura:
+  <registro_horario>
+    <empresa>
+      <cif>NIF</cif>
+      <nombre>Nombre S.L.</nombre>
+    </empresa>
+    <periodo>
+      <inicio>2024-01-01</inicio>
+      <fin>2024-01-31</fin>
+    </periodo>
+    <trabajadores>
+      <trabajador>
+        <nif>12345678Z</nif>
+        <nombre>María García</nombre>
+        <dias>
+          <dia fecha="2024-01-02">
+            <marcaje hora="09:02" tipo="entrada"/>
+            <marcaje hora="14:05" tipo="pausa"/>
+            <marcaje hora="15:10" tipo="reanudacion"/>
+            <marcaje hora="18:03" tipo="salida"/>
+            <total_horas>8.10</total_horas>
+          </dia>
+          ...
+        </dias>
+      </trabajador>
+      ...
+    </trabajadores>
+    <firma_digital>SHA256_HASH</firma_digital>
+  </registro_horario>
+
+REPORTE 4: CERTIFICADO MENSUAL TRABAJADOR
+-----------------------------------------
+Formato: PDF con firma digital visible
+Contenido:
+  - "CERTIFICADO DE JORNADA LABORAL"
+  - Empresa + CIF
+  - Trabajador + NIF
+  - Mes/Año
+  - Total horas ordinarias
+  - Total horas extraordinarias
+  - Días ausencia justificada
+  - Firma responsable + sello empresa
+  - QR que enlaza a verificación online (hash + timestamp)
+
+REPORTE 5: INTEGRACION NOMINA (Sage/A3/Nominaplus)
+--------------------------------------------------
+Formato: CSV con cabecera específica por software
+Ejemplo Sage:
+  NIF;Fecha;HorasOrdinarias;HorasExtra;TipoAusencia;Justificacion
+  12345678Z;01/01/2024;8.00;0.00;;
+  12345678Z;02/01/2024;8.10;0.10;;
+  ...
+
+================================================================================
+7. CUMPLIMIENTO LEGAL RD 8/2019 + RGPD
+================================================================================
+
+REQUISITOS RD 8/2019 IMPLEMENTADOS
+----------------------------------
+[X] Art. 34.9 ET: Registro diario inequívoco entrada/salida
+[X] Art. 34.3 ET: Alerta descanso interjornada <12h
+[X] Art. 34.4 ET: Validación descanso intrajornada >15min si jornada >6h
+[X] Art. 35 ET: Cálculo automático horas extraordinarias
+[X] Art. 35.2 ET: Límite 80h extraordinarias anuales (bloqueo automático)
+[X] Art. 7.1 RD 8/2019: Conservación datos mínimo 4 años (script cleanup automático)
+[X] Art. 5 RD 8/2019: Acceso inmediato Inspección Trabajo (endpoint dedicado + auth especial)
+[X] Festivos: Base datos integrada 17 CC.AA. + municipios (actualización anual automática)
+
+REQUISITOS RGPD IMPLEMENTADOS
+-----------------------------
+[X] Art. 6 RGPD: Consentimiento explícito geolocalización (checkbox + registro fecha/hora/IP)
+[X] Art. 9 RGPD: Datos biométricos no almacenados (solo PIN numérico)
+[X] Art. 13 RGPD: Información clara al trabajador sobre tratamiento
+[X] Art. 17 RGPD: Derecho al olvido (eliminación + anonimización datos tras 4 años)
+[X] Art. 30 RGPD: Registro actividades tratamiento (modelo Auditoria)
+[X] Art. 32 RGPD: Encriptación AES-256 datos sensibles (PIN, NIF en base)
+[X] Minimización datos: Solo coords en momento marcaje, nunca tracking continuo
+[X] Breach notification: Alerta admin + registro si acceso no autorizado a datos sensibles
+
+================================================================================
+8. STACK TECNICO
+================================================================================
+
+BACKEND
+-------
+Python 3.11+
+Django 4.2 LTS
+Django REST Framework 3.14
+PostgreSQL 14 (con extensión pgcrypto para encriptación)
+Redis 7 (cache + celery broker)
+Celery 5.3 (tareas background: cleanup, notificaciones)
+Gunicorn 21 (WSGI server)
+Nginx 1.24 (reverse proxy + static files)
+
+SEGURIDAD BACKEND
+-----------------
+django-cryptography (encriptación campos sensibles)
+django-auditlog (registro auditoría automático)
+django-csp (Content Security Policy headers)
+django-ratelimit (protección fuerza bruta PIN)
+django-axes (bloqueo cuentas tras intentos fallidos)
+django-sslserver (forzar HTTPS en desarrollo)
+
+FRONTEND ADMIN
+--------------
+React 18 + TypeScript
+Vite (build)
+Ant Design (UI components)
+Recharts (gráficos)
+React Query (gestión estado/api)
+Tailwind CSS (utilidades)
+
+PWA MARCAJE
+-----------
+HTML5 + CSS3 + Vanilla JS
+Workbox 6 (service worker)
+IndexedDB (almacenamiento offline)
+QRious (generación QR para certificados)
+
+HOSTING MINIMO
+--------------
+Servidor: 2 vCPU, 4GB RAM, 50GB SSD
+SO: Ubuntu 22.04 LTS
+Firewall: UFW (solo puertos 80/443)
+Backup: Script diario cifrado + rotación 30 días
+SSL: Let's Encrypt (renovación automática)
+
+================================================================================
+9. FASES DE IMPLEMENTACION (ESTIMACION REALISTA)
+================================================================================
+
+FASE 1: MVP NUCLEO (2-3 semanas)
+--------------------------------
+- Setup proyecto Django + Docker compose
+- Modelos básicos: Empresa, Trabajador, TipoJornada, Marcaje
+- Autenticación JWT básica (admin)
+- API REST marcajes CRUD
+- Script migración inicial datos prueba
+- Panel admin Django básico (sin React)
+
+FASE 2: LOGICA HORARIA (3 semanas)
+----------------------------------
+- Modelo Calendario + DiaCalendario
+- Validaciones RD 8/2019 (descansos, horas extra)
+- PWA marcaje básico (sin offline)
+- Listado trabajadores + creación
+- Exportación CSV básico
+
+FASE 3: PANEL ADMIN REACT (3 semanas)
+--------------------------------------
+- Setup React + Vite + Tailwind
+- Componentes principales (dashboard, trabajadores, calendarios)
+- Integración API REST
+- Diseño responsive mobile-first
+- Autenticación admin con 2FA
+
+FASE 4: CUMPLIMIENTO LEGAL (2 semanas)
+--------------------------------------
+- Endpoint exportación Inspección Trabajo (XML validado)
+- Auditoría completa (modelo + triggers)
+- Encriptación campos sensibles
+- Consentimientos RGPD + gestión
+- Script conservación 4 años + cleanup automático
+
+FASE 5: POLISH + OFFLINE (2 semanas)
+------------------------------------
+- Service Worker + IndexedDB (offline marcajes)
+- Notificaciones push (retrasos, aprobaciones vacaciones)
+- Generación PDF con WeasyPrint
+- Testing cross-browser + mobile
+- Documentación técnica + manual usuario
+
+TOTAL ESTIMADO: 12-14 semanas para versión producción estable
+
+================================================================================
+10. ADVERTENCIAS OPERATIVAS CRITICAS
+================================================================================
+
+1. NUNCA almacenes ubicación continua: Solo coords en momento marcaje (mínimo necesario RGPD)
+2. NUNCA uses hora cliente para marcajes: Siempre timestamp servidor (evita fraude)
+3. Bloquea corrección retroactiva >72h sin justificación extensa + auditoría obligatoria
+4. Implementa rate limiting estricto en endpoint PIN (10 intentos/5 min máximo)
+5. Backup diario cifrado fuera del servidor principal (obligatorio 4 años conservación)
+6. Prueba carga mínima: 500 marcajes simultáneos (empresas medianas)
+7. Geolocalización SOLO con consentimiento explícito + registro fecha/hora/IP del consentimiento
+8. Nunca almacenes contraseñas/PIN en claro: Siempre hash + salt (PBKDF2 o Argon2)
+
+================================================================================
+11. PROXIMO PASO OPERATIVO
+================================================================================
+
+No es viable entregar "app completa funcional" en un mensaje (serían +15.000 líneas).
+
+PROPUESTA REALISTA:
+1. Te proporciono script setup inicial (requirements.txt + settings.py base)
+2. Te entrego modelos Django completos (models.py validados RD 8/2019)
+3. Implementamos endpoint marcaje básico (views.py + serializers.py)
+4. Iteramos módulo a módulo según prioridades
+
+¿Quieres que comience con el archivo models.py completo (incluyendo validaciones legales) 
+o prefieres el esquema de base de datos SQL directamente para PostgreSQL?
+================================================================================

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>c4isrgotchi v9.0 - TACTICAL SOLDIER</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Courier New',monospace}
+body{background:#0a0e1a;color:#8f9bb9;min-height:100vh;padding:20px}
+header{background:#151b2d;padding:15px;margin-bottom:20px;border-radius:8px;border:1px solid #1e2742}
+h1{color:#00d4ff;font-size:20px;margin-bottom:10px}
+.stats{display:flex;gap:15px;flex-wrap:wrap;font-size:12px}
+.stat{background:#0f1525;padding:5px 10px;border-radius:4px}
+.stat b{color:#00ff9d}
+.main{display:grid;grid-template-columns:350px 1fr;gap:20px}
+@media(max-width:768px){.main{grid-template-columns:1fr}}
+
+/* PIXEL ART SOLDIER */
+.viz{background:#151b2d;padding:30px;border-radius:8px;border:1px solid #1e2742;text-align:center;min-height:300px;position:relative}
+.soldier-container{width:120px;height:160px;margin:20px auto;position:relative}
+
+/* Pixel Art Soldier usando box-shadow */
+.soldier-pixel{
+  width:4px;height:4px;background:#00d4ff;
+  box-shadow:
+    /* Helmet */
+    20px 0 0 #1a5f7a,24px 0 0 #1a5f7a,28px 0 0 #1a5f7a,32px 0 0 #1a5f7a,36px 0 0 #1a5f7a,
+    20px 4px 0 #1a5f7a,24px 4px 0 #1a5f7a,28px 4px 0 #1a5f7a,32px 4px 0 #1a5f7a,36px 4px 0 #1a5f7a,
+    /* Face */
+    24px 8px 0 #f5d0b0,28px 8px 0 #f5d0b0,32px 8px 0 #f5d0b0,
+    24px 12px 0 #f5d0b0,28px 12px 0 #f5d0b0,32px 12px 0 #f5d0b0,
+    /* Eyes */
+    26px 10px 0 #000,30px 10px 0 #000,
+    /* Body/Torso */
+    16px 16px 0 #2d5a3d,20px 16px 0 #2d5a3d,24px 16px 0 #2d5a3d,28px 16px 0 #2d5a3d,32px 16px 0 #2d5a3d,36px 16px 0 #2d5a3d,40px 16px 0 #2d5a3d,
+    16px 20px 0 #2d5a3d,20px 20px 0 #2d5a3d,24px 20px 0 #2d5a3d,28px 20px 0 #2d5a3d,32px 20px 0 #2d5a3d,36px 20px 0 #2d5a3d,40px 20px 0 #2d5a3d,
+    16px 24px 0 #2d5a3d,20px 24px 0 #2d5a3d,24px 24px 0 #2d5a3d,28px 24px 0 #2d5a3d,32px 24px 0 #2d5a3d,36px 24px 0 #2d5a3d,40px 24px 0 #2d5a3d,
+    /* Arms */
+    12px 16px 0 #1a4a3a,12px 20px 0 #1a4a3a,12px 24px 0 #1a4a3a,
+    44px 16px 0 #1a4a3a,44px 20px 0 #1a4a3a,44px 24px 0 #1a4a3a,
+    /* Legs */
+    20px 28px 0 #1a3a2a,24px 28px 0 #1a3a2a,28px 28px 0 #1a3a2a,32px 28px 0 #1a3a2a,36px 28px 0 #1a3a2a,40px 28px 0 #1a3a2a,
+    20px 32px 0 #1a3a2a,24px 32px 0 #1a3a2a,28px 32px 0 #1a3a2a,32px 32px 0 #1a3a2a,36px 32px 0 #1a3a2a,40px 32px 0 #1a3a2a,
+    20px 36px 0 #1a3a2a,24px 36px 0 #1a3a2a,28px 36px 0 #1a3a2a,32px 36px 0 #1a3a2a,36px 36px 0 #1a3a2a,40px 36px 0 #1a3a2a,
+    /* Boots */
+    20px 40px 0 #2a1a1a,24px 40px 0 #2a1a1a,28px 40px 0 #2a1a1a,
+    32px 40px 0 #2a1a1a,36px 40px 0 #2a1a1a,40px 40px 0 #2a1a1a,
+    /* Weapon */
+    44px 18px 0 #3a3a3a,48px 18px 0 #3a3a3a,52px 18px 0 #3a3a3a,56px 18px 0 #3a3a3a,
+    44px 22px 0 #3a3a3a,48px 22px 0 #3a3a3a,52px 22px 0 #3a3a3a,56px 22px 0 #3a3a3a
+  ;
+  animation:idle 2s infinite;
+  image-rendering:pixelated;
+}
+
+.soldier-pixel.mission{
+  animation:shake 0.5s infinite;
+  filter:hue-rotate(30deg) saturate(2);
+}
+.soldier-pixel.sleep{
+  animation:breathe 3s infinite;
+  opacity:0.7;
+}
+.soldier-pixel.couch{
+  transform:scale(1.1);
+}
+
+@keyframes idle{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-3px)}
+}
+@keyframes shake{
+  0%,100%{transform:translateX(-2px)}
+  50%{transform:translateX(2px)}
+}
+@keyframes breathe{
+  0%,100%{transform:scaleY(1)}
+  50%{transform:scaleY(0.95)}
+}
+
+.status-tag{display:inline-block;padding:4px 8px;background:#0f1525;border:1px solid #00ff9d;border-radius:4px;font-size:10px;color:#00ff9d;margin:10px 0}
+.dialogue{font-size:11px;color:#8f9bb9;margin-top:15px;padding:10px;background:#0f1525;border-radius:4px;min-height:40px}
+
+.tabs{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.tab{background:#0f1525;border:1px solid #1e2742;padding:10px 15px;cursor:pointer;border-radius:4px;font-size:12px;transition:all 0.2s}
+.tab:hover,.tab.active{background:#00d4ff;color:#000;border-color:#00d4ff}
+.panel{display:none}
+.panel.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.card{background:#0f1525;border:1px solid #1e2742;padding:15px;border-radius:6px;cursor:pointer;font-size:11px;transition:all 0.2s;text-align:center}
+.card:hover{border-color:#00d4ff;background:#151b2d;transform:translateY(-2px)}
+.card:active{transform:scale(0.98)}
+.log{background:#0f1525;border:1px solid #1e2742;padding:15px;border-radius:6px;margin-top:20px;max-height:150px;overflow-y:auto;font-size:11px}
+.entry{padding:3px 0;border-bottom:1px solid #1e2742}
+.entry.ok{color:#00ff9d}
+.entry.warn{color:#ff6b6b}
+.entry.sys{color:#00d4ff}
+.btn{background:#0f1525;border:1px solid #1e2742;color:#8f9bb9;padding:8px 15px;border-radius:4px;cursor:pointer;margin:5px;font-size:11px}
+.btn:hover{border-color:#00d4ff;background:#151b2d}
+input,select{background:#0f1525;border:1px solid #1e2742;color:#8f9bb9;padding:8px;border-radius:4px;width:100%;margin:5px 0}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal-content{background:#151b2d;padding:30px;border-radius:8px;border:1px solid #1e2742;max-width:500px;width:90%;max-height:80vh;overflow-y:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1> c4isrgotchi v9.0</h1>
+  <div class="stats">
+    <div class="stat">NIVEL <b id="lvl">1</b></div>
+    <div class="stat">XP <b id="xp">0</b></div>
+    <div class="stat">CR <b id="cr">500</b></div>
+    <div class="stat">HP <b id="hp">100</b></div>
+    <div class="stat">STA <b id="sta">100</b></div>
+    <div class="stat">MOR <b id="mor">80</b></div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="viz">
+    <div class="status-tag" id="status">🟢 IDLE</div>
+    <div class="soldier-container">
+      <div class="soldier-pixel" id="soldier"></div>
+    </div>
+    <div class="dialogue" id="dialogue">Unidad lista para operaciones, comandante.</div>
+  </div>
+  
+  <div>
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('cmd')">COMANDOS</div>
+      <div class="tab" onclick="showTab('ops')">MISIONES</div>
+      <div class="tab" onclick="showTab('gear')">EQUIPO</div>
+      <div class="tab" onclick="showTab('save')">GUARDAR</div>
+    </div>
+    
+    <div id="cmd" class="panel active">
+      <div class="grid">
+        <div class="card" onclick="act('feed')">🍖 RACIONES<br><small>+30 STA</small></div>
+        <div class="card" onclick="act('med')">💊 MEDKIT<br><small>+40 HP</small></div>
+        <div class="card" onclick="act('train')">💪 ENTRENAR<br><small>+20 DISC</small></div>
+        <div class="card" onclick="act('patrol')">🚶 PATRULLA<br><small>+25 MOR</small></div>
+        <div class="card" onclick="act('rest')">😴 DESCANSAR<br><small>+30 HP/STA</small></div>
+        <div class="card" onclick="act('sleep')">💤 DORMIR<br><small>+50 HP/STA</small></div>
+      </div>
+    </div>
+    
+    <div id="ops" class="panel">
+      <div class="grid">
+        <div class="card" onclick="mission('recon')">🔍 RECON<br><small>5s | +50 XP</small></div>
+        <div class="card" onclick="mission('strike')">⚔️ STRIKE<br><small>10s | +100 XP</small></div>
+        <div class="card" onclick="mission('intel')">📡 INTEL<br><small>15s | +150 XP</small></div>
+        <div class="card" onclick="mission('black')">👤 BLACK OPS<br><small>20s | +250 XP</small></div>
+      </div>
+    </div>
+    
+    <div id="gear" class="panel">
+      <div class="grid">
+        <div class="card" onclick="buy('weapon',200)">🔫 ARMA<br><small>200 CR</small></div>
+        <div class="card" onclick="buy('armor',250)">🛡️ ARMADURA<br><small>250 CR</small></div>
+        <div class="card" onclick="buy('medkit',100)">💊 MEDKIT x3<br><small>100 CR</small></div>
+        <div class="card" onclick="buy('implant',500)">🧠 IMPLANTE<br><small>500 CR</small></div>
+      </div>
+    </div>
+    
+    <div id="save" class="panel">
+      <div class="grid">
+        <div class="card" onclick="exportSave()">📥 EXPORTAR SAVE</div>
+        <div class="card" onclick="importSave()">📤 IMPORTAR SAVE</div>
+        <div class="card" onclick="clearSave()">🗑️ BORRAR TODO</div>
+      </div>
+      <div style="margin-top:20px;padding:15px;background:#0f1525;border-radius:6px;font-size:11px">
+        <b style="color:#00d4ff">GUARDADO AUTOMÁTICO:</b> El juego se guarda automáticamente en tu navegador cada 10 segundos.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="log" id="log"></div>
+
+<script>
+// GAME STATE
+let game = JSON.parse(localStorage.getItem('c4isr_save')) || {
+  lvl:1, xp:0, cr:500, hp:100, sta:100, mor:80, disc:50,
+  inventory:{weapon:0,armor:0,medkit:3,implant:0},
+  mission:null, state:'idle', lastSave:Date.now()
+};
+
+const $ = id => document.getElementById(id);
+
+const log = (msg, type='sys') => {
+  const div = document.createElement('div');
+  div.className = `entry ${type}`;
+  div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  $('log').prepend(div);
+  if($('log').children.length > 20) $('log').lastChild.remove();
+};
+
+const save = () => {
+  game.lastSave = Date.now();
+  localStorage.setItem('c4isr_save', JSON.stringify(game));
+};
+
+const updateUI = () => {
+  $('lvl').textContent = game.lvl;
+  $('xp').textContent = game.xp;
+  $('cr').textContent = game.cr;
+  $('hp').textContent = Math.floor(game.hp);
+  $('sta').textContent = Math.floor(game.sta);
+  $('mor').textContent = Math.floor(game.mor);
+  
+  const statusEl = $('status');
+  const soldierEl = $('soldier');
+  
+  if(game.mission){
+    statusEl.textContent = '🔴 EN MISIÓN';
+    statusEl.style.borderColor = '#ff6b6b';
+    statusEl.style.color = '#ff6b6b';
+    soldierEl.classList.add('mission');
+    soldierEl.classList.remove('idle', 'sleep', 'couch');
+  }else{
+    statusEl.textContent = '🟢 IDLE';
+    statusEl.style.borderColor = '#00ff9d';
+    statusEl.style.color = '#00ff9d';
+    soldierEl.classList.remove('mission');
+    
+    if(game.state === 'sleep'){
+      soldierEl.classList.add('sleep');
+    }else if(game.state === 'couch'){
+      soldierEl.classList.add('couch');
+    }else{
+      soldierEl.classList.add('idle');
+    }
+  }
+  
+  save();
+};
+
+const say = (text) => {
+  $('dialogue').textContent = text;
+  setTimeout(() => {
+    if(!game.mission) $('dialogue').textContent = 'Unidad lista para operaciones, comandante.';
+  }, 4000);
+};
+
+const act = (action) => {
+  if(game.mission){
+    log('⚠️ Unidad en misión - Esperar', 'warn');
+    return;
+  }
+  
+  switch(action){
+    case 'feed':
+      game.sta = Math.min(100, game.sta + 30);
+      log('✅ Raciones consumidas. STA +30', 'ok');
+      say('Energía restaurada, comandante.');
+      break;
+    case 'med':
+      if(game.inventory.medkit > 0){
+        game.inventory.medkit--;
+        game.hp = Math.min(100, game.hp + 40);
+        log('✅ Medkit usado. HP +40', 'ok');
+        say('Heridas curadas. Listo para combatir.');
+      }else{
+        log('❌ Sin medkits disponibles', 'warn');
+        say('Necesitamos suministros médicos.');
+      }
+      break;
+    case 'train':
+      if(game.sta >= 20){
+        game.sta -= 20;
+        game.disc = Math.min(100, game.disc + 20);
+        game.xp += 25;
+        log('✅ Entrenamiento completado. XP +25 | DISC +20', 'ok');
+        say('Disciplina y combate mejorados.');
+      }else{
+        log('❌ Stamina insuficiente (necesita 20)', 'warn');
+        say('Necesito descansar antes de entrenar.');
+      }
+      break;
+    case 'patrol':
+      if(game.sta >= 15){
+        game.sta -= 15;
+        game.mor = Math.min(100, game.mor + 25);
+        log('✅ Patrulla completada. MOR +25', 'ok');
+        say('Perímetro asegurado. Sin amenazas.');
+      }else{
+        log('❌ Stamina insuficiente (necesita 15)', 'warn');
+      }
+      break;
+    case 'rest':
+      game.hp = Math.min(100, game.hp + 30);
+      game.sta = Math.min(100, game.sta + 30);
+      game.state = 'couch';
+      log('✅ Descanso táctico. HP/STA +30', 'ok');
+      say('Recuperando parámetros...');
+      setTimeout(() => {
+        game.state = 'idle';
+        updateUI();
+      }, 5000);
+      break;
+    case 'sleep':
+      game.hp = Math.min(100, game.hp + 50);
+      game.sta = Math.min(100, game.sta + 50);
+      game.state = 'sleep';
+      log('✅ Ciclo de sueño completado. HP/STA +50', 'ok');
+      say('Sistemas recargados al 100%.');
+      setTimeout(() => {
+        game.state = 'idle';
+        updateUI();
+      }, 6000);
+      break;
+  }
+  updateUI();
+};
+
+const mission = (type) => {
+  if(game.mission){
+    log('⚠️ Misión ya en curso', 'warn');
+    return;
+  }
+  
+  const missions = {
+    recon:{time:5, xp:50, cr:100, req:{sta:20}, name:'RECON'},
+    strike:{time:10, xp:100, cr:200, req:{sta:40}, name:'STRIKE'},
+    intel:{time:15, xp:150, cr:300, req:{sta:30, disc:40}, name:'INTEL'},
+    black:{time:20, xp:250, cr:500, req:{sta:50, disc:60}, name:'BLACK OPS'}
+  };
+  
+  const m = missions[type];
+  if(game.sta < m.req.sta || (m.req.disc && game.disc < m.req.disc)){
+    log('❌ Requisitos insuficientes para esta misión', 'warn');
+    say('Necesito más preparación para esta operación.');
+    return;
+  }
+  
+  game.mission = {type, start:Date.now(), duration:m.time * 1000};
+  game.sta -= m.req.sta;
+  game.state = 'mission';
+  log(`🚀 Misión ${m.name} iniciada. ETA: ${m.time}s`, 'sys');
+  say(`Desplegando en operación ${m.name}...`);
+  updateUI();
+  
+  setTimeout(() => {
+    const success = Math.random() > 0.3;
+    if(success){
+      game.xp += m.xp;
+      game.cr += m.cr;
+      game.mor = Math.min(100, game.mor + 10);
+      log(`✅ MISIÓN ÉXITO: XP +${m.xp} | CR +${m.cr}`, 'ok');
+      say('Misión completada con éxito. Regresando a base.');
+      
+      // Level up
+      if(game.xp >= game.lvl * 200){
+        game.lvl++;
+        game.xp = 0;
+        game.hp = 100;
+        game.sta = 100;
+        log(`🎉 NIVEL ${game.lvl} ALCANZADO - Stats restaurados`, 'ok');
+        say(`¡Ascendido a nivel ${game.lvl}! ¡Excelente trabajo!`);
+      }
+    }else{
+      game.hp = Math.max(0, game.hp - 20);
+      game.mor = Math.max(0, game.mor - 15);
+      log('❌ MISIÓN FALLIDA - Daños recibidos', 'warn');
+      say('Misión comprometida. Regresando con bajas...');
+    }
+    game.mission = null;
+    game.state = 'idle';
+    updateUI();
+  }, m.time * 1000);
+};
+
+const buy = (item, cost) => {
+  if(game.cr < cost){
+    log('❌ Créditos insuficientes', 'warn');
+    say('Fondos insuficientes para esta compra.');
+    return;
+  }
+  
+  game.cr -= cost;
+  
+  if(item === 'medkit'){
+    game.inventory.medkit += 3;
+    log(`✅ MEDKIT x3 adquirido`, 'ok');
+    say('Suministros médicos recibidos.');
+  }else{
+    game.inventory[item]++;
+    log(`✅ ${item.toUpperCase()} adquirido`, 'ok');
+    say('Equipamiento recibido y verificado.');
+  }
+  
+  updateUI();
+};
+
+const showTab = (tab) => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  $(tab).classList.add('active');
+};
+
+const exportSave = () => {
+  const data = btoa(JSON.stringify(game));
+  navigator.clipboard.writeText(data).then(() => {
+    log('✅ Save exportado al portapapeles', 'ok');
+    alert('Código de save copiado al portapapeles:\n\n' + data.substring(0, 100) + '...');
+  }).catch(() => {
+    log('⚠️ No se pudo copiar al portapapeles', 'warn');
+  });
+};
+
+const importSave = () => {
+  const code = prompt('Pega tu código de save:');
+  if(code){
+    try{
+      game = JSON.parse(atob(code));
+      localStorage.setItem('c4isr_save', JSON.stringify(game));
+      updateUI();
+      log('✅ Save importado correctamente', 'ok');
+    }catch(e){
+      log('❌ Código de save inválido', 'warn');
+    }
+  }
+};
+
+const clearSave = () => {
+  if(confirm('¿Estás seguro de borrar TODO el progreso?')){
+    localStorage.removeItem('c4isr_save');
+    location.reload();
+  }
+};
+
+// Auto-save every 10 seconds
+setInterval(save, 10000);
+
+// Init
+window.onload = () => {
+  log('🪖 c4isrgotchi v9.0 INICIADO', 'sys');
+  log('Bienvenido, comandante. Tu unidad táctica está lista.', 'ok');
+  updateUI();
+};
+</script>
+</body>
+</html>

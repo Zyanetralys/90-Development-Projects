@@ -1,0 +1,17 @@
+../img/map/tilesets/home_ceil.tmx
+../img/map/tilesets/stomach_ceil.tmx
+../img/map/tilesets/forest_ceil.tmx
+../img/map/tilesets/forest_sand.tmx
+../img/map/tilesets/cave_ceil.tmx
+../img/map/tilesets/ice_ceil.tmx
+../img/map/tilesets/base_ceil.tmx
+../img/map/tilesets/red_ceil.tmx
+../img/map/tilesets/road_line.tmx
+../img/map/tilesets/road_step.tmx
+../img/map/tilesets/gray_ceil.tmx
+../img/map/tilesets/fall_sand.tmx
+../img/map/tilesets/fall_ceil.tmx
+../img/map/tilesets/coalmine_ceil.tmx
+../img/map/tilesets/carpet.tmx
+../img/map/tilesets/mansion_ceil.tmx
+../img/map/tilesets/gravel.tmx

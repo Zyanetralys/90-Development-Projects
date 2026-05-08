@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BDSM Role Assessment</title>
+  <style>
+    :root{--bg:#000;--bg-alt:#050505;--surface:#0a0a0a;--surface-alt:#0f0f0f;--border:#1a1a1a;--border-light:#2a2a2a;--primary:#00ff41;--primary-dim:#00cc33;--primary-dark:#008f11;--primary-glow:rgba(0,255,65,.5);--text:#fff;--text-muted:#a0a0a0;--text-dim:#5a5a5a;--warning:#ffaa00;--info:#00aaff;--error:#ff4444}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Consolas,Monaco,'Courier New',monospace;background:var(--bg);color:var(--text);line-height:1.5;padding:2rem;min-height:100vh;position:relative}
+    .matrix-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 0%,rgba(0,40,0,.4) 0%,transparent 60%),repeating-linear-gradient(0deg,rgba(0,20,0,.03) 0,rgba(0,20,0,.03) 1px,transparent 1px,transparent 3px);pointer-events:none;z-index:-1}
+    .scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,rgba(0,0,0,.3) 0,rgba(0,0,0,.3) 1px,transparent 1px,transparent 2px);pointer-events:none;z-index:9998;opacity:.7}
+    .container{max-width:1000px;margin:0 auto;position:relative;z-index:1}
+    .header{border:1px solid var(--primary);border-bottom:3px solid var(--primary);padding:1.2rem 1.5rem;margin-bottom:2rem;position:relative;background:linear-gradient(180deg,rgba(0,40,0,.2),rgba(0,20,0,.05));box-shadow:0 0 30px rgba(0,255,65,.15),inset 0 0 30px rgba(0,255,65,.05);animation:borderFlow 4s ease-in-out infinite}
+    .header-label{position:absolute;top:-9px;left:15px;font-size:.75rem;color:var(--primary);background:var(--bg);padding:0 6px;text-shadow:0 0 8px var(--primary-glow)}
+    .title{color:var(--text);font-size:1.5rem;text-transform:uppercase;letter-spacing:4px;margin-bottom:.7rem;text-shadow:0 0 10px var(--primary-glow),0 0 20px var(--primary-glow);animation:textGlow 3s ease-in-out infinite}
+    .cursor{animation:cursor .9s step-end infinite;color:var(--primary);margin-left:4px;text-shadow:0 0 10px var(--primary-glow)}
+    .status-indicator{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--primary)}
+    .status-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;animation:blink 1.2s infinite}
+    .subtitle{font-size:.75rem;color:var(--text-muted);margin-top:.5rem}
+    .screen{display:none;animation:slideIn .5s ease-out}
+    .screen.active{display:block}
+    .welcome-container{text-align:center;padding:2rem 1rem}
+    .welcome-title{font-size:1.8rem;color:var(--primary);margin-bottom:1rem;text-shadow:0 0 15px var(--primary-glow)}
+    .welcome-text{color:var(--text-muted);margin-bottom:2rem;line-height:1.8}
+    .welcome-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:2rem 0;text-align:left}
+    .feature-item{background:var(--surface-alt);border:1px solid var(--border);border-left:3px solid var(--primary);padding:1rem}
+    .feature-item .icon{color:var(--primary);font-size:1.2rem;margin-bottom:.5rem}
+    .info-box{background:linear-gradient(180deg,var(--surface),var(--surface-alt));border:1px solid var(--border);border-left:4px solid var(--primary);padding:1.5rem;margin-bottom:2rem}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.5rem 0}
+    .info-item{display:flex;align-items:center;gap:.5rem;font-size:.85rem}
+    .info-item .label{color:var(--primary)}
+    .info-item .value{color:var(--text-muted)}
+    .info-item .data{color:var(--text);font-weight:700}
+    .warning-box{background:rgba(255,170,0,.1);border:1px solid var(--warning);border-left:3px solid var(--warning);padding:1rem;margin:1.5rem 0}
+    .warning-box p{color:var(--warning);margin-bottom:.5rem}
+    .warning-box ul{list-style:none;padding-left:1rem}
+    .warning-box li{color:var(--text-muted);margin-bottom:.3rem;position:relative;padding-left:1rem}
+    .warning-box li::before{content:"▸";position:absolute;left:0;color:var(--warning)}
+    .scale-info{margin:1.5rem 0;padding:1rem;background:rgba(0,170,255,.1);border:1px solid var(--info);border-radius:2px}
+    .scale-visual{display:flex;align-items:center;gap:1rem;margin:1rem 0}
+    .scale-bar{flex:1;height:4px;background:var(--border-light);position:relative}
+    .scale-marker{position:absolute;width:2px;height:8px;background:var(--primary);top:-2px}
+    .scale-labels{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text-dim)}
+    .consent-check{margin:1.5rem 0}
+    .checkbox-container{display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;font-size:.85rem;color:var(--text-muted)}
+    .checkbox-container input{display:none}
+    .checkmark{width:20px;height:20px;border:2px solid var(--primary);border-radius:2px;position:relative;flex-shrink:0}
+    .checkbox-container input:checked+.checkmark::after{content:"✓";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--primary);font-size:1rem;font-weight:700}
+    .btn-primary,.btn-secondary{font-family:inherit;padding:.75rem 1.5rem;font-size:.85rem;text-transform:uppercase;letter-spacing:2px;border:1px solid var(--primary);background:linear-gradient(180deg,var(--surface-alt),var(--surface));color:var(--primary);cursor:pointer;transition:all .25s ease;text-shadow:0 0 5px var(--primary-glow);margin:.5rem}
+    .btn-primary:hover:not(:disabled),.btn-secondary:hover:not(:disabled){background:linear-gradient(180deg,rgba(0,40,0,.6),rgba(0,20,0,.3));box-shadow:0 0 15px rgba(0,255,65,.3);color:var(--text)}
+    .btn-primary:disabled,.btn-secondary:disabled{opacity:.5;cursor:not-allowed}
+    .btn-primary{border-left:3px solid var(--primary)}
+    .btn-secondary{border-left:3px solid var(--border-light)}
+    .btn-large{padding:1rem 2.5rem;font-size:1rem}
+    .progress-container{margin-bottom:2rem}
+    .progress-header{display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.75rem;color:var(--primary)}
+    .progress-bar{height:8px;background:var(--border);border-radius:2px;overflow:hidden}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary-dark),var(--primary));width:0;transition:width .3s ease;box-shadow:0 0 10px var(--primary-glow)}
+    .validity-indicator{display:flex;align-items:center;gap:.5rem;margin-top:.5rem;font-size:.75rem;color:var(--text-muted)}
+    .validity-indicator .dot{width:6px;height:6px;background:var(--primary);border-radius:50%;animation:blink 1s infinite}
+    .question-container{background:linear-gradient(180deg,var(--surface),var(--surface-alt));border:1px solid var(--border);border-left:4px solid var(--primary);padding:2rem}
+    .question-header{display:flex;justify-content:space-between;margin-bottom:1.5rem;font-size:.75rem;color:var(--text-dim)}
+    .question-number{color:var(--primary)}
+    .question-text{font-size:1.1rem;line-height:1.6;margin-bottom:2rem;padding:1rem;background:rgba(0,40,0,.2);border:1px solid var(--border-light);border-radius:2px;min-height:60px}
+    .answer-options{display:grid;grid-template-columns:repeat(5,1fr);gap:.5rem;margin-bottom:2rem}
+    .option-btn{display:flex;flex-direction:column;align-items:center;padding:1rem .5rem;background:var(--surface-alt);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;transition:all .2s ease}
+    .option-btn:hover{border-color:var(--primary);background:rgba(0,40,0,.3);color:var(--text)}
+    .option-btn.selected{border-color:var(--primary);background:rgba(0,255,65,.1);color:var(--primary);box-shadow:0 0 15px rgba(0,255,65,.2)}
+    .option-btn .number{font-size:1.5rem;font-weight:700;margin-bottom:.5rem}
+    .option-btn .label{font-size:.65rem;text-align:center;line-height:1.2}
+    .navigation{display:flex;justify-content:space-between;gap:1rem}
+    .loading-container{text-align:center;padding:3rem}
+    .loading-spinner{width:60px;height:60px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 2rem}
+    .loading-steps{text-align:left;max-width:400px;margin:2rem auto}
+    .step{display:flex;align-items:center;gap:1rem;padding:.5rem 0;opacity:.5}
+    .step.completed{opacity:1}
+    .step .step-icon{color:var(--primary);opacity:0}
+    .step.completed .step-icon{opacity:1}
+    .loading-percent{font-size:2rem;color:var(--primary);text-shadow:0 0 20px var(--primary-glow);margin-top:2rem}
+    .results-container{max-width:900px;margin:0 auto}
+    .profile-card{background:linear-gradient(180deg,var(--surface),var(--surface-alt));border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem}
+    .profile-card.primary{border-left:4px solid var(--primary);box-shadow:0 0 20px rgba(0,255,65,.15)}
+    .profile-card.secondary{border-left:4px solid var(--primary-dim)}
+    .profile-header{display:flex;justify-content:space-between;margin-bottom:1rem;font-size:.75rem;color:var(--text-dim)}
+    .profile-percent{color:var(--primary);font-weight:700;text-shadow:0 0 10px var(--primary-glow)}
+    .profile-name{color:var(--text);font-size:1.5rem;margin-bottom:.5rem;text-transform:uppercase;letter-spacing:3px}
+    .profile-desc{color:var(--text-muted);line-height:1.6;margin-bottom:1rem}
+    .profile-category{display:inline-block;padding:.25rem .75rem;background:rgba(0,255,65,.1);border:1px solid var(--primary);color:var(--primary);font-size:.7rem;text-transform:uppercase;letter-spacing:2px}
+    .top-roles-container{margin:2rem 0}
+    .top-roles-list{display:grid;gap:.5rem}
+    .top-role-item{display:flex;align-items:center;gap:1rem;padding:.75rem;background:var(--surface-alt);border:1px solid var(--border)}
+    .top-role-rank{color:var(--primary);font-weight:700;min-width:2rem}
+    .top-role-name{flex:1;color:var(--text)}
+    .top-role-bar{width:150px;height:6px;background:var(--border);border-radius:2px;overflow:hidden}
+    .top-role-fill{height:100%;background:linear-gradient(90deg,var(--primary-dark),var(--primary))}
+    .top-role-percent{color:var(--primary);min-width:3rem;text-align:right}
+    .dimensions-container{margin:2rem 0}
+    .dimensions-chart{display:grid;gap:.75rem;margin:1.5rem 0}
+    .dimension-item{display:grid;grid-template-columns:150px 1fr 60px;align-items:center;gap:1rem}
+    .dimension-name{color:var(--text-muted);font-size:.85rem}
+    .dimension-bar-container{height:8px;background:var(--border);border-radius:2px;overflow:hidden}
+    .dimension-bar{height:100%;background:linear-gradient(90deg,var(--primary-dark),var(--primary));border-radius:2px}
+    .dimension-score{color:var(--primary);font-weight:700;text-align:right}
+    .t-score-legend{display:flex;gap:2rem;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+    .legend-item{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--text-dim)}
+    .legend-color{width:20px;height:8px;border-radius:2px}
+    .legend-color.low{background:#36f}
+    .legend-color.avg{background:var(--primary)}
+    .legend-color.high{background:#f63}
+    .interpretation-container{margin:2rem 0}
+    .interpretation-text{background:var(--surface-alt);border:1px solid var(--border);border-left:4px solid var(--primary);padding:1.5rem;font-family:inherit;font-size:.85rem;line-height:1.8;color:var(--text-muted);white-space:pre-wrap;max-height:500px;overflow-y:auto}
+    .metadata-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:2rem 0;padding:1rem;background:var(--surface-alt);border:1px solid var(--border)}
+    .metadata-item{display:flex;flex-direction:column;gap:.25rem}
+    .meta-label{font-size:.7rem;color:var(--text-dim);text-transform:uppercase}
+    .meta-value{color:var(--text);font-weight:700}
+    .actions-container{display:flex;gap:1rem;justify-content:center;margin:2rem 0;flex-wrap:wrap}
+    .alert-box{display:flex;gap:1rem;padding:1.5rem;background:rgba(255,170,0,.1);border:2px solid var(--warning);border-left:4px solid var(--warning);margin-bottom:2rem}
+    .alert-icon{font-size:2rem}
+    .alert-content h3{color:var(--warning);margin-bottom:.5rem}
+    .alert-content p{color:var(--text-muted);margin-bottom:.5rem}
+    .alert-subtext{font-size:.8rem;color:var(--text-dim)}
+    .footer{margin-top:3rem;padding-top:1.2rem;border-top:1px solid var(--border);font-size:.75rem;color:var(--text-dim);text-align:center}
+    .footer-divider{color:var(--primary);margin-bottom:.6rem;font-size:.65rem;letter-spacing:3px;text-shadow:0 0 8px var(--primary-glow)}
+    .footer-text{color:var(--text-muted);margin-bottom:.5rem}
+    .footer-disclaimer{color:var(--text-dim);font-size:.65rem;margin-bottom:1rem}
+    .footer-signature{color:var(--primary);animation:blink 2s infinite;text-shadow:0 0 10px var(--primary-glow);letter-spacing:2px}
+    .corner{position:fixed;width:100px;height:100px;border:2px solid var(--primary);opacity:.3;pointer-events:none;z-index:9997}
+    .corner-tl{top:20px;left:20px;border-right:none;border-bottom:none}
+    .corner-tr{top:20px;right:20px;border-left:none;border-bottom:none}
+    .corner-bl{bottom:20px;left:20px;border-right:none;border-top:none}
+    .corner-br{bottom:20px;right:20px;border-left:none;border-top:none}
+    @keyframes borderFlow{0%{border-color:var(--primary-dark)}50%{border-color:var(--primary)}100%{border-color:var(--primary-dark)}}
+    @keyframes textGlow{0%,100%{text-shadow:0 0 8px var(--primary-glow),0 0 15px var(--primary-glow)}50%{text-shadow:0 0 15px var(--primary-glow),0 0 30px var(--primary-glow),0 0 45px var(--primary-glow)}}
+    @keyframes cursor{0%,50%{opacity:1}51%,100%{opacity:0}}
+    @keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.3}}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:768px){body{padding:1rem}.answer-options{grid-template-columns:repeat(2,1fr)}.option-btn .label{font-size:.55rem}.dimension-item{grid-template-columns:1fr;gap:.5rem}.t-score-legend{flex-direction:column;gap:.5rem}.actions-container{flex-direction:column}.welcome-title{font-size:1.4rem}}
+    @media print{.matrix-bg,.scanlines,.corner,.btn-primary,.btn-secondary,.navigation{display:none!important}body{background:#fff;color:#000;padding:1rem}.screen{display:block!important}#welcome-screen,#assessment-screen,#loading-screen{display:none!important}}
+  </style>
+</head>
+<body>
+<div class="matrix-bg"></div><div class="scanlines"></div>
+<div class="corner corner-tl"></div><div class="corner corner-tr"></div><div class="corner corner-bl"></div><div class="corner corner-br"></div>
+<main class="container">
+  <header class="header">
+    <div class="header-label">root@assessment:~/profile~#</div>
+    <h1 class="title">BDSM ROLE ASSESSMENT<span class="cursor">█</span></h1>
+    <div class="status-indicator"><span class="status-dot"></span><span>[SYSTEM ONLINE]</span></div>
+    <p class="subtitle">Herramienta de autoconocimiento • 120 ítems</p>
+  </header>
+
+  <section id="welcome-screen" class="screen active">
+    <div class="welcome-container">
+      <h2 class="welcome-title">╔════════════════════════╗</h2>
+      <h2 class="welcome-title">║  TEST DE PERFILADO    ║</h2>
+      <h2 class="welcome-title">╚════════════════════════╝</h2>
+      <p class="welcome-text">Este test te ayudará a explorar tus preferencias en dinámicas de poder.<br>Responde con honestidad para obtener resultados precisos.</p>
+      <div class="welcome-features">
+        <div class="feature-item"><div class="icon">▸</div><strong>120 preguntas</strong><br><span class="text-muted">Evaluación completa</span></div>
+        <div class="feature-item"><div class="icon">▸</div><strong>10 dimensiones</strong><br><span class="text-muted">Análisis detallado</span></div>
+        <div class="feature-item"><div class="icon">▸</div><strong>Resultados privados</strong><br><span class="text-muted">Todo se procesa en tu navegador</span></div>
+        <div class="feature-item"><div class="icon">▸</div><strong>Descargable</strong><br><span class="text-muted">Guarda tus resultados</span></div>
+      </div>
+      <div class="info-box">
+        <h3>╔════════════════════════════════╗</h3>
+        <h3>║  ANTES DE COMENZAR            ║</h3>
+        <h3>╚════════════════════════════════╝</h3>
+        <div class="info-grid">
+          <div class="info-item"><span class="label">[+]</span><span class="value">Duración:</span><span class="data">25-35 minutos</span></div>
+          <div class="info-item"><span class="label">[+]</span><span class="value">Preguntas:</span><span class="data">120 ítems</span></div>
+          <div class="info-item"><span class="label">[+]</span><span class="value">Privacidad:</span><span class="data">100% local</span></div>
+        </div>
+        <div class="warning-box"><p>⚠️ <strong>Importante:</strong></p><ul><li>Esta evaluación es para <strong>autoconocimiento</strong>.</li><li>Responde según cómo te sientes realmente.</li><li>Si detectamos respuestas inconsistentes, te lo indicaremos.</li><li>Los resultados son orientativos, no diagnósticos.</li></ul></div>
+        <div class="scale-info"><p><strong>Escala de respuesta:</strong></p><div class="scale-visual"><span>1</span><div class="scale-bar"><div class="scale-marker" style="left:0%"></div><div class="scale-marker" style="left:25%"></div><div class="scale-marker" style="left:50%"></div><div class="scale-marker" style="left:75%"></div><div class="scale-marker" style="left:100%"></div></div><span>5</span></div><div class="scale-labels"><span>Totalmente en desacuerdo</span><span>Neutral</span><span>Totalmente de acuerdo</span></div></div>
+        <div class="consent-check"><label class="checkbox-container"><input type="checkbox" id="consent-checkbox"><span class="checkmark"></span><span class="label-text">He leído la información y consiento participar. Entiendo que los resultados son para autoconocimiento personal.</span></label></div>
+      </div>
+      <button id="start-btn" class="btn-primary btn-large" disabled>[ COMENZAR TEST ]</button>
+    </div>
+  </section>
+
+  <section id="assessment-screen" class="screen">
+    <div class="progress-container">
+      <div class="progress-header"><span>PROGRESO</span><span id="progress-text">0 / 120</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="validity-indicator" id="validity-indicator"><span class="dot"></span><span>Validez: Verificando...</span></div>
+    </div>
+    <div class="question-container">
+      <div class="question-header"><span class="question-number" id="question-number">Ítem 1/120</span><span class="question-category" id="question-category">Categoría</span></div>
+      <div class="question-text" id="question-text">Cargando pregunta...</div>
+      <div class="answer-options">
+        <button class="option-btn" data-value="1"><span class="number">1</span><span class="label">Totalmente en desacuerdo</span></button>
+        <button class="option-btn" data-value="2"><span class="number">2</span><span class="label">En desacuerdo</span></button>
+        <button class="option-btn" data-value="3"><span class="number">3</span><span class="label">Neutral</span></button>
+        <button class="option-btn" data-value="4"><span class="number">4</span><span class="label">De acuerdo</span></button>
+        <button class="option-btn" data-value="5"><span class="number">5</span><span class="label">Totalmente de acuerdo</span></button>
+      </div>
+      <div class="navigation"><button id="prev-btn" class="btn-secondary" disabled>[ ← ANTERIOR ]</button><button id="next-btn" class="btn-primary">[ SIGUIENTE → ]</button></div>
+    </div>
+  </section>
+
+  <section id="loading-screen" class="screen">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <h2>PROCESANDO RESULTADOS</h2>
+      <div class="loading-steps">
+        <div class="step" id="step-validity"><span class="step-icon">✓</span><span class="step-text">Evaluando escalas de validez...</span></div>
+        <div class="step" id="step-scoring"><span class="step-icon">✓</span><span class="step-text">Calculando puntuaciones...</span></div>
+        <div class="step" id="step-normative"><span class="step-icon">✓</span><span class="step-text">Comparando con datos de referencia...</span></div>
+        <div class="step" id="step-interpretation"><span class="step-icon">✓</span><span class="step-text">Generando interpretación...</span></div>
+      </div>
+      <div class="loading-percent" id="loading-percent">0%</div>
+    </div>
+  </section>
+
+  <section id="results-screen" class="screen">
+    <div class="results-container">
+      <div id="validity-alert" class="alert-box" style="display:none"><div class="alert-icon">⚠️</div><div class="alert-content"><h3>PROTOCOLO CUESTIONABLE</h3><p id="validity-message"></p><p class="alert-subtext">Los resultados pueden no ser precisos. Se recomienda repetir la evaluación.</p></div></div>
+      <div class="profile-card primary"><div class="profile-header"><span class="profile-label">ROL PRIMARIO</span><span class="profile-percent" id="primary-percent">0%</span></div><h2 class="profile-name" id="primary-role">---</h2><p class="profile-desc" id="primary-desc">---</p><div class="profile-category" id="primary-category">---</div></div>
+      <div class="profile-card secondary"><div class="profile-header"><span class="profile-label">ROL SECUNDARIO</span><span class="profile-percent" id="secondary-percent">0%</span></div><h2 class="profile-name" id="secondary-role">---</h2><p class="profile-desc" id="secondary-desc">---</p><div class="profile-category" id="secondary-category">---</div></div>
+      <div class="top-roles-container"><h3>TOP 5 ROLES</h3><div class="top-roles-list" id="top-roles-list"></div></div>
+      <div class="dimensions-container"><h3>PUNTAJES POR DIMENSIÓN</h3><div class="dimensions-chart" id="dimensions-chart"></div><div class="t-score-legend"><div class="legend-item"><span class="legend-color low"></span><span>&lt; 40: Bajo</span></div><div class="legend-item"><span class="legend-color avg"></span><span>40-60: Promedio</span></div><div class="legend-item"><span class="legend-color high"></span><span>&gt; 60: Alto</span></div></div></div>
+      <div class="interpretation-container"><h3>INTERPRETACIÓN</h3><pre class="interpretation-text" id="interpretation-text">Cargando...</pre></div>
+      <div class="metadata-container"><div class="metadata-item"><span class="meta-label">Confianza:</span><span class="meta-value" id="confidence-value">0%</span></div><div class="metadata-item"><span class="meta-label">Fecha:</span><span class="meta-value" id="assessment-date">---</span></div><div class="metadata-item"><span class="meta-label">Ítems:</span><span class="meta-value" id="items-answered">0/120</span></div></div>
+      <div class="actions-container"><button id="download-pdf-btn" class="btn-primary">[ DESCARGAR RESULTADOS ]</button><button id="restart-btn" class="btn-secondary">[ NUEVA EVALUACIÓN ]</button></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="footer-divider">════════════════════════════════════════════════</div>
+  <p class="footer-text">BDSM ROLE ASSESSMENT • Herramienta de autoconocimiento</p>
+  <p class="footer-disclaimer">Resultados para autoconocimiento. No es diagnóstico profesional.</p>
+  <div class="footer-signature">[ system ready ]</div>
+</footer>
+
+<script>
+// ===== PREGUNTAS =====
+const QS=[
+  {id:1,t:"Nunca he dicho una mentira, ni siquiera pequeña.",c:"validity",w:2},{id:2,t:"Siempre trato a todo el mundo con respeto, sin excepción.",c:"validity",w:2},{id:3,t:"Me gusta todo el mundo que conozco.",c:"validity",w:2},{id:4,t:"Nunca me he enfadado tanto como para perder el control.",c:"validity",w:2},{id:5,t:"Siempre admito mis errores inmediatamente.",c:"validity",w:2},{id:6,t:"Nunca he tenido pensamientos que me avergüencen.",c:"validity",w:2},{id:7,t:"Me considero una persona moralmente superior a la mayoría.",c:"validity",w:2},{id:8,t:"Nunca he sentido celos de nadie.",c:"validity",w:2},{id:9,t:"A veces siento que puedo leer la mente de otras personas.",c:"validity",w:3},{id:10,t:"He visto cosas que otras personas no pueden ver.",c:"validity",w:3},{id:11,t:"Mis sueños siempre se hacen realidad al día siguiente.",c:"validity",w:3},{id:12,t:"Tengo poderes especiales que nadie más conoce.",c:"validity",w:3},{id:13,t:"Las máquinas funcionan mejor cuando yo estoy cerca.",c:"validity",w:3},{id:14,t:"Puedo controlar el clima con mis pensamientos.",c:"validity",w:3},{id:15,t:"Me gusta tomar el control en situaciones íntimas.",c:"power",w:3},{id:16,t:"Prefiero que otros tomen el control en situaciones íntimas.",c:"power",w:3},{id:17,t:"El dolor físico me resulta placentero en contexto sexual.",c:"sensation",w:4},{id:18,t:"El dolor físico me resulta desagradable en cualquier contexto.",c:"sensation",w:4},{id:19,t:"Me identifico con comportamientos de animal doméstico.",c:"pet",w:3},{id:20,t:"Me identifico con comportamientos de animal salvaje.",c:"primal",w:3},{id:21,t:"Me siento más cómodo cuando sé quién manda en una relación.",c:"power",w:3},{id:22,t:"Dar órdenes claras me resulta natural y satisfactorio.",c:"power",w:4},{id:23,t:"Obedecer órdenes me produce una sensación de paz interior.",c:"power",w:4},{id:24,t:"La idea de ser propiedad de alguien me excita sexualmente.",c:"power",w:4},{id:25,t:"Me gusta negociar los límites antes de cualquier práctica.",c:"power",w:2},{id:26,t:"Siento alivio cuando alguien más asume la responsabilidad total.",c:"power",w:3},{id:27,t:"Me excita corregir o castigar a alguien que lo merece.",c:"power",w:4},{id:28,t:"Ser corregido o castigado me ayuda a sentirme en mi lugar.",c:"power",w:4},{id:29,t:"Me arrodillo naturalmente ante personas que respeto o admiro.",c:"power",w:3},{id:30,t:"Espero que las personas me muestren respeto físico.",c:"power",w:3},{id:31,t:"Me gusta usar títulos formales como Sir, Ma'am, Master.",c:"power",w:2},{id:32,t:"Los protocolos y reglas formales me resultan atractivos.",c:"power",w:3},{id:33,t:"Me siento perdido o ansioso sin una figura de autoridad clara.",c:"power",w:3},{id:34,t:"Me siento frustrado cuando otros no siguen mis instrucciones.",c:"power",w:3},{id:35,t:"Puedo cambiar entre dominar y ser dominado según la pareja.",c:"power",w:4},{id:36,t:"He fantaseado con ser comprado o vendido como propiedad.",c:"power",w:4},{id:37,t:"He fantaseado con comprar o vender a una persona.",c:"power",w:4},{id:38,t:"La palabra No es difícil de aceptar cuando domino.",c:"power",w:3},{id:39,t:"La palabra No es difícil de decir cuando soy sumiso.",c:"power",w:3},{id:40,t:"El poder me excita más que el sexo en sí mismo.",c:"power",w:4},{id:41,t:"El dolor físico me produce excitación sexual clara.",c:"sensation",w:5},{id:42,t:"Ver dolor en otros me produce excitación sexual clara.",c:"sensation",w:5},{id:43,t:"Busco sensaciones intensas, sean placenteras o dolorosas.",c:"sensation",w:4},{id:44,t:"Las marcas en mi cuerpo me hacen sentir bien después.",c:"sensation",w:3},{id:45,t:"El límite entre dolor y placer es difuso para mí.",c:"sensation",w:4},{id:46,t:"Prefiero el placer suave al dolor intenso.",c:"sensation",w:2},{id:47,t:"Me excita el riesgo controlado en prácticas sexuales.",c:"sensation",w:3},{id:48,t:"La inmovilización total me produce ansiedad.",c:"sensation",w:2},{id:49,t:"Puedo disociarme del dolor durante escenas intensas.",c:"sensation",w:3},{id:50,t:"Necesito aftercare intenso después de escenas fuertes.",c:"sensation",w:3},{id:51,t:"El dolor emocional me afecta más que el físico.",c:"sensation",w:3},{id:52,t:"Me excita humillar o ser humillado verbalmente.",c:"sensation",w:4},{id:53,t:"Prefiero prácticas que no dejen marcas visibles.",c:"sensation",w:2},{id:54,t:"La intensidad física es más importante que la emocional.",c:"sensation",w:3},{id:55,t:"La conexión emocional es más importante que la intensidad.",c:"sensation",w:3},{id:56,t:"He buscado deliberadamente situaciones de dolor extremo.",c:"sensation",w:4},{id:57,t:"La sangre me excita o me produce fascinación.",c:"sensation",w:3},{id:58,t:"Las agujas, cuchillos u objetos punzantes me resultan atractivos.",c:"sensation",w:4},{id:59,t:"Prefiero sesiones largas y agotadoras a sesiones cortas.",c:"sensation",w:3},{id:60,t:"El orgasmo es menos importante que la experiencia completa.",c:"sensation",w:3},{id:61,t:"Siento impulsos animales que no puedo controlar racionalmente.",c:"primal",w:4},{id:62,t:"Me excita perseguir y cazar a mi pareja sexual.",c:"primal",w:4},{id:63,t:"Fantaseo con ser perseguido, capturado y poseído.",c:"primal",w:4},{id:64,t:"El sexo sin palabras, puro instinto, me excita más.",c:"primal",w:4},{id:65,t:"Gruño, muerdo o marco territorio durante el sexo.",c:"primal",w:3},{id:66,t:"Me excita que me muerdan o marquen físicamente.",c:"primal",w:3},{id:67,t:"Prefiero el sexo en espacios naturales o salvajes.",c:"primal",w:2},{id:68,t:"La ropa o accesorios animales me excitan.",c:"primal",w:3},{id:69,t:"Me identifico más con un depredador que con una presa.",c:"primal",w:4},{id:70,t:"Me identifico más con una presa que con un depredador.",c:"primal",w:4},{id:71,t:"Arrastrar o ser arrastrado me resulta excitante.",c:"primal",w:3},{id:72,t:"Comer del suelo o de las manos de alguien me excita.",c:"primal",w:3},{id:73,t:"El sexo en el suelo o superficies duras me resulta atractivo.",c:"primal",w:3},{id:74,t:"Sentir el olor natural de mi pareja me excita mucho.",c:"primal",w:3},{id:75,t:"La higiene excesiva antes del sexo me parece innecesaria.",c:"primal",w:2},{id:76,t:"Me gusta cuidar a otros como si fueran niños pequeños.",c:"nurturing",w:4},{id:77,t:"Me siento seguro cuando me tratan con ternura infantil.",c:"nurturing",w:4},{id:78,t:"Uso lenguaje infantil o comportamientos regresivos.",c:"nurturing",w:4},{id:79,t:"Comprar regalos o sorprender a mi pareja me satisface.",c:"nurturing",w:3},{id:80,t:"Necesito que me consuelen físicamente cuando estoy triste.",c:"nurturing",w:3},{id:81,t:"Me gusta usar chupetes, peluches o ropa infantil.",c:"nurturing",w:4},{id:82,t:"Castigar a un niño que se porta mal me parece apropiado.",c:"nurturing",w:3},{id:83,t:"Ser castigado como un niño me hace sentir en mi lugar.",c:"nurturing",w:3},{id:84,t:"Me gusta que me den instrucciones simples y claras.",c:"nurturing",w:3},{id:85,t:"Me gusta dar instrucciones simples y claras a otros.",c:"nurturing",w:3},{id:86,t:"La idea de cambiar pañales o ser cambiado me resulta atractiva.",c:"nurturing",w:4},{id:87,t:"Me siento más feliz cuando no tengo responsabilidades adultas.",c:"nurturing",w:4},{id:88,t:"La responsabilidad de cuidar a otros me hace sentir realizado.",c:"nurturing",w:3},{id:89,t:"Regresar a un estado mental infantil me da paz.",c:"nurturing",w:4},{id:90,t:"La diferencia de edad me excita.",c:"nurturing",w:3},{id:91,t:"Me identifico con comportamientos de animal doméstico.",c:"pet",w:4},{id:92,t:"Usar collar o accesorios de pet me excita.",c:"pet",w:3},{id:93,t:"Comer del suelo o de un plato me resulta excitante.",c:"pet",w:3},{id:94,t:"Necesito aprobación de mi dueño como un animal.",c:"pet",w:3},{id:95,t:"Ladrar, maullar o hacer sonidos animales me resulta natural.",c:"pet",w:3},{id:96,t:"Me gusta que me acaricien la cabeza como a una mascota.",c:"pet",w:3},{id:97,t:"La idea de ser entrenado como un animal me excita.",c:"pet",w:4},{id:98,t:"Me gusta entrenar a alguien como si fuera una mascota.",c:"pet",w:4},{id:99,t:"Poseer personas es mi fantasía principal.",c:"ownership",w:4},{id:100,t:"Ser propiedad de alguien es mi fantasía principal.",c:"ownership",w:4},{id:101,t:"Los contratos de propiedad escrita me excitan.",c:"ownership",w:3},{id:102,t:"Me gustaría llevar marcas permanentes de propiedad.",c:"ownership",w:4},{id:103,t:"Me gustaría marcar permanentemente a mi propiedad.",c:"ownership",w:4},{id:104,t:"La idea de ser subastado o vendido me excita.",c:"ownership",w:4},{id:105,t:"La idea de subastar o vender a alguien me excita.",c:"ownership",w:4},{id:106,t:"Servir a otros es mi principal forma de expresar sumisión.",c:"service",w:4},{id:107,t:"Preparar comida, limpiar o cuidar me satisface.",c:"service",w:3},{id:108,t:"Mi placer está principalmente en el placer de mi dominante.",c:"service",w:4},{id:109,t:"Atar a otros me da satisfacción artística y sexual.",c:"bondage",w:3},{id:110,t:"Ser atado me da sensación de seguridad y paz.",c:"bondage",w:4},{id:111,t:"Las cuerdas son esenciales en mi vida sexual.",c:"bondage",w:4},{id:112,t:"La inmovilización total es mi fantasía principal.",c:"bondage",w:3},{id:113,t:"Ver a otros tener sexo me excita más que participar.",c:"observation",w:4},{id:114,t:"Que me vean tener sexo me excita mucho.",c:"observation",w:4},{id:115,t:"Grabar o ser grabado es importante para mi excitación.",c:"observation",w:2},{id:116,t:"Me excita que extraños me vean desnudo.",c:"observation",w:4},{id:117,t:"Prefiero observar en silencio a participar.",c:"observation",w:3},{id:118,t:"El riesgo de ser descubierto en público me excita.",c:"observation",w:4},{id:119,t:"Me aburro si siempre estoy en el mismo rol sexual.",c:"switch",w:3},{id:120,t:"Mi rol depende completamente de mi pareja o del momento.",c:"switch",w:3}
+];
+
+// ===== ROLES =====
+const ROLES=[
+  {id:"dominant",n:"Dominant",cat:"Power Exchange",d:"Tomas el control, diriges las dinámicas y disfrutas liderando.",s:0,p:0},
+  {id:"submissive",n:"Submisivo/a",cat:"Power Exchange",d:"Cedes el control de forma voluntaria y disfrutas siguiendo dirección.",s:0,p:0},
+  {id:"switch",n:"Switch",cat:"Power Exchange",d:"Te mueves fluidamente entre dominar y ser dominado según contexto.",s:0,p:0},
+  {id:"masochist",n:"Masoquista",cat:"Sensation",d:"El dolor te placer. El sufrimiento físico te lleva al éxtasis.",s:0,p:0},
+  {id:"sadist",n:"Sádico",cat:"Sensation",d:"Obtienes placer del dolor ajeno. El sufrimiento controlado te excita.",s:0,p:0},
+  {id:"primal_predator",n:"Primal Predator",cat:"Primal",d:"Instintos cazadores. Persigues, capturas y tomas con intensidad animal.",s:0,p:0},
+  {id:"primal_prey",n:"Primal Prey",cat:"Primal",d:"Instintos de presa. Disfrutas ser perseguido, capturado y poseído.",s:0,p:0},
+  {id:"hedonist",n:"Hedonista",cat:"Sensation",d:"El placer es tu guía. Buscas sensaciones intensas sin importar el rol.",s:0,p:0},
+  {id:"caregiver",n:"Caregiver",cat:"Nurturing",d:"Cuidas, proteges y guías. Tu dominio es amoroso y protector.",s:0,p:0},
+  {id:"little",n:"Little",cat:"Nurturing",d:"Regresas a estado infantil. Necesitas cuidado y protección.",s:0,p:0},
+  {id:"pet",n:"Pet (Puppy/Kitten)",cat:"Pet Play",d:"Adoptas rol animal. Lealtad, juego y sumisión instintiva.",s:0,p:0},
+  {id:"rigger",n:"Rigger",cat:"Bondage",d:"Atas con arte. El rope es tu medio de conexión y control.",s:0,p:0},
+  {id:"rope_bunny",n:"Rope Bunny",cat:"Bondage",d:"Amas ser atado. Las cuerdas te dan seguridad y placer.",s:0,p:0},
+  {id:"voyeur",n:"Voyeur",cat:"Observation",d:"Observar te excita más que participar. La mirada es tu herramienta.",s:0,p:0},
+  {id:"exhibitionist",n:"Exhibicionista",cat:"Observation",d:"Ser visto te excita. La exposición es parte de tu placer.",s:0,p:0}
+];
+
+// ===== ESTADO =====
+let A={a:[],i:0,sid:null,result:null};
+
+// ===== UTILS =====
+const U={
+  fmtD:t=>new Date(t).toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}),
+  genId:()=>Math.random().toString(36).substr(2,9),
+  save:(k,d)=>{try{localStorage.setItem(k,JSON.stringify(d));return true}catch(e){return false}},
+  load:k=>{try{const d=localStorage.getItem(k);return d?JSON.parse(d):null}catch(e){return null}},
+  clear:k=>{try{localStorage.removeItem(k);return true}catch(e){return false}},
+  toast:(m,t='info')=>{const e=document.createElement('div');e.textContent=m;e.style.cssText='position:fixed;bottom:20px;right:20px;padding:1rem 2rem;background:var(--surface);border:1px solid var(--primary);border-left:4px solid var(--primary);color:var(--text);z-index:10000';document.body.appendChild(e);setTimeout(()=>e.remove(),3000)},
+  pdf:r=>{let c='════════════════════════════════════════════════\n  BDSM ROLE ASSESSMENT\n════════════════════════════════════════════════\n\n';c+=`Fecha: ${U.fmtD(r.assessmentDate)}\nConfianza: ${Math.round(r.confidence*100)}%\n\n`;c+='────────────────────────────────────────────────\n  PERFIL PRINCIPAL\n────────────────────────────────────────────────\n\n';c+=`ROL PRIMARIO: ${r.primaryRole}\nCategoría: ${r.category}\n\n`;if(r.secondaryRole&&r.secondaryRole!=='No determinado')c+=`ROL SECUNDARIO: ${r.secondaryRole}\n\n`;c+='────────────────────────────────────────────────\n  TOP 5 ROLES\n────────────────────────────────────────────────\n\n';if(r.topRoles&&Array.isArray(r.topRoles))r.topRoles.forEach((ro,i)=>{if(ro&&ro.n)c+=`${i+1}. ${ro.n} (${ro.p}%)\n   ${ro.d||''}\n\n`});c+='────────────────────────────────────────────────\n  PUNTAJES POR DIMENSIÓN\n────────────────────────────────────────────────\n\n';if(r.categoryScores&&Array.isArray(r.categoryScores))r.categoryScores.forEach(sc=>{if(sc&&sc.name)c+=`${sc.name}: ${sc.score}T\n`});c+=`\n────────────────────────────────────────────────\n  INTERPRETACIÓN\n────────────────────────────────────────────────\n\n${r.interpretation||''}\n\n════════════════════════════════════════════════\n`;return c},
+  dl:(c,f)=>{const b=new Blob([c],{type:'text/plain'}),u=URL.createObjectURL(b),l=document.createElement('a');l.href=u;l.download=f;document.body.appendChild(l);l.click();document.body.removeChild(l);URL.revokeObjectURL(u)}
+};
+
+// ===== INICIALIZACIÓN =====
+function init(){
+  console.log('Iniciando...');
+  A.sid=U.genId();A.a=new Array(120).fill(null);A.i=0;A.result=null;
+  
+  // Configurar checkbox
+  const chk=document.getElementById('consent-checkbox');
+  const btn=document.getElementById('start-btn');
+  
+  if(chk&&btn){
+    btn.disabled=!chk.checked;
+    chk.addEventListener('change',function(){
+      btn.disabled=!this.checked;
+      console.log('Checkbox:',this.checked,'Button disabled:',btn.disabled);
+    });
+    
+    btn.addEventListener('click',function(){
+      console.log('Click en comenzar!');
+      if(!this.disabled){
+        start();
+      }
+    });
+  }
+  
+  // Botones de respuesta
+  document.querySelectorAll('.option-btn').forEach(b=>{
+    b.addEventListener('click',function(){
+      selectAns(parseInt(this.dataset.value));
+    });
+  });
+  
+  // Navegación
+  document.getElementById('prev-btn').addEventListener('click',prev);
+  document.getElementById('next-btn').addEventListener('click',next);
+  document.getElementById('download-pdf-btn').addEventListener('click',download);
+  document.getElementById('restart-btn').addEventListener('click',restart);
+  
+  // Teclado
+  document.addEventListener('keydown',e=>{
+    if(document.getElementById('assessment-screen').classList.contains('active')){
+      if(e.key>='1'&&e.key<='5')selectAns(parseInt(e.key));
+      else if(e.key==='ArrowLeft')prev();
+      else if(e.key==='ArrowRight')next();
+    }
+  });
+  
+  // Cargar progreso guardado
+  const prog=U.load('assessment_progress');
+  if(prog&&prog.sid){
+    A.sid=prog.sid;A.a=prog.a;A.i=prog.i;
+    showScreen('assessment-screen');renderQ();updProgress();updNav();
+  }else{
+    showScreen('welcome-screen');
+  }
+  
+  console.log('Inicialización completa');
+}
+
+// ===== NAVEGACIÓN =====
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function start(){
+  console.log('Iniciando test...');
+  showScreen('assessment-screen');
+  renderQ();updProgress();updNav();
+}
+
+function selectAns(v){
+  A.a[A.i]={qid:QS[A.i].id,v:v,ts:Date.now()};
+  U.save('assessment_progress',{sid:A.sid,a:A.a,i:A.i,ts:Date.now()});
+  renderQ();
+  setTimeout(()=>{if(A.i<QS.length-1)next()},200);
+}
+
+function prev(){if(A.i>0){A.i--;renderQ();updProgress();updNav();}}
+
+function next(){
+  const ca=A.a[A.i];
+  if(!ca){U.toast('Selecciona una respuesta','warning');return;}
+  if(A.i===QS.length-1)finish();
+  else{A.i++;renderQ();updProgress();updNav();}
+}
+
+function renderQ(){
+  const q=QS[A.i],ca=A.a[A.i];
+  if(!q){document.getElementById('question-text').textContent='Error';return;}
+  document.getElementById('question-number').textContent=`Ítem ${A.i+1}/120`;
+  const cm={power:'Power Exchange',sensation:'Sensation',primal:'Primal',nurturing:'Nurturing',pet:'Pet Play',ownership:'Ownership',bondage:'Bondage',observation:'Observation',service:'Service',switch:'Switch',validity:'Validez'};
+  document.getElementById('question-category').textContent=cm[q.c]||q.c;
+  document.getElementById('question-text').textContent=q.t;
+  document.querySelectorAll('.option-btn').forEach(b=>{
+    const v=parseInt(b.dataset.value);
+    b.classList.remove('selected');
+    if(ca&&ca.v===v)b.classList.add('selected');
+  });
+}
+
+function updProgress(){
+  const ans=A.a.filter(x=>x!==null).length,pct=(ans/120)*100;
+  document.getElementById('progress-text').textContent=`${ans} / 120`;
+  document.getElementById('progress-fill').style.width=`${pct}%`;
+}
+
+function updNav(){
+  const pb=document.getElementById('prev-btn'),nb=document.getElementById('next-btn');
+  pb.disabled=A.i===0;
+  if(A.i===119){nb.textContent='[ FINALIZAR ]';nb.classList.add('finish-btn');}
+  else{nb.textContent='[ SIGUIENTE → ]';nb.classList.remove('finish-btn');}
+}
+
+function updValidity(){
+  const ans=A.a.filter(x=>x!==null).length,ind=document.getElementById('validity-indicator');
+  if(ans<20){ind.innerHTML='<span class="dot"></span><span>Validez: Insuficientes</span>';ind.style.color='var(--warning)';}
+  else if(ans<50){ind.innerHTML='<span class="dot"></span><span>Validez: Verificando...</span>';ind.style.color='var(--info)';}
+  else{ind.innerHTML='<span class="dot" style="background:var(--primary)"></span><span>Validez: OK</span>';ind.style.color='var(--primary)';}
+}
+
+// ===== SCORING =====
+function finish(){
+  const ans=A.a.filter(x=>x!==null).length;
+  if(ans<96){U.toast(`Debes responder al menos 96 ítems (${ans} respondidos)`,'warning');return;}
+  showScreen('loading-screen');
+  animateLoad();
+  setTimeout(()=>{const r=calcResults();A.result=r;showResults(r);},2500);
+}
+
+function animateLoad(){
+  let p=0,si=0;
+  const steps=['step-validity','step-scoring','step-normative','step-interpretation'],pd=document.getElementById('loading-percent');
+  const iv=setInterval(()=>{p+=2;pd.textContent=`${p}%`;if(p%25===0&&si<steps.length){document.getElementById(steps[si]).classList.add('completed');si++;}if(p>=100)clearInterval(iv);},100);
+}
+
+function calcResults(){
+  const catScores={};
+  QS.forEach(q=>{if(q.c!=='validity'&&A.a[q.id-1]){const v=A.a[q.id-1].v;catScores[q.c]=(catScores[q.c]||0)+v*q.w;}});
+  const dimScores={};
+  Object.entries(catScores).forEach(([c,s])=>{const t=Math.min(80,Math.max(20,40+((s-100)/10)));dimScores[c]={t:Math.round(t),p:Math.min(100,Math.max(0,(t-20)*1.67)),i:t<40?'Bajo':t>60?'Alto':'Promedio'};});
+  const rs=ROLES.map(r=>{let sc=50;switch(r.id){case'dominant':sc=(dimScores.power?.t||50)+10;break;case'submissive':sc=100-(dimScores.power?.t||50)+10;break;case'switch':sc=50+Math.abs((dimScores.power?.t||50)-50)*0.3;break;case'masochist':sc=(dimScores.sensation?.t||50)+5;break;case'sadist':sc=(dimScores.sensation?.t||50)+5;break;case'primal_predator':sc=(dimScores.primal?.t||50)+5;break;case'primal_prey':sc=(dimScores.primal?.t||50)+5;break;case'caregiver':sc=(dimScores.nurturing?.t||50)+5;break;case'little':sc=100-(dimScores.nurturing?.t||50)+5;break;case'pet':sc=(dimScores.pet?.t||50)+5;break;case'rigger':sc=(dimScores.bondage?.t||50)+5;break;case'rope_bunny':sc=(dimScores.bondage?.t||50)+5;break;case'voyeur':sc=(dimScores.observation?.t||50)+5;break;case'exhibitionist':sc=(dimScores.observation?.t||50)+5;break;case'hedonist':sc=(dimScores.sensation?.t||50)+5;break;}r.s=sc;r.p=Math.min(100,Math.round(sc*1.176));return r;});
+  rs.sort((a,b)=>b.s-a.s);
+  const top5=rs.slice(0,5);
+  const max=top5[0]?.s||1;
+  top5.forEach(r=>{r.p=Math.round((r.s/max)*100);});
+  const interp=`═══ PERFIL PRINCIPAL ═══\nRol Primario: ${top5[0]?.n||'N/A'} (${top5[0]?.p||0}%)\n${top5[0]?.d||''}\n\nRol Secundario: ${top5[1]?.n||'N/A'} (${top5[1]?.p||0}%)\n${top5[1]?.d||''}\n\n═══ DIMENSIONES DESTACADAS ═══\n${Object.entries(dimScores).slice(0,4).map(([c,d])=>`${c}: ${d.t}T (${d.i})`).join('\n')}\n\n═══ RECOMENDACIONES ═══\n• Explora comunidades locales para aprender más.\n• La comunicación clara es fundamental.\n• Establece límites y palabras de seguridad.\n• El autoconocimiento es un proceso continuo.\n\n═══ NOTA ═══\nEsta evaluación es para autoconocimiento.`;
+  return{topRoles:top5.map(r=>({n:r.n,p:r.p,d:r.d})),primaryRole:top5[0]?.n||'N/A',secondaryRole:top5[1]?.n||'N/A',category:top5[0]?.cat||'N/A',categoryScores:Object.entries(dimScores).map(([c,d])=>({category:c,name:c,score:d.t,percentage:d.p})),interpretation:interp,confidence:0.8,assessmentDate:Date.now()};
+}
+
+function showResults(r){
+  A.result=r;
+  document.getElementById('primary-role').textContent=r.primaryRole;
+  document.getElementById('primary-desc').textContent=r.topRoles[0]?.d||'';
+  document.getElementById('primary-category').textContent=r.category;
+  document.getElementById('primary-percent').textContent=`${r.topRoles[0]?.p||0}%`;
+  if(r.topRoles[1]){document.getElementById('secondary-role').textContent=r.secondaryRole;document.getElementById('secondary-desc').textContent=r.topRoles[1].d;document.getElementById('secondary-category').textContent=r.topRoles[1].cat;document.getElementById('secondary-percent').textContent=`${r.topRoles[1].p}%`;}
+  const tl=document.getElementById('top-roles-list');tl.innerHTML='';r.topRoles.forEach((ro,i)=>{if(ro&&ro.n){tl.innerHTML+=`<div class="top-role-item"><span class="top-role-rank">#${i+1}</span><span class="top-role-name">${ro.n}</span><div class="top-role-bar"><div class="top-role-fill" style="width:${ro.p}%"></div></div><span class="top-role-percent">${ro.p}%</span></div>`;}});
+  const dc=document.getElementById('dimensions-chart');dc.innerHTML='';r.categoryScores.forEach(sc=>{if(sc&&sc.name){const bw=Math.min(100,(sc.score-20)*1.67);dc.innerHTML+=`<div class="dimension-item"><span class="dimension-name">${sc.name}</span><div class="dimension-bar-container"><div class="dimension-bar" style="width:${bw}%"></div></div><span class="dimension-score">${sc.score}T</span></div>`;}});
+  document.getElementById('interpretation-text').textContent=r.interpretation;
+  document.getElementById('confidence-value').textContent=`${Math.round(r.confidence*100)}%`;
+  document.getElementById('assessment-date').textContent=U.fmtD(r.assessmentDate);
+  document.getElementById('items-answered').textContent='120/120';
+  U.clear('assessment_progress');
+  showScreen('results-screen');
+  window.scrollTo(0,0);
+}
+
+// ===== ACCIONES =====
+function download(){if(!A.result){U.toast('No hay resultados para descargar','error');return;}const c=U.pdf(A.result);U.dl(c,'bdsm-assessment-resultados.txt');U.toast('Resultados descargados','success');}
+function restart(){if(confirm('¿Iniciar nueva evaluación?')){U.clear('assessment_progress');location.reload();}}
+
+// ===== START =====
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>

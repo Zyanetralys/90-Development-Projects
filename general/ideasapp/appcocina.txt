@@ -1,0 +1,250 @@
+# GESTOR AVANZADO DE RECETAS – ESQUEMA COMPLETO
+
+# Formato .txt – Copiar y pegar
+
+# Lenguaje: Python (Desktop App)
+
+# Persistencia: SQLite
+
+# Arquitectura: Modular / Escalable
+
+==================================================
+VISIÓN GENERAL
+==============
+
+Aplicación local multiplataforma para gestionar recetas como conocimiento estructurado.
+Incluye búsqueda avanzada por ingredientes, etiquetas, notas, favoritos, variantes,
+exportación profesional, imágenes y motor de decisión culinaria.
+
+==================================================
+FUNCIONALIDADES PRINCIPALES
+===========================
+
+* CRUD completo de recetas
+* Ingredientes normalizados con alias
+* Búsqueda por ingredientes (estricto / contiene / flexible)
+* Etiquetas y categorías libres
+* Filtro y ordenación avanzada
+* Sistema de notas (1–10)
+* Favoritos
+* Variantes de recetas
+* Notas por receta
+* Imágenes asociadas
+* Exportación a PDF / CSV / Excel / JSON
+* Persistencia local robusta
+
+==================================================
+ESTRUCTURA DEL PROYECTO
+=======================
+
+recetario/
+│
+├── main.py
+│
+├── core/
+│   ├── scoring.py          # Motor de puntuación por ingredientes
+│   ├── normalizer.py       # Normalización y alias de ingredientes
+│   ├── exporter.py         # Exportaciones PDF/CSV/Excel/JSON
+│   └── image_manager.py    # Gestión de imágenes
+│
+├── database/
+│   ├── schema.py           # Creación de tablas SQLite
+│   ├── db.py               # Conexión y transacciones
+│   ├── recipes.py          # CRUD recetas
+│   ├── ingredients.py      # CRUD ingredientes
+│   ├── tags.py             # CRUD etiquetas
+│   ├── ratings.py          # Sistema de notas
+│   ├── notes.py            # Notas por receta
+│   ├── variants.py         # Variantes de recetas
+│   └── images.py           # Imágenes
+│
+├── ui/
+│   ├── main_window.py      # Ventana principal
+│   ├── search_panel.py     # Filtros y búsquedas
+│   ├── recipe_list.py      # Listado ordenable
+│   ├── recipe_view.py      # Vista detalle receta
+│   └── recipe_editor.py    # Editor de recetas
+│
+├── images/                 # Carpeta imágenes
+├── exports/                # Exportaciones
+└── recetas.db              # Base de datos SQLite
+
+==================================================
+MODELO DE DATOS (SQLITE)
+========================
+
+## TABLE recipes
+
+id INTEGER PRIMARY KEY
+nombre TEXT NOT NULL
+descripcion TEXT
+pasos TEXT
+tiempo INTEGER
+dificultad TEXT
+cocina TEXT
+favorita BOOLEAN DEFAULT 0
+rating_actual INTEGER
+created_at TEXT
+updated_at TEXT
+
+---
+
+## TABLE ingredients
+
+id INTEGER PRIMARY KEY
+nombre TEXT UNIQUE
+categoria TEXT
+alias TEXT
+
+---
+
+## TABLE recipe_ingredients
+
+recipe_id INTEGER
+ingredient_id INTEGER
+obligatorio BOOLEAN
+cantidad TEXT
+unidad TEXT
+
+---
+
+## TABLE tags
+
+id INTEGER PRIMARY KEY
+nombre TEXT UNIQUE
+tipo TEXT
+
+---
+
+## TABLE recipe_tags
+
+recipe_id INTEGER
+tag_id INTEGER
+
+---
+
+## TABLE ratings
+
+recipe_id INTEGER
+score INTEGER
+comentario TEXT
+fecha TEXT
+
+---
+
+## TABLE notes
+
+id INTEGER PRIMARY KEY
+recipe_id INTEGER
+texto TEXT
+created_at TEXT
+
+---
+
+## TABLE recipe_variants
+
+id INTEGER PRIMARY KEY
+recipe_id INTEGER
+nombre TEXT
+cambios TEXT
+
+---
+
+## TABLE images
+
+id INTEGER PRIMARY KEY
+recipe_id INTEGER
+path TEXT
+descripcion TEXT
+
+==================================================
+BÚSQUEDA POR INGREDIENTES
+=========================
+
+MODOS:
+
+* ESTRICTO: solo ingredientes seleccionados
+* CONTIENE: incluye los seleccionados
+* FLEXIBLE: scoring por coincidencia
+
+SCORING BASE:
+
+* +100 si todos los obligatorios están
+* +10 por ingrediente presente
+* -20 por ingrediente obligatorio faltante
+
+==================================================
+FILTROS DISPONIBLES
+===================
+
+* Ingredientes (multi)
+* Etiquetas / categorías
+* Cocina
+* Dificultad
+* Tiempo máximo
+* Favoritas
+* Nota exacta (ej: 9)
+* Nota múltiple (5,6,9)
+* Rango de notas (slider)
+
+==================================================
+ORDENACIÓN
+==========
+
+* Favoritas primero
+* Nota (asc/desc)
+* Fecha modificación
+* Fecha creación
+* Alfabético A–Z / Z–A
+* Mejor coincidencia ingredientes
+
+==================================================
+EXPORTACIÓN
+===========
+
+FORMATOS:
+
+* PDF (una receta o selección, con imágenes)
+* CSV (datos planos)
+* Excel (.xlsx) hojas múltiples
+* JSON (backup completo)
+
+EXPORTABLE:
+
+* Una receta
+* Selección
+* Favoritas
+* Top por nota
+* Dataset completo
+
+==================================================
+UX / INTERFAZ
+=============
+
+* Buscador global
+* Panel lateral de filtros
+* Lista ordenable por columnas
+* Vista receta con:
+
+  * Imágenes
+  * Ingredientes estructurados
+  * Etiquetas
+  * Nota
+  * Favorita
+  * Variantes
+  * Notas
+* Editor con autocompletado
+* Guardado automático
+
+==================================================
+ESTADO DEL PRODUCTO
+===================
+
+Nivel: Producto serio / gestor de conocimiento personal
+Preparado para empaquetado en .exe
+Escalable a móvil o web
+Compatible con IA futura
+
+==================================================
+FIN DEL ESQUEMA
+===============

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>María Jesús Martínez Leo | Ciberseguridad y Sistemas IT</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.5;
+      padding: 2.5rem;
+      max-width: 850px;
+      margin: 0 auto;
+      font-size: 11px;
+    }
+    
+    header {
+      border-bottom: 3px solid #0066cc;
+      padding-bottom: 1.2rem;
+      margin-bottom: 1.8rem;
+    }
+    
+    h1 {
+      font-size: 1.6rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 0.8rem;
+      color: #000;
+    }
+    
+    .contact-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #444;
+    }
+    
+    .contact-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.6rem;
+      background: #f0f4f8;
+      border: 1px solid #d0d9e0;
+      border-radius: 4px;
+    }
+    
+    .contact-group a {
+      color: #0066cc;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .contact-group a:hover {
+      color: #004d99;
+      text-decoration: underline;
+    }
+    
+    .contact-separator {
+      color: #999;
+      font-weight: 300;
+      margin: 0 0.3rem;
+    }
+    
+    .contact-item {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.6rem;
+      background: #f8fafc;
+      border: 1px solid #e0e7ef;
+      border-radius: 4px;
+      color: #444;
+    }
+    
+    section { margin-bottom: 1.8rem; }
+    
+    h2 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-bottom: 2px solid #0066cc;
+      padding-bottom: 0.4rem;
+      margin-bottom: 1rem;
+      color: #0066cc;
+    }
+    
+    .exp-item { margin-bottom: 1.3rem; padding-left: 0; }
+    
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.3rem;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    
+    .exp-title { font-weight: 600; font-size: 0.92rem; color: #000; }
+    
+    .exp-company { color: #4a4a4a; font-size: 0.88rem; }
+    .exp-company a { color: #0066cc; text-decoration: none; border-bottom: 1px dotted #0066cc; }
+    .exp-company a:hover { border-bottom-style: solid; }
+    
+    .exp-date { color: #666; font-size: 0.82rem; font-style: italic; }
+    
+    .exp-details { list-style: none; margin-top: 0.4rem; }
+    .exp-details li {
+      padding-left: 1.1rem;
+      margin-bottom: 0.25rem;
+      color: #333;
+      font-size: 0.88rem;
+      position: relative;
+    }
+    .exp-details li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #0066cc;
+      font-weight: bold;
+    }
+    
+    .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    
+    .skill-cat {
+      background: #f8fafc;
+      border: 1px solid #e0e7ef;
+      border-left: 3px solid #0066cc;
+      padding: 0.8rem;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .skill-cat h3 {
+      font-size: 0.85rem;
+      margin-bottom: 0.4rem;
+      color: #0066cc;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e7ef;
+      padding-bottom: 0.2rem;
+    }
+    
+    .skill-list { list-style: none; font-size: 0.82rem; color: #444; }
+    .skill-list li { margin-bottom: 0.15rem; }
+    
+    .edu-item { margin-bottom: 0.6rem; font-size: 0.88rem; }
+    .edu-title { font-weight: 600; color: #000; }
+    .edu-school { color: #4a4a4a; }
+    .edu-school a { color: #0066cc; text-decoration: none; }
+    .edu-school a:hover { text-decoration: underline; }
+    .edu-date { color: #666; font-size: 0.8rem; }
+    
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: #444;
+    }
+    
+    .cert-item {
+      padding: 0.25rem 0.5rem;
+      background: #f8fafc;
+      border: 1px solid #e0e7ef;
+      border-radius: 3px;
+      transition: all 0.2s ease;
+    }
+    
+    .cert-item:hover {
+      border-color: #0066cc;
+      background: #e6f2ff;
+    }
+    
+    .cert-item strong { color: #0066cc; }
+    
+    .projects-list { list-style: none; font-size: 0.82rem; color: #444; }
+    .projects-list li { margin-bottom: 0.3rem; padding-left: 1rem; position: relative; }
+    .projects-list li::before { content: "→"; position: absolute; left: 0; color: #0066cc; font-weight: bold; }
+    
+    .availability {
+      font-size: 0.85rem;
+      color: #444;
+      background: #f0f4f8;
+      padding: 0.8rem;
+      border-left: 3px solid #0066cc;
+      border-radius: 0 4px 4px 0;
+    }
+    
+    footer {
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e5e5;
+      font-size: 0.75rem;
+      color: #666;
+      text-align: center;
+    }
+    
+    @media print {
+      body { padding: 1rem; font-size: 10px; }
+      a { color: #000; text-decoration: none; border: none; }
+      .contact-group, .contact-item, .skill-cat, .cert-item, .availability { background: #fff; border-color: #000; }
+      section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>María Jesús Martínez Leo</h1>
+  <div class="contact-bar">
+    <span class="contact-group">
+      <a href="https://zyanetralys.github.io/cv_cyberplayer/" target="_blank">🌐 CV Web</a>
+      <span class="contact-separator">|</span>
+      <a href="https://www.linkedin.com/in/mjmal/" target="_blank">LinkedIn</a>
+      <span class="contact-separator">|</span>
+      <a href="https://github.com/Zyanetralys" target="_blank">GitHub</a>
+    </span>
+    <span class="contact-separator">•</span>
+    <span class="contact-item">Madrid / Cádiz</span>
+    <span class="contact-separator">•</span>
+    <span class="contact-item">Inglés: C1</span>
+    <span class="contact-separator">•</span>
+    <span class="contact-item">Permiso B + A2</span>
+  </div>
+</header>
+
+<section>
+  <h2>Experiencia</h2>
+  
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Desarrolladora de Proyectos Técnicos</div>
+        <div class="exp-company"><a href="https://github.com/Zyanetralys" target="_blank">Proyectos Personales</a> | Portfolio GitHub</div>
+      </div>
+      <div class="exp-date">2024 – Actualidad</div>
+    </div>
+    <ul class="exp-details">
+      <li>Desarrollo de proyectos en Java: programación orientada a objetos, estructuras de datos y algoritmos.</li>
+      <li>Automatización con Python: scripts para pentesting, análisis de logs, extracción de datos y herramientas CTF.</li>
+      <li>Consultas y ejercicios SQL: resolución de retos en PostgreSQL y MySQL (Lost at SQL, Police Department).</li>
+      <li>Scripting en Bash: automatización de tareas de sistema, hardening y despliegue en entornos Linux.</li>
+      <li>Prácticas de ciberseguridad: laboratorios en HackTheBox, TryHackMe, VulnHub y Blue Team Labs.</li>
+      <li>Documentación técnica y publicación de recursos en GitHub con enfoque en buenas prácticas y reutilización.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Consultora Especialista IT</div>
+        <div class="exp-company"><a href="https://alvatross.com/" target="_blank">Alvatross</a> | Telecomunicaciones</div>
+      </div>
+      <div class="exp-date">Feb 2026 – Actualidad</div>
+    </div>
+    <ul class="exp-details">
+      <li>Colaboración con equipos DevOps, desarrollo y sistemas en entornos OSS/BSS.</li>
+      <li>Validación técnica de stacks, arquitecturas y competencias.</li>
+      <li>Definición de requisitos técnicos y documentación en Confluence.</li>
+      <li>Coordinación con áreas técnicas para alineación de perfiles y soporte a proyectos IT.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Consultora Especialista IT</div>
+        <div class="exp-company"><a href="https://www.atmmaggioli.es/" target="_blank">ATM Grupo Maggioli</a> | Administración Pública</div>
+      </div>
+      <div class="exp-date">Feb 2023 – Feb 2026</div>
+    </div>
+    <ul class="exp-details">
+      <li>Análisis funcional y técnico de perfiles IT en entornos regulados (ENS, ISO 27001).</li>
+      <li>Coordinación con equipos de ciberseguridad, datos e implantaciones.</li>
+      <li>Onboarding técnico y validación de competencias.</li>
+      <li>Participación en implementación de controles de seguridad y cumplimiento normativo.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Soporte Backend (Prácticas)</div>
+        <div class="exp-company"><a href="https://www.atmmaggioli.es/" target="_blank">ATM Grupo Maggioli</a></div>
+      </div>
+      <div class="exp-date">Ene – Jun 2025</div>
+    </div>
+    <ul class="exp-details">
+      <li>Desarrollo de scripts en Python para automatización de tareas de mantenimiento.</li>
+      <li>Consultas SQL (PostgreSQL/MySQL) para extracción y validación de datos.</li>
+      <li>Soporte nivel 2: resolución de incidencias y documentación técnica en Confluence.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Analista de Ciberseguridad</div>
+        <div class="exp-company"><a href="https://nocountry.com/" target="_blank">NoCountry</a> | Proyecto Fintech</div>
+      </div>
+      <div class="exp-date">Sep – Dic 2025</div>
+    </div>
+    <ul class="exp-details">
+      <li>Escaneo de vulnerabilidades web con OWASP ZAP y análisis SAST.</li>
+      <li>Redacción de guías de buenas prácticas: cifrado, autenticación, protección de datos.</li>
+      <li>Automatización de tareas de seguridad con scripting en Python.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Técnico de Sistemas</div>
+        <div class="exp-company"><a href="https://www.sermicro.es/" target="_blank">Sermicro</a> | Consultoría IT y Outsourcing</div>
+      </div>
+      <div class="exp-date">Nov – Dic 2023</div>
+    </div>
+    <ul class="exp-details">
+      <li>Soporte N1/N2 Windows: resolución de incidencias, ticketing, atención 24/7.</li>
+      <li>Administración de Active Directory: usuarios, permisos, GPO.</li>
+      <li>Instalación y configuración de sistemas y software corporativo.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Técnico de Sistemas</div>
+        <div class="exp-company"><a href="https://www.juntadeandalucia.es/" target="_blank">Red Guadalinfo</a> | Junta de Andalucía</div>
+      </div>
+      <div class="exp-date">Ene – May 2021</div>
+    </div>
+    <ul class="exp-details">
+      <li>Gestión de usuarios en entornos Windows y Linux (Guadalinex).</li>
+      <li>Configuración de servicios de red: DNS, DHCP, políticas de grupo (GPO).</li>
+      <li>Mantenimiento de redes LAN/WiFi y soporte técnico a usuarios finales.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Formación</h2>
+  <div class="edu-item">
+    <div class="edu-title">Máster en Ciberseguridad</div>
+    <div class="edu-school"><a href="https://www.ucam.edu/" target="_blank">Universidad Católica San Antonio de Murcia</a></div>
+    <div class="edu-date">2025 | 1.500h • 60 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Máster en Big Data y Business Intelligence</div>
+    <div class="edu-school"><a href="https://www.universidadisabel1.com/" target="_blank">Universidad Isabel I</a></div>
+    <div class="edu-date">2025 | 1.800h • 72 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Grado Superior en Administración de Sistemas Informáticos en Red (ASIR)</div>
+    <div class="edu-school"><a href="https://www.ilerna.es/" target="_blank">Ilerna</a></div>
+    <div class="edu-date">2025 | 2.000h • 120 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Grado Superior en Desarrollo de Aplicaciones Multiplataforma (DAM) (Cursando)</div>
+    <div class="edu-school"><a href="https://www.ilerna.es/" target="_blank">Ilerna</a></div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Técnico en Ciberseguridad</div>
+    <div class="edu-school"><a href="https://www.incibe.es/" target="_blank">INCIBE</a></div>
+    <div class="edu-date">2024 | 250h</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Grado en Sistemas Microinformáticos y Redes</div>
+    <div class="edu-school"><a href="https://www.ilerna.es/" target="_blank">Ilerna</a></div>
+    <div class="edu-date">2021 | 2.000h</div>
+  </div>
+</section>
+
+<section>
+  <h2>Competencias</h2>
+  <div class="skills-grid">
+    <div class="skill-cat">
+      <h3>Sistemas</h3>
+      <ul class="skill-list">
+        <li>Windows Server, AD, GPO, IIS</li>
+        <li>Linux: Kali, Ubuntu, Arch</li>
+        <li>VMware, VirtualBox</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>Redes</h3>
+      <ul class="skill-list">
+        <li>TCP/IP, DNS, DHCP, VLANs</li>
+        <li>VPN, pfSense, OPNsense, IPFire</li>
+        <li>Firewalls, DMZ</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>Desarrollo</h3>
+      <ul class="skill-list">
+        <li>Java, Python, Bash, PowerShell</li>
+        <li>SQL: PostgreSQL, MySQL</li>
+        <li>Git, HTML/CSS, JS/TS</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>Seguridad</h3>
+      <ul class="skill-list">
+        <li>Nmap, OWASP ZAP, Burp Suite</li>
+        <li>OSINT, Forensics, Hardening</li>
+        <li>ISO 27001, ENS, RGPD</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Certificaciones Adicionales</h2>
+  <div class="cert-grid">
+    <div class="cert-item"><strong>ISO 27001:2022</strong> Lead Auditor</div>
+    <div class="cert-item"><strong>CTIGA</strong> Threat Intelligence y Governance</div>
+    <div class="cert-item"><strong>C-OSIA</strong> OSINT Analyst</div>
+    <div class="cert-item"><strong>CRPO</strong> Ransomware Protection</div>
+    <div class="cert-item"><strong>CSCSO</strong> SME Cyber Security Officer</div>
+    <div class="cert-item"><strong>CCSC</strong> Cybersecurity Career Starter</div>
+    <div class="cert-item"><strong>OSForensics</strong> Triage</div>
+    <div class="cert-item"><strong>CyberSOC Nivel 1</strong> Resility</div>
+    <div class="cert-item"><strong>Threat Hunting</strong> Resility</div>
+    <div class="cert-item"><strong>ICS300</strong> Industrial Control Systems</div>
+    <div class="cert-item"><strong>PMJ</strong> Ethical Hacking</div>
+    <div class="cert-item"><strong>Pentesting Pro</strong> HackerMentor</div>
+    <div class="cert-item"><strong>Ethical Hacker</strong> Cisco</div>
+    <div class="cert-item"><strong>NDE</strong> EC-Council</div>
+    <div class="cert-item"><strong>SQL Injection</strong> EC-Council</div>
+    <div class="cert-item"><strong>XSS Defenses</strong> Linux Foundation</div>
+    <div class="cert-item"><strong>Cybersecurity Essentials</strong> Linux Foundation</div>
+    <div class="cert-item"><strong>Linux 101</strong> 8dot8 Academy</div>
+    <div class="cert-item"><strong>Kali Linux 101</strong> Academia Ciberseguridad</div>
+    <div class="cert-item"><strong>Bash Scripting</strong> DevOps Bootcamp</div>
+    <div class="cert-item"><strong>AZ-204</strong> Azure Bootcamp</div>
+    <div class="cert-item"><strong>Python Backend</strong> IBM</div>
+    <div class="cert-item"><strong>Docker y Git</strong> Código Facilito</div>
+    <div class="cert-item"><strong>Protección de Datos</strong> Resility/IBM</div>
+    <div class="cert-item"><strong>Cisco Switching CCNP</strong> Min. Interior</div>
+    <div class="cert-item"><strong>SOC 101</strong> Operaciones de Seguridad</div>
+  </div>
+  <p style="margin-top:0.5rem;font-size:0.75rem;color:#666;">
+    +100 certificaciones adicionales disponibles bajo demanda.
+  </p>
+</section>
+
+<section>
+  <h2>Laboratorios y Comunidades</h2>
+  <ul class="projects-list">
+    <li><strong>GitHub:</strong> Python, automatización, pentesting, Java/SQL</li>
+    <li><strong>Blue Team:</strong> Let'sDefend, CyberDefenders, SOC 101</li>
+    <li><strong>CTF/Pentesting:</strong> HackTheBox, TryHackMe, VulnHub, PicoCTF, OverTheWire</li>
+    <li><strong>Comunidades:</strong> XSec, C1b3rwall, DragonJAR, UnderC0de, Women IT</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Disponibilidad</h2>
+  <div class="availability">
+    <strong>Modalidad:</strong> Remoto • Híbrido • Presencial &nbsp;&nbsp;
+    <strong>Ubicación:</strong> Madrid / Cádiz • Movilidad nacional
+  </div>
+</section>
+
+<footer>
+  <p>• Referencias y repositorios privados disponibles bajo solicitud</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BDSM Role Assessment | Perfil Psicológico</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<!-- Matrix Background -->
+<div class="matrix-bg"></div>
+<!-- Scanlines -->
+<div class="scanlines"></div>
+<!-- Corner Decorations -->
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<!-- Main Container -->
+<main class="container">
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-label">root@assessment:~/profile~#</div>
+    <h1 class="title">
+      BDSM ROLE ASSESSMENT
+      <span class="cursor">█</span>
+    </h1>
+    <div class="status-indicator">
+      <span class="status-dot"></span>
+      <span>[SYSTEM ONLINE]</span>
+    </div>
+    <p class="subtitle">Herramienta de autoconocimiento • 120 ítems</p>
+  </header>
+
+  <!-- Welcome Screen -->
+  <section id="welcome-screen" class="screen active">
+    <div class="info-box">
+      <h2>╔════════════════════════════════════════════════╗</h2>
+      <h3>║  INFORMACIÓN DE LA EVALUACIÓN                ║</h3>
+      <h2>╚════════════════════════════════════════════════╝</h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">[+]</span>
+          <span class="value">Ítems Totales:</span>
+          <span class="data" id="total-questions">120</span>
+        </div>
+        <div class="info-item">
+          <span class="label">[+]</span>
+          <span class="value">Ítems Clínicos:</span>
+          <span class="data" id="clinical-questions">100</span>
+        </div>
+        <div class="info-item">
+          <span class="label">[+]</span>
+          <span class="value">Escalas de Validez:</span>
+          <span class="data" id="validity-questions">20</span>
+        </div>
+        <div class="info-item">
+          <span class="label">[+]</span>
+          <span class="value">Tiempo Estimado:</span>
+          <span class="data">25-35 minutos</span>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <p>⚠️ <strong>IMPORTANTE:</strong></p>
+        <ul>
+          <li>Esta evaluación es para <strong>autoconocimiento</strong>.</li>
+          <li>Las escalas de validez detectan respuestas inconsistentes.</li>
+          <li>Responde con honestidad para obtener resultados precisos.</li>
+          <li>Si las escalas de validez fallan, los resultados pueden no ser precisos.</li>
+        </ul>
+      </div>
+
+      <div class="scale-info">
+        <p><strong>Escala de Respuesta:</strong></p>
+        <div class="scale-visual">
+          <span>1</span>
+          <div class="scale-bar">
+            <div class="scale-marker" style="left: 0%"></div>
+            <div class="scale-marker" style="left: 25%"></div>
+            <div class="scale-marker" style="left: 50%"></div>
+            <div class="scale-marker" style="left: 75%"></div>
+            <div class="scale-marker" style="left: 100%"></div>
+          </div>
+          <span>5</span>
+        </div>
+        <div class="scale-labels">
+          <span>Totalmente en desacuerdo</span>
+          <span>Neutral</span>
+          <span>Totalmente de acuerdo</span>
+        </div>
+      </div>
+
+      <div class="consent-check">
+        <label class="checkbox-container">
+          <input type="checkbox" id="consent-checkbox">
+          <span class="checkmark"></span>
+          <span class="label-text">
+            He leído la información y consiento participar en esta evaluación.
+            Entiendo que los resultados son para autoconocimiento.
+          </span>
+        </label>
+      </div>
+
+      <button id="start-btn" class="btn-primary" disabled>
+        [ INICIAR EVALUACIÓN ]
+      </button>
+    </div>
+  </section>
+
+  <!-- Assessment Screen -->
+  <section id="assessment-screen" class="screen">
+    <div class="progress-container">
+      <div class="progress-header">
+        <span>PROGRESO</span>
+        <span id="progress-text">0 / 120</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="validity-indicator" id="validity-indicator">
+        <span class="dot"></span>
+        <span>Validez: Verificando...</span>
+      </div>
+    </div>
+
+    <div class="question-container">
+      <div class="question-header">
+        <span class="question-number" id="question-number">Ítem 1/120</span>
+        <span class="question-category" id="question-category">Categoría</span>
+      </div>
+      
+      <div class="question-text" id="question-text">
+        Cargando pregunta...
+      </div>
+
+      <div class="answer-options">
+        <button class="option-btn" data-value="1">
+          <span class="number">1</span>
+          <span class="label">Totalmente en desacuerdo</span>
+        </button>
+        <button class="option-btn" data-value="2">
+          <span class="number">2</span>
+          <span class="label">En desacuerdo</span>
+        </button>
+        <button class="option-btn" data-value="3">
+          <span class="number">3</span>
+          <span class="label">Neutral</span>
+        </button>
+        <button class="option-btn" data-value="4">
+          <span class="number">4</span>
+          <span class="label">De acuerdo</span>
+        </button>
+        <button class="option-btn" data-value="5">
+          <span class="number">5</span>
+          <span class="label">Totalmente de acuerdo</span>
+        </button>
+      </div>
+
+      <div class="navigation">
+        <button id="prev-btn" class="btn-secondary" disabled>
+          [ ← ANTERIOR ]
+        </button>
+        <button id="next-btn" class="btn-primary">
+          [ SIGUIENTE → ]
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading Screen -->
+  <section id="loading-screen" class="screen">
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <h2>PROCESANDO RESULTADOS</h2>
+      <div class="loading-steps">
+        <div class="step" id="step-validity">
+          <span class="step-icon">✓</span>
+          <span class="step-text">Evaluando escalas de validez...</span>
+        </div>
+        <div class="step" id="step-scoring">
+          <span class="step-icon">✓</span>
+          <span class="step-text">Calculando puntuaciones...</span>
+        </div>
+        <div class="step" id="step-normative">
+          <span class="step-icon">✓</span>
+          <span class="step-text">Comparando con datos de referencia...</span>
+        </div>
+        <div class="step" id="step-interpretation">
+          <span class="step-icon">✓</span>
+          <span class="step-text">Generando interpretación...</span>
+        </div>
+      </div>
+      <div class="loading-percent" id="loading-percent">0%</div>
+    </div>
+  </section>
+
+  <!-- Results Screen -->
+  <section id="results-screen" class="screen">
+    <div class="results-container">
+      
+      <!-- Validity Alert -->
+      <div id="validity-alert" class="alert-box" style="display: none;">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <h3>PROTOCOLO CUESTIONABLE</h3>
+          <p id="validity-message"></p>
+          <p class="alert-subtext">Los resultados pueden no ser precisos. Se recomienda repetir la evaluación con más honestidad.</p>
+        </div>
+      </div>
+
+      <!-- Primary Profile -->
+      <div class="profile-card primary">
+        <div class="profile-header">
+          <span class="profile-label">ROL PRIMARIO</span>
+          <span class="profile-percent" id="primary-percent">0%</span>
+        </div>
+        <h2 class="profile-name" id="primary-role">---</h2>
+        <p class="profile-desc" id="primary-desc">---</p>
+        <div class="profile-category" id="primary-category">---</div>
+      </div>
+
+      <!-- Secondary Profile -->
+      <div class="profile-card secondary">
+        <div class="profile-header">
+          <span class="profile-label">ROL SECUNDARIO</span>
+          <span class="profile-percent" id="secondary-percent">0%</span>
+        </div>
+        <h2 class="profile-name" id="secondary-role">---</h2>
+        <p class="profile-desc" id="secondary-desc">---</p>
+        <div class="profile-category" id="secondary-category">---</div>
+      </div>
+
+      <!-- Top 5 Roles -->
+      <div class="top-roles-container">
+        <h3>TOP 5 ROLES</h3>
+        <div class="top-roles-list" id="top-roles-list"></div>
+      </div>
+
+      <!-- Dimension Scores -->
+      <div class="dimensions-container">
+        <h3>PUNTAJES POR DIMENSIÓN</h3>
+        <div class="dimensions-chart" id="dimensions-chart"></div>
+        <div class="t-score-legend">
+          <div class="legend-item">
+            <span class="legend-color low"></span>
+            <span>&lt; 40: Bajo</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color avg"></span>
+            <span>40-60: Promedio</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color high"></span>
+            <span>&gt; 60: Alto</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clinical Interpretation -->
+      <div class="interpretation-container">
+        <h3>INTERPRETACIÓN</h3>
+        <pre class="interpretation-text" id="interpretation-text">Cargando...</pre>
+      </div>
+
+      <!-- Metadata -->
+      <div class="metadata-container">
+        <div class="metadata-item">
+          <span class="meta-label">Confianza:</span>
+          <span class="meta-value" id="confidence-value">0%</span>
+        </div>
+        <div class="metadata-item">
+          <span class="meta-label">Fecha:</span>
+          <span class="meta-value" id="assessment-date">---</span>
+        </div>
+        <div class="metadata-item">
+          <span class="meta-label">Ítems:</span>
+          <span class="meta-value" id="items-answered">0/120</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions-container">
+        <button id="download-pdf-btn" class="btn-primary">[ DESCARGAR ]</button>
+        <button id="restart-btn" class="btn-secondary">[ NUEVA EVALUACIÓN ]</button>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-divider">════════════════════════════════════════════════</div>
+  <p class="footer-text">BDSM ROLE ASSESSMENT • Herramienta de autoconocimiento</p>
+  <div class="footer-signature">[ system ready ]</div>
+</footer>
+
+<!-- Scripts -->
+<script src="js/utils.js"></script>
+<script src="js/assessment.js"></script>
+<script src="js/results.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

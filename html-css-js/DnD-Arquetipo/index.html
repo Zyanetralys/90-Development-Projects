@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D&D Arquetipos</title>
+  <style>
+    :root{--bg:#050508;--surface:#0f0f16;--border:#1e1e2a;--primary:#00ff9d;--text:#e0e6ed;--muted:#8b9bb4;--dim:#4a5568}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:monospace;background:var(--bg);color:var(--text);padding:1rem;line-height:1.5}
+    .grid{max-width:800px;margin:0 auto}
+    .hdr{border:1px solid var(--primary);padding:1rem;margin-bottom:1rem;text-align:center}
+    .hdr h1{color:var(--primary);font-size:1.2rem;text-transform:uppercase;letter-spacing:2px}
+    .screen{display:none}
+    .screen.active{display:block}
+    .card{background:var(--surface);border:1px solid var(--border);padding:1rem;margin-bottom:1rem}
+    .btn{background:var(--surface);border:1px solid var(--primary);color:var(--primary);padding:.5rem 1rem;cursor:pointer;font-family:inherit}
+    .btn:hover{background:rgba(0,255,157,.1)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .prog{height:4px;background:var(--border);margin:1rem 0}
+    .prog-fill{height:100%;background:var(--primary);width:0;transition:width .2s}
+    .q-box{padding:1rem;background:rgba(0,255,157,.03);border-left:3px solid var(--primary);margin:1rem 0;min-height:60px}
+    .opts{display:grid;grid-template-columns:repeat(5,1fr);gap:.3rem;margin:1rem 0}
+    .opt{padding:.6rem;text-align:center;border:1px solid var(--border);cursor:pointer;font-size:.8rem;background:var(--surface)}
+    .opt:hover,.opt.sel{border-color:var(--primary);background:rgba(0,255,157,.1);color:var(--primary)}
+    .nav{display:flex;justify-content:space-between;margin-top:1rem}
+    .res-bar{height:6px;background:var(--border);margin:.3rem 0}
+    .res-fill{height:100%;background:var(--primary)}
+    pre{white-space:pre-wrap;font-size:.8rem;color:var(--muted);background:var(--surface);padding:1rem;border:1px solid var(--border);max-height:40vh;overflow:auto}
+    @media(max-width:600px){.opts{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+<div class="grid">
+  <header class="hdr">
+    <h1>D&D ARQUETIPOS</h1>
+    <div style="font-size:.75rem;color:var(--muted)">120 ítems • Escala 1-5</div>
+  </header>
+
+  <section id="welcome" class="screen active">
+    <div class="card">
+      <p style="margin-bottom:1rem;color:var(--muted)">Responde según tu tendencia natural. Resultados procesados localmente.</p>
+      <label style="display:flex;align-items:center;gap:.5rem;margin:1rem 0;font-size:.85rem">
+        <input type="checkbox" id="consent">
+        <span>Acepto participar para autoconocimiento.</span>
+      </label>
+      <button id="startBtn" class="btn" style="width:100%" disabled>[ INICIAR ]</button>
+    </div>
+  </section>
+
+  <section id="assess" class="screen">
+    <div class="prog"><div id="progFill" class="prog-fill"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--dim)">
+      <span id="qIdx">1/120</span><span id="qCat">---</span>
+    </div>
+    <div class="q-box" id="qText">Cargando...</div>
+    <div class="opts" id="qOpts"></div>
+    <div class="nav">
+      <button id="prevBtn" class="btn" disabled>[ ← ]</button>
+      <button id="nextBtn" class="btn">[ → ]</button>
+    </div>
+  </section>
+
+  <section id="loading" class="screen">
+    <div class="card" style="text-align:center;padding:2rem">
+      <div style="font-size:2rem;margin-bottom:1rem">⟳</div>
+      <h3>PROCESANDO...</h3>
+      <div id="loadPct" style="color:var(--primary);font-size:1.5rem;margin-top:1rem">0%</div>
+    </div>
+  </section>
+
+  <section id="results" class="screen">
+    <div class="card">
+      <h3 style="color:var(--primary)">ARQUETIPO PRIMARIO</h3>
+      <h2 id="resMain" style="margin:.5rem 0">---</h2>
+      <p id="resDesc" style="color:var(--muted);font-size:.9rem">---</p>
+      <span id="resCat" style="background:rgba(0,255,157,.1);padding:.2rem .5rem;font-size:.7rem">---</span>
+    </div>
+    <div class="card">
+      <h3>SECUNDARIO</h3>
+      <h4 id="resSec">---</h4>
+      <p id="resSecDesc" style="color:var(--muted);font-size:.85rem">---</p>
+    </div>
+    <div class="card">
+      <h3>DIMENSIONES (%)</h3>
+      <div id="resDims"></div>
+      <div style="font-size:.7rem;color:var(--dim);margin-top:.5rem">◼ &lt;40%: Bajo • 40-60%: Promedio • &gt;60%: Alto</div>
+    </div>
+    <pre id="resReport"></pre>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin:1rem 0">
+      <button id="dlBtn" class="btn">[ EXPORTAR ]</button>
+      <button id="reBtn" class="btn">[ NUEVO ]</button>
+    </div>
+  </section>
+</div>
+
+<script>
+// ===== DATOS =====
+const Q=[
+{id:1,t:"Suelo seguir las normas incluso cuando nadie las vigila.",c:"VAL",w:3,r:0},
+{id:2,t:"Nunca he sentido envidia por los logros ajenos.",c:"VAL",w:3,r:0},
+{id:3,t:"Me considero una persona completamente honesta en todo momento.",c:"VAL",w:3,r:0},
+{id:4,t:"Nunca he mentido para evitar un problema.",c:"VAL",w:3,r:0},
+{id:5,t:"Siempre admito mis errores inmediatamente.",c:"VAL",w:3,r:0},
+{id:6,t:"Nunca he tenido pensamientos que me avergüencen.",c:"VAL",w:3,r:0},
+{id:7,t:"Me considero moralmente superior a la mayoría.",c:"VAL",w:3,r:0},
+{id:8,t:"Nunca he sentido miedo en situaciones de riesgo real.",c:"VAL",w:3,r:0},
+{id:9,t:"A veces siento que puedo anticipar lo que va a pasar.",c:"VAL",w:2,r:0},
+{id:10,t:"He tenido experiencias que otros no pueden comprender.",c:"VAL",w:2,r:0},
+{id:11,t:"Mis intuiciones casi siempre resultan correctas.",c:"VAL",w:2,r:0},
+{id:12,t:"Siento que tengo un destino especial que cumplir.",c:"VAL",w:2,r:0},
+{id:13,t:"Prefiero resolver los conflictos con fuerza directa.",c:"STR",w:4,r:0},
+{id:14,t:"Me resulta agotador mantener la calma en discusiones acaloradas.",c:"STR",w:3,r:0},
+{id:15,t:"Disfruto superando límites físicos o mentales exigentes.",c:"STR",w:4,r:0},
+{id:16,t:"Cuando hay tensión, mi primer impulso es actuar, no reflexionar.",c:"STR",w:3,r:0},
+{id:17,t:"Prefiero la acción rápida antes que la planificación prolongada.",c:"STR",w:4,r:0},
+{id:18,t:"Me siento incómodo cuando las decisiones se retrasan por burocracia.",c:"STR",w:3,r:0},
+{id:19,t:"El contacto físico directo me resulta más efectivo que las palabras.",c:"STR",w:3,r:0},
+{id:20,t:"Me motiva la competencia y superar a otros en rendimiento.",c:"STR",w:4,r:0},
+{id:21,t:"Me fascina el estudio de sistemas complejos o desconocidos.",c:"INT",w:4,r:0},
+{id:22,t:"Prefiero analizar múltiples escenarios antes de tomar una decisión.",c:"INT",w:4,r:0},
+{id:23,t:"Me resulta satisfactorio resolver acertijos o problemas abstractos.",c:"INT",w:4,r:0},
+{id:24,t:"Desconfío de soluciones que no entiendo por completo.",c:"INT",w:3,r:0},
+{id:25,t:"Me atrae el poder de manipular variables a mi favor.",c:"INT",w:4,r:0},
+{id:26,t:"Prefiero trabajar con teorías y modelos antes que con práctica inmediata.",c:"INT",w:3,r:0},
+{id:27,t:"Me cuesta aceptar afirmaciones sin evidencia lógica.",c:"INT",w:4,r:0},
+{id:28,t:"Disfruto aprendiendo por mi cuenta, sin supervisión directa.",c:"INT",w:3,r:0},
+{id:29,t:"Me resulta fácil leer las intenciones de otras personas.",c:"CHA",w:4,r:0},
+{id:30,t:"Disfruto siendo el centro de atención en grupos sociales.",c:"CHA",w:4,r:0},
+{id:31,t:"Me resulta natural adaptar mi discurso según mi audiencia.",c:"CHA",w:4,r:0},
+{id:32,t:"Prefiero convencer antes que imponer.",c:"CHA",w:3,r:0},
+{id:33,t:"Me siento cómodo negociando acuerdos entre partes opuestas.",c:"CHA",w:4,r:0},
+{id:34,t:"Uso el humor o la ironía para desactivar tensiones.",c:"CHA",w:3,r:0},
+{id:35,t:"Me motiva más el reconocimiento social que la riqueza material.",c:"CHA",w:3,r:0},
+{id:36,t:"Me resulta difícil fingir entusiasmo cuando no me interesa algo.",c:"CHA",w:2,r:0},
+{id:37,t:"Creo que el orden y la estructura son fundamentales para la convivencia.",c:"WIS",w:4,r:0},
+{id:38,t:"Sigo un código personal de honor que no negociaría.",c:"WIS",w:4,r:0},
+{id:39,t:"Prefiero la justicia antes que la compasión en casos difíciles.",c:"WIS",w:3,r:0},
+{id:40,t:"Me siento responsable del bienestar de quienes dependen de mí.",c:"WIS",w:4,r:0},
+{id:41,t:"Creo que algunas reglas deben romperse si la causa es justa.",c:"WIS",w:4,r:0},
+{id:42,t:"Me guía la compasión hacia los más vulnerables.",c:"WIS",w:4,r:0},
+{id:43,t:"Prefiero perdonar antes que buscar venganza.",c:"WIS",w:3,r:0},
+{id:44,t:"Me cuesta tolerar la injusticia, incluso si no me afecta directamente.",c:"WIS",w:4,r:0},
+{id:45,t:"Me resulta fácil pasar desapercibido cuando lo necesito.",c:"DEX",w:4,r:0},
+{id:46,t:"Prefiero observar antes de intervenir.",c:"DEX",w:4,r:0},
+{id:47,t:"Disfruto usando el engaño o la estrategia indirecta.",c:"DEX",w:4,r:0},
+{id:48,t:"Me siento más seguro cuando tengo una ruta de escape planificada.",c:"DEX",w:3,r:0},
+{id:49,t:"Prefiero la flexibilidad antes que los planes rígidos.",c:"DEX",w:4,r:0},
+{id:50,t:"Me resulta natural detectar mentiras o inconsistencias en otros.",c:"DEX",w:3,r:0},
+{id:51,t:"Prefiero operar en entornos de baja visibilidad o control estricto.",c:"DEX",w:3,r:0},
+{id:52,t:"Me cuesta seguir instrucciones si no comprendo su propósito.",c:"DEX",w:3,r:0},
+{id:53,t:"Puedo mantener la calma en situaciones de alta presión o riesgo.",c:"CON",w:4,r:0},
+{id:54,t:"Me recupero rápidamente de contratiempos o fracasos.",c:"CON",w:4,r:0},
+{id:55,t:"Disfruto de entornos impredecibles o caóticos.",c:"CON",w:3,r:0},
+{id:56,t:"Prefiero asumir riesgos calculados antes que jugar seguro.",c:"CON",w:4,r:0},
+{id:57,t:"Me excita la adrenalina de situaciones límite.",c:"CON",w:4,r:0},
+{id:58,t:"Puedo operar eficazmente con recursos limitados.",c:"CON",w:3,r:0},
+{id:59,t:"Me motiva más la supervivencia que el confort.",c:"CON",w:3,r:0},
+{id:60,t:"Prefiero la resistencia prolongada antes que los estallidos de energía.",c:"CON",w:3,r:0},
+{id:61,t:"Me gusta liderar y dirigir operaciones complejas.",c:"LEAD",w:4,r:0},
+{id:62,t:"Me siento cómodo tomando decisiones que afectan a otros.",c:"LEAD",w:4,r:0},
+{id:63,t:"Prefiero delegar tareas antes que ejecutarlas yo mismo.",c:"LEAD",w:3,r:0},
+{id:64,t:"Me motiva la visión a largo plazo antes que los resultados inmediatos.",c:"LEAD",w:4,r:0},
+{id:65,t:"Disfruto mentorando o entrenando a personas con potencial.",c:"LEAD",w:4,r:0},
+{id:66,t:"Prefiero la disciplina estructurada antes que la creatividad libre.",c:"LEAD",w:3,r:0},
+{id:67,t:"Me resulta natural asumir responsabilidad en crisis.",c:"LEAD",w:4,r:0},
+{id:68,t:"Creo que la autoridad debe ganarse, no imponerse.",c:"LEAD",w:3,r:0},
+{id:69,t:"Prefiero entornos naturales antes que urbanos.",c:"NAT",w:4,r:0},
+{id:70,t:"Me resulta satisfactorio rastrear o seguir huellas/pistas.",c:"NAT",w:4,r:0},
+{id:71,t:"Disfruto la soledad prolongada en entornos salvajes.",c:"NAT",w:3,r:0},
+{id:72,t:"Prefiero la adaptación al entorno antes que la modificación del mismo.",c:"NAT",w:4,r:0},
+{id:73,t:"Me conecto emocionalmente con animales o sistemas naturales.",c:"NAT",w:4,r:0},
+{id:74,t:"Prefiero soluciones sostenibles antes que rápidas.",c:"NAT",w:3,r:0},
+{id:75,t:"Me resulta fácil orientarme en territorios desconocidos.",c:"NAT",w:3,r:0},
+{id:76,t:"Creo en el equilibrio entre todas las fuerzas en juego.",c:"NAT",w:4,r:0},
+{id:77,t:"Me gusta crear o construir cosas con mis manos o herramientas.",c:"TEC",w:4,r:0},
+{id:78,t:"Disfruto optimizando sistemas o mecanismos existentes.",c:"TEC",w:4,r:0},
+{id:79,t:"Prefiero la utilidad práctica antes que la estética.",c:"TEC",w:3,r:0},
+{id:80,t:"Me resulta natural combinar elementos dispares en algo funcional.",c:"TEC",w:4,r:0},
+{id:81,t:"Disfruto reparando o mejorando objetos que otros descartan.",c:"TEC",w:4,r:0},
+{id:82,t:"Prefiero la innovación iterativa antes que los saltos radicales.",c:"TEC",w:3,r:0},
+{id:83,t:"Me resulta satisfactorio documentar procesos o crear manuales.",c:"TEC",w:3,r:0},
+{id:84,t:"Creo que la tecnología debe servir al progreso humano.",c:"TEC",w:3,r:0},
+{id:85,t:"Me resulta fácil ocultar mis verdaderas intenciones.",c:"SHD",w:4,r:0},
+{id:86,t:"Disfruto operando desde las sombras o el anonimato.",c:"SHD",w:4,r:0},
+{id:87,t:"Prefiero la información secreta antes que el conocimiento público.",c:"SHD",w:4,r:0},
+{id:88,t:"Me resulta natural manipular percepciones a mi favor.",c:"SHD",w:4,r:0},
+{id:89,t:"Disfruto descifrando códigos o lenguajes ocultos.",c:"SHD",w:3,r:0},
+{id:90,t:"Prefiero la lealtad silenciosa antes que el compromiso público.",c:"SHD",w:3,r:0},
+{id:91,t:"Me resulta fácil cortar lazos emocionales cuando es necesario.",c:"SHD",w:3,r:0},
+{id:92,t:"Creo que algunos secretos deben protegerse a cualquier costo.",c:"SHD",w:4,r:0},
+{id:93,t:"Me gusta proteger a quienes no pueden protegerse a sí mismos.",c:"SUP",w:4,r:0},
+{id:94,t:"Disfruto sanando o restaurando a otros física o mentalmente.",c:"SUP",w:4,r:0},
+{id:95,t:"Prefiero el apoyo logístico antes que el combate directo.",c:"SUP",w:4,r:0},
+{id:96,t:"Me resulta natural mantener la moral del grupo en crisis.",c:"SUP",w:4,r:0},
+{id:97,t:"Disfruto enseñando o compartiendo conocimiento práctico.",c:"SUP",w:3,r:0},
+{id:98,t:"Prefiero la cooperación antes que la competencia individual.",c:"SUP",w:4,r:0},
+{id:99,t:"Me resulta satisfactorio ver prosperar a mi equipo.",c:"SUP",w:4,r:0},
+{id:100,t:"Creo que el éxito colectivo supera al logro personal.",c:"SUP",w:3,r:0},
+{id:101,t:"Prefiero la fuerza bruta antes que la técnica refinada.",c:"STR",w:3,r:0},
+{id:102,t:"Me cuesta trabajar en equipo si los objetivos no están claros.",c:"CHA",w:2,r:0},
+{id:103,t:"Desconfío de personas que muestran demasiada perfección.",c:"DEX",w:3,r:0},
+{id:104,t:"Prefiero la improvisación controlada antes que los protocolos estrictos.",c:"CON",w:3,r:0},
+{id:105,t:"Me resulta difícil perdonar traiciones de confianza.",c:"WIS",w:3,r:0},
+{id:106,t:"Disfruto más del viaje que del destino final.",c:"NAT",w:3,r:0},
+{id:107,t:"Prefiero la precisión antes que la velocidad en tareas complejas.",c:"TEC",w:3,r:0},
+{id:108,t:"Me resulta natural anticipar necesidades antes de que se expresen.",c:"SUP",w:3,r:0},
+{id:109,t:"Creo que el caos es un estado natural que debe canalizarse, no eliminarse.",c:"CON",w:3,r:0},
+{id:110,t:"Prefiero la lealtad probada antes que la simpatía superficial.",c:"WIS",w:3,r:0},
+{id:111,t:"Me resulta fácil cambiar de rol según las circunstancias lo requieran.",c:"SWT",w:4,r:0},
+{id:112,t:"Disfruto adaptándome a dinámicas de poder cambiantes.",c:"SWT",w:4,r:0},
+{id:113,t:"Prefiero la versatilidad antes que la especialización extrema.",c:"SWT",w:4,r:0},
+{id:114,t:"Me resulta natural alternar entre liderar y seguir.",c:"SWT",w:4,r:0},
+{id:115,t:"Disfruto aprendiendo múltiples disciplinas en paralelo.",c:"SWT",w:3,r:0},
+{id:116,t:"Prefiero la flexibilidad cognitiva antes que la rigidez doctrinal.",c:"SWT",w:3,r:0},
+{id:117,t:"Me resulta fácil leer el ambiente y ajustar mi conducta en consecuencia.",c:"SWT",w:3,r:0},
+{id:118,t:"Creo que la maestría viene de la experiencia cruzada, no del aislamiento.",c:"SWT",w:3,r:0},
+{id:119,t:"Suelo decir exactamente lo que pienso, sin filtros.",c:"VAL",w:2,r:1},
+{id:120,t:"Nunca he cambiado de opinión después de haber tomado una decisión firme.",c:"VAL",w:2,r:1}
+];
+
+const SCALES={VAL:{n:"Validez",i:Q.filter(q=>q.c==="VAL")},STR:{n:"Fuerza",i:Q.filter(q=>q.c==="STR")},INT:{n:"Intelecto",i:Q.filter(q=>q.c==="INT")},CHA:{n:"Carisma",i:Q.filter(q=>q.c==="CHA")},WIS:{n:"Moral",i:Q.filter(q=>q.c==="WIS")},DEX:{n:"Sigilo",i:Q.filter(q=>q.c==="DEX")},CON:{n:"Resiliencia",i:Q.filter(q=>q.c==="CON")},LEAD:{n:"Liderazgo",i:Q.filter(q=>q.c==="LEAD")},NAT:{n:"Naturaleza",i:Q.filter(q=>q.c==="NAT")},TEC:{n:"Técnica",i:Q.filter(q=>q.c==="TEC")},SHD:{n:"Sombra",i:Q.filter(q=>q.c==="SHD")},SUP:{n:"Soporte",i:Q.filter(q=>q.c==="SUP")},SWT:{n:"Versatilidad",i:Q.filter(q=>q.c==="SWT")}};
+
+const ARCH=[
+{id:"fighter",n:"Guerrero/a",cat:"Martial",d:"Fuerza directa y resistencia.",w:{STR:.35,CON:.25,LEAD:.15,WIS:.1,CHA:.1,DEX:.05}},
+{id:"rogue",n:"Pícaro/a",cat:"Stealth",d:"Sigilo, astucia y adaptabilidad.",w:{DEX:.35,CON:.2,SHD:.15,INT:.1,SWT:.1,CHA:.1}},
+{id:"wizard",n:"Mago/a",cat:"Arcane",d:"Análisis profundo y control intelectual.",w:{INT:.4,DEX:.15,CON:.1,SWT:.15,TEC:.1,VAL:.1}},
+{id:"cleric",n:"Clérigo/a",cat:"Divine",d:"Fe, soporte y código moral.",w:{SUP:.35,WIS:.25,LEAD:.15,INT:.1,CHA:.1,CON:.05}},
+{id:"paladin",n:"Paladín",cat:"Divine Martial",d:"Fuerza marcial y convicción moral.",w:{STR:.25,WIS:.3,LEAD:.2,CON:.15,SUP:.05,CHA:.05}},
+{id:"ranger",n:"Explorador/a",cat:"Nature",d:"Supervivencia, movilidad y equilibrio natural.",w:{NAT:.35,DEX:.2,CON:.15,INT:.1,SWT:.1,STR:.05}},
+{id:"barbarian",n:"Bárbaro/a",cat:"Primal",d:"Furia controlada y acción instintiva.",w:{STR:.35,CON:.3,DEX:.1,WIS:.1,CHA:.1,SWT:.05}},
+{id:"bard",n:"Bardo/a",cat:"Social",d:"Influencia social y creatividad aplicada.",w:{CHA:.35,INT:.2,SUP:.15,SWT:.15,DEX:.05,CON:.1}},
+{id:"druid",n:"Druida",cat:"Nature Arcane",d:"Armonía sistémica y adaptación orgánica.",w:{NAT:.35,INT:.2,WIS:.15,SUP:.1,CON:.1,SWT:.05}},
+{id:"warlock",n:"Brujo/a",cat:"Pact",d:"Poder negociado y pragmatismo.",w:{INT:.25,CON:.2,CHA:.15,SHD:.15,WIS:.1,SWT:.15}},
+{id:"monk",n:"Monje/a",cat:"Martial Spiritual",d:"Disciplina interna y control somático.",w:{STR:.2,CON:.25,WIS:.2,DEX:.15,SWT:.1,INT:.1}},
+{id:"sorcerer",n:"Hechicero/a",cat:"Innate",d:"Talento innato y expresión espontánea.",w:{INT:.25,CHA:.2,CON:.15,SWT:.15,WIS:.1,DEX:.15}},
+{id:"artificer",n:"Artífice",cat:"Tech",d:"Ingeniería aplicada y utilidad práctica.",w:{TEC:.35,INT:.25,CON:.15,DEX:.1,SUP:.1,SWT:.05}}
+];
+
+// ===== ESTADO =====
+let st={a:new Array(120).fill(null),i:0,r:null};
+const E=id=>document.getElementById(id);
+
+// ===== INICIALIZACIÓN =====
+window.onload=function(){
+  const consent=E('consent'),startBtn=E('startBtn');
+  if(consent&&startBtn){
+    startBtn.disabled=!consent.checked;
+    consent.onchange=function(){startBtn.disabled=!this.checked};
+    startBtn.onclick=function(){show('assess');render();upd()};
+  }
+  if(E('prevBtn'))E('prevBtn').onclick=prev;
+  if(E('nextBtn'))E('nextBtn').onclick=next;
+  if(E('dlBtn'))E('dlBtn').onclick=dl;
+  if(E('reBtn'))E('reBtn').onclick=function(){location.reload()};
+  if(E('qOpts')){
+    E('qOpts').onclick=function(e){
+      const opt=e.target.closest('.opt');
+      if(opt&&opt.dataset.v)answer(+opt.dataset.v);
+    };
+  }
+  document.onkeydown=function(e){
+    if(E('assess').className.indexOf('active')<0)return;
+    if(e.key>='1'&&e.key<='5'){e.preventDefault();answer(+e.key)}
+    if(e.key==='ArrowLeft'){e.preventDefault();prev()}
+    if(e.key==='ArrowRight'){e.preventDefault();next()}
+  };
+  try{
+    const p=JSON.parse(localStorage.getItem('dnd')||'null');
+    if(p&&p.a&&p.a.length===120){st=p;show('assess');render();upd()}
+  }catch(err){}
+};
+
+// ===== NAVEGACIÓN =====
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.className=s.className.replace(' active',''));
+  E(id).className+=' active';
+}
+function prev(){if(st.i>0){st.i--;render();upd()}}
+function next(){
+  if(!st.a[st.i]){alert('Selecciona una respuesta');return}
+  if(st.i>=119){finish()}else{st.i++;render();upd()}
+}
+function answer(v){
+  st.a[st.i]={q:Q[st.i].id,v:v,t:Date.now()};
+  try{localStorage.setItem('dnd',JSON.stringify(st))}catch(e){}
+  const opts=E('qOpts').querySelectorAll('.opt');
+  opts.forEach(o=>o.className=o.className.replace(' sel',''));
+  opts[v-1].className+=' sel';
+  setTimeout(function(){
+    if(st.i>=119){finish()}else{st.i++;render();upd()}
+  },100);
+}
+function render(){
+  const q=Q[st.i],a=st.a[st.i];
+  E('qIdx').textContent=(st.i+1)+'/120';
+  const cm={VAL:'Validez',STR:'Fuerza',INT:'Intelecto',CHA:'Carisma',WIS:'Moral',DEX:'Sigilo',CON:'Resiliencia',LEAD:'Liderazgo',NAT:'Naturaleza',TEC:'Técnica',SHD:'Sombra',SUP:'Soporte',SWT:'Versatilidad'};
+  E('qCat').textContent=cm[q.c]||q.c;
+  E('qText').textContent=q.t;
+  const labels=['Total desacuerdo','En desacuerdo','Neutral','De acuerdo','Total acuerdo'];
+  E('qOpts').innerHTML=[1,2,3,4,5].map(x=>'<div class="opt'+(a&&a.v===x?' sel':'')+'" data-v="'+x+'"><strong>'+x+'</strong><br><small>'+labels[x-1]+'</small></div>').join('');
+}
+function upd(){
+  const n=st.a.filter(x=>x).length;
+  E('progFill').style.width=(n/120*100)+'%';
+  E('prevBtn').disabled=st.i===0;
+  E('nextBtn').textContent=st.i===119?'[ FINALIZAR ]':'[ → ]';
+}
+
+// ===== SCORING EN PORCENTAJES =====
+function finish(){
+  if(st.a.filter(x=>x).length<96){alert('Mínimo 96 ítems');return}
+  show('loading');
+  let p=0;
+  const iv=setInterval(function(){p+=5;E('loadPct').textContent=Math.min(100,p)+'%';if(p>=100)clearInterval(iv)},20);
+  setTimeout(calc,600);
+}
+
+function calc(){
+  // Raw scores
+  const raw={};
+  for(var k in SCALES){
+    var s=0;
+    for(var j=0;j<SCALES[k].i.length;j++){
+      var q=SCALES[k].i[j],a=st.a[q.id-1];
+      if(!a)continue;
+      var v=a.v;
+      if(q.r)v=6-v;
+      s+=v*q.w;
+    }
+    raw[k]=s;
+  }
+  
+  // PORCENTAJES DIRECTOS (0-100%)
+  const pct={};
+  for(var k in raw){
+    var sc=SCALES[k],max=Math.max(1,sc.i.reduce(function(a,b){return a+5*b.w},0));
+    var norm=raw[k]/max; // 0.0 a 1.0
+    pct[k]=Math.round(norm*100); // 0% a 100%
+  }
+  
+  // Validity check
+  var valid=true,msg="";
+  if(pct.VAL>85){valid=false;msg="Posible idealización de respuestas."}
+  
+  // Archetype scores en %
+  var scored=ARCH.map(function(ar){
+    var sc=50;
+    for(var k in ar.w){sc+=(pct[k]||50-50)*ar.w[k]}
+    var finalPct=Math.min(100,Math.max(0,Math.round(sc)));
+    return{id:ar.id,n:ar.n,cat:ar.cat,d:ar.d,pct:finalPct};
+  });
+  scored.sort(function(a,b){return b.pct-a.pct});
+  var top5=scored.slice(0,5);
+  
+  // Report en %
+  var dims=Object.entries(pct).filter(function(x){return x[0]!='VAL'}).sort(function(a,b){return b[1]-a[1]}).slice(0,4);
+  var lb={STR:'Fuerza',INT:'Intelecto',CHA:'Carisma',WIS:'Moral',DEX:'Sigilo',CON:'Resiliencia',LEAD:'Liderazgo',NAT:'Naturaleza',TEC:'Técnica',SHD:'Sombra',SUP:'Soporte',SWT:'Versatilidad'};
+  var rep='PERFIL: '+top5[0].n+'\nCategoria: '+top5[0].cat+'\nAfinidad: '+top5[0].pct+'%\n\nDIMENSIONES (%):\n'+dims.map(function(d){var l=d[1]<40?'Bajo':d[1]>60?'Alto':'Promedio';return'  • '+lb[d[0]]+': '+d[1]+'% ('+l+')'}).join('\n')+'\n\nSECUNDARIO: '+(top5[1]?top5[1].n+' ('+top5[1].pct+'%)':'N/A')+'\n\nNota: Resultados en porcentaje de afinidad.';
+  
+  st.r={top5:top5,primary:top5[0],secondary:top5[1]||null,pct:pct,valid:valid,msg:msg,rep:rep,conf:valid?.88:.45,date:Date.now()};
+  try{localStorage.setItem('dnd_res',JSON.stringify(st.r))}catch(e){}
+  showRes();
+}
+
+function showRes(){
+  var r=st.r;
+  E('resMain').textContent=r.primary.n;
+  E('resCat').textContent=r.primary.cat;
+  E('resDesc').textContent=r.primary.d;
+  E('resSec').textContent=r.secondary?r.secondary.n+' ('+r.secondary.pct+'%)':'No determinado';
+  E('resSecDesc').textContent=r.secondary?r.secondary.d:'---';
+  
+  var dims=Object.entries(r.pct).filter(function(x){return x[0]!='VAL'});
+  E('resDims').innerHTML=dims.map(function(d){
+    return'<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;margin:.2rem 0"><span style="width:100px;color:var(--muted)">'+d[0]+'</span><div class="res-bar"><div class="res-fill" style="width:'+d[1]+'%"></div></div><span>'+d[1]+'%</span></div>';
+  }).join('');
+  
+  E('resReport').textContent=r.rep;
+  show('results');
+}
+
+function dl(){
+  if(!st.r){alert('Sin resultados');return}
+  var b=new Blob([st.r.rep],{type:'text/plain'}),u=URL.createObjectURL(b);
+  var a=document.createElement('a');a.href=u;a.download='dnd-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(u);
+}
+</script>
+</body>
+</html>

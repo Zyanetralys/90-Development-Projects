@@ -1,0 +1,40 @@
+body {
+    background-color: #111;
+    color: #f00;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+.hidden {
+    display: none;
+}
+
+h1, h2 {
+    margin: 20px 0;
+}
+
+#slider {
+    width: 60%;
+    margin: 20px 0;
+}
+
+button {
+    background-color: #222;
+    color: #f00;
+    border: 1px solid #f00;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #f00;
+    color: #111;
+}
+
+#chart {
+    margin-top: 20px;
+}

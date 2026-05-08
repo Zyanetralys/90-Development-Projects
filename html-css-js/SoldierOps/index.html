@@ -1,0 +1,3945 @@
+<!DOCTYPE html>
+<!-- 
+  TCU-01 TACTICAL COMPANION UNIT
+  ================================
+  Version: 2.0.0
+  Deploy: Upload index.html to GitHub Pages repo root
+  GitHub Pages: Settings > Pages > Source: main branch / root
+  
+  DEPLOY INSTRUCTIONS:
+  1. Create a new GitHub repository
+  2. Upload this index.html file to the root
+  3. Go to Settings > Pages > select "main" branch, "/ (root)" folder
+  4. Your game will be live at: https://[username].github.io/[repo-name]/
+  
+  SAVE DATA: Stored in localStorage as 'tcu01_save_v2'
+  BACKUP: Auto-backup every 10s, last 5 versions retained
+  
+  (c) TCU-01 Project - MIT License
+  TODO: v3.0 - GitHub Gist cloud sync integration
+  TODO: v3.0 - Multiplayer faction wars
+  TODO: v3.0 - Voice synthesis for TCU-01 dialogue
+-->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TCU-01 :: TACTICAL COMPANION UNIT</title>
+<style>
+/* ============================================
+   TCU-01 :: CORE STYLE SYSTEM v2.0
+   Terminal aesthetic - Matrix/Kali Linux theme
+   ============================================ */
+:root {
+  --green: #00ff41;
+  --green-dim: #00aa2b;
+  --green-dark: #004d0f;
+  --green-glow: rgba(0,255,65,0.3);
+  --red: #ff3333;
+  --red-dim: #aa0000;
+  --amber: #ffaa00;
+  --amber-dim: #aa6600;
+  --cyan: #00ffff;
+  --cyan-dim: #007777;
+  --purple: #cc00ff;
+  --purple-dim: #660077;
+  --white: #e0ffe0;
+  --bg: #000000;
+  --bg2: #050f05;
+  --bg3: #0a1a0a;
+  --border: #00ff4130;
+  --border-active: #00ff4180;
+  --font: 'Courier New', 'Lucida Console', monospace;
+  --font-size: 13px;
+  --glow: 0 0 8px var(--green-glow), 0 0 20px rgba(0,255,65,0.15);
+  --glow-strong: 0 0 12px var(--green-glow), 0 0 30px rgba(0,255,65,0.3), 0 0 60px rgba(0,255,65,0.1);
+  --transition: 0.15s ease;
+  --stat-width: 100%;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--green);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  height: 100%;
+  overflow: hidden;
+  cursor: default;
+  user-select: none;
+}
+
+/* === CRT EFFECTS === */
+body::before {
+  content: '';
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9998;
+  animation: scanFlicker 8s infinite;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9997;
+}
+
+@keyframes scanFlicker {
+  0%,96%,100% { opacity:1; }
+  97% { opacity:0.97; }
+  98% { opacity:0.99; }
+  99% { opacity:0.96; }
+}
+
+/* === MATRIX RAIN CANVAS === */
+#matrix-canvas {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  opacity: 0.04;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* === LAYOUT === */
+#app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 260px 1fr 220px;
+  grid-template-areas:
+    "header header header"
+    "sidebar main rightbar"
+    "footer footer footer";
+  gap: 1px;
+  background: var(--border);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* === HEADER === */
+#header {
+  grid-area: header;
+  background: var(--bg2);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#header-logo .logo-text {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--green);
+  text-shadow: var(--glow-strong);
+  letter-spacing: 3px;
+  animation: logoPulse 4s infinite;
+}
+
+@keyframes logoPulse {
+  0%,100% { text-shadow: var(--glow-strong); }
+  50% { text-shadow: var(--glow); }
+}
+
+.logo-sub { font-size: 9px; color: var(--green-dim); letter-spacing: 2px; }
+
+#header-stats {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+
+.hstat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hstat-label { color: var(--green-dim); }
+.hstat-val { color: var(--green); font-weight: bold; }
+.hstat-val.warn { color: var(--amber); }
+.hstat-val.danger { color: var(--red); animation: blink 0.7s infinite; }
+
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+#header-controls {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-hdr {
+  background: transparent;
+  border: 1px solid var(--border-active);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 1px;
+}
+
+.btn-hdr:hover, .btn-hdr.active {
+  background: var(--green-dark);
+  color: var(--green);
+  border-color: var(--green);
+  text-shadow: var(--glow);
+  box-shadow: var(--glow);
+}
+
+/* === SIDEBAR (LEFT) === */
+#sidebar {
+  grid-area: sidebar;
+  background: var(--bg2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+}
+
+/* === MAIN === */
+#main {
+  grid-area: main;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* === RIGHT BAR === */
+#rightbar {
+  grid-area: rightbar;
+  background: var(--bg2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 1px solid var(--border);
+}
+
+/* === FOOTER === */
+#footer {
+  grid-area: footer;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding: 4px 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.status-item {
+  font-size: 10px;
+  color: var(--green-dim);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.status-item .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: dotPulse 2s infinite;
+}
+
+@keyframes dotPulse {
+  0%,100% { opacity:1; box-shadow: 0 0 4px var(--green); }
+  50% { opacity:0.4; box-shadow: none; }
+}
+
+.status-item .dot.amber { background: var(--amber); }
+.status-item .dot.red { background: var(--red); animation: blink 0.5s infinite; }
+
+/* === PANEL HEADERS === */
+.panel-header {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--green-dim);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+
+.panel-header .ph-title { color: var(--green); text-shadow: var(--glow); }
+
+/* === TCU DISPLAY (SIDEBAR) === */
+#tcu-display {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+}
+
+#tcu-name {
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--green);
+  text-shadow: var(--glow);
+  margin-bottom: 2px;
+}
+
+#tcu-rank { font-size: 10px; color: var(--amber); margin-bottom: 6px; letter-spacing: 1px; }
+
+/* === SPRITE CONTAINER === */
+#sprite-container {
+  width: 100px;
+  height: 130px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+/* === ANIME SOLDIER SPRITE (CSS Art) === */
+#sprite {
+  position: relative;
+  width: 60px;
+  height: 110px;
+  transform-origin: bottom center;
+}
+
+/* Floating animation base */
+.anim-idle { animation: floatIdle 3s ease-in-out infinite; }
+.anim-walk { animation: walkBob 0.5s ease-in-out infinite alternate; }
+.anim-sleep { animation: sleepDroop 2s ease-in-out infinite; }
+.anim-rest { animation: restSway 4s ease-in-out infinite; }
+.anim-train { animation: trainPulse 0.3s ease-in-out infinite alternate; }
+.anim-mission { animation: missionShake 0.2s ease-in-out infinite; }
+.anim-alert { animation: alertBounce 0.4s ease-in-out infinite alternate; }
+
+@keyframes floatIdle {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes walkBob {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-3px) rotate(2deg); }
+}
+@keyframes sleepDroop {
+  0%,100% { transform: translateY(2px) rotate(3deg); }
+  50% { transform: translateY(4px) rotate(5deg); }
+}
+@keyframes restSway {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(-1deg); }
+}
+@keyframes trainPulse {
+  0% { transform: scaleY(0.97) translateY(0); }
+  100% { transform: scaleY(1.02) translateY(-2px); }
+}
+@keyframes missionShake {
+  0%,100% { transform: translateX(-1px) rotate(-1deg); }
+  50% { transform: translateX(1px) rotate(1deg); }
+}
+@keyframes alertBounce {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-5px) scale(1.02); }
+}
+
+/* HAIR */
+.sp-hair {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 40px; height: 22px;
+  background: #1a0a2e;
+  border-radius: 50% 50% 20% 20% / 60% 60% 30% 30%;
+  z-index: 10;
+}
+.sp-hair::before {
+  content: '';
+  position: absolute;
+  top: 14px; left: -8px;
+  width: 12px; height: 30px;
+  background: #1a0a2e;
+  border-radius: 40% 20% 40% 60%;
+  transform: rotate(-5deg);
+}
+.sp-hair::after {
+  content: '';
+  position: absolute;
+  top: 14px; right: -8px;
+  width: 12px; height: 30px;
+  background: #1a0a2e;
+  border-radius: 20% 40% 60% 40%;
+  transform: rotate(5deg);
+}
+/* Hair highlight */
+.sp-hair-hi {
+  position: absolute;
+  top: 2px; left: 50%;
+  transform: translateX(-40%);
+  width: 12px; height: 6px;
+  background: rgba(100,60,200,0.4);
+  border-radius: 50%;
+  z-index: 11;
+}
+
+/* HEAD */
+.sp-head {
+  position: absolute;
+  top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 30px;
+  background: #ffe0c0;
+  border-radius: 45% 45% 40% 40% / 50% 50% 45% 45%;
+  z-index: 9;
+}
+
+/* FACE FEATURES */
+.sp-face {
+  position: absolute;
+  top: 8px; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 30px;
+  z-index: 12;
+}
+
+/* Eyes */
+.sp-eye-l, .sp-eye-r {
+  position: absolute;
+  top: 11px;
+  width: 7px; height: 7px;
+  background: #1a0a3e;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.sp-eye-l { left: 4px; }
+.sp-eye-r { right: 4px; }
+.sp-eye-l::after, .sp-eye-r::after {
+  content: '';
+  position: absolute;
+  top: 1px; left: 1px;
+  width: 3px; height: 3px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+}
+/* Eye shine */
+.sp-eye-shine-l, .sp-eye-shine-r {
+  position: absolute;
+  top: 10px;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid rgba(150,100,255,0.5);
+  z-index: 13;
+}
+.sp-eye-shine-l { left: 3px; }
+.sp-eye-shine-r { right: 3px; }
+
+/* Blush */
+.sp-blush-l, .sp-blush-r {
+  position: absolute;
+  top: 17px;
+  width: 8px; height: 4px;
+  background: rgba(255,100,100,0.25);
+  border-radius: 50%;
+}
+.sp-blush-l { left: 1px; }
+.sp-blush-r { right: 1px; }
+
+/* Mouth */
+.sp-mouth {
+  position: absolute;
+  bottom: 5px; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 4px;
+  border-bottom: 2px solid #c06060;
+  border-radius: 0 0 50% 50%;
+}
+
+/* Nose */
+.sp-nose {
+  position: absolute;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 3px;
+  border-right: 1.5px solid rgba(180,120,80,0.5);
+  border-radius: 0 50% 50% 0;
+}
+
+/* HEADSET */
+.sp-headset {
+  position: absolute;
+  top: 4px; left: 50%;
+  transform: translateX(-50%);
+  width: 38px; height: 14px;
+  border: 2px solid #446644;
+  border-bottom: none;
+  border-radius: 50% 50% 0 0;
+  z-index: 14;
+}
+.sp-headset::before {
+  content: '';
+  position: absolute;
+  left: -5px; top: 4px;
+  width: 6px; height: 8px;
+  background: #334433;
+  border-radius: 40%;
+  border: 1px solid #446644;
+}
+.sp-headset::after {
+  content: '';
+  position: absolute;
+  right: -5px; top: 4px;
+  width: 6px; height: 8px;
+  background: #334433;
+  border-radius: 40%;
+  border: 1px solid #446644;
+}
+/* Mic */
+.sp-mic {
+  position: absolute;
+  top: 20px; left: 10px;
+  width: 14px; height: 2px;
+  background: #446644;
+  z-index: 15;
+  transform-origin: left center;
+  transform: rotate(-10deg);
+}
+.sp-mic::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: -2px;
+  width: 4px; height: 6px;
+  background: #334433;
+  border-radius: 40%;
+  border: 1px solid #00ff41;
+}
+
+/* NECK */
+.sp-neck {
+  position: absolute;
+  top: 35px; left: 50%;
+  transform: translateX(-50%);
+  width: 10px; height: 8px;
+  background: #ffe0c0;
+  z-index: 8;
+}
+
+/* BODY / UNIFORM */
+.sp-body {
+  position: absolute;
+  top: 40px; left: 50%;
+  transform: translateX(-50%);
+  width: 36px; height: 36px;
+  background: #2d4a2d;
+  border-radius: 4px 4px 2px 2px;
+  z-index: 7;
+}
+/* Uniform detail - chest pockets */
+.sp-body::before {
+  content: '';
+  position: absolute;
+  top: 4px; left: 4px;
+  width: 10px; height: 8px;
+  background: #244024;
+  border-radius: 2px;
+}
+.sp-body::after {
+  content: '';
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 10px; height: 8px;
+  background: #244024;
+  border-radius: 2px;
+}
+
+/* HEART on uniform */
+.sp-heart {
+  position: absolute;
+  top: 46px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  z-index: 10;
+  animation: heartbeat 2s ease-in-out infinite;
+  color: #ff6688;
+  text-shadow: 0 0 6px rgba(255,100,136,0.8);
+}
+@keyframes heartbeat {
+  0%,100% { transform: translateX(-50%) scale(1); }
+  15% { transform: translateX(-50%) scale(1.3); }
+  30% { transform: translateX(-50%) scale(1); }
+  45% { transform: translateX(-50%) scale(1.2); }
+}
+
+/* RANK PATCH on shoulder */
+.sp-patch {
+  position: absolute;
+  top: 42px; left: 1px;
+  width: 8px; height: 8px;
+  background: #aa8800;
+  border-radius: 1px;
+  z-index: 10;
+  font-size: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+/* BELT */
+.sp-belt {
+  position: absolute;
+  top: 72px; left: 50%;
+  transform: translateX(-50%);
+  width: 38px; height: 5px;
+  background: #1a2e1a;
+  z-index: 8;
+  border-radius: 1px;
+}
+.sp-belt::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 6px; height: 5px;
+  background: #665500;
+  border-radius: 1px;
+}
+
+/* ARMS */
+.sp-arm-l, .sp-arm-r {
+  position: absolute;
+  top: 42px;
+  width: 12px; height: 30px;
+  background: #2d4a2d;
+  border-radius: 4px;
+  z-index: 6;
+}
+.sp-arm-l { left: 0px; transform: rotate(8deg); transform-origin: top center; }
+.sp-arm-r { right: 0px; transform: rotate(-8deg); transform-origin: top center; }
+
+/* Hands */
+.sp-hand-l, .sp-hand-r {
+  position: absolute;
+  top: 66px;
+  width: 8px; height: 9px;
+  background: #ffe0c0;
+  border-radius: 40%;
+  z-index: 7;
+}
+.sp-hand-l { left: 1px; }
+.sp-hand-r { right: 1px; }
+
+/* WEAPON (assault rifle) */
+.sp-weapon {
+  position: absolute;
+  top: 58px; right: -10px;
+  width: 22px; height: 6px;
+  background: #222;
+  border-radius: 1px 3px 1px 1px;
+  z-index: 8;
+  transform: rotate(-10deg);
+}
+.sp-weapon::before {
+  content: '';
+  position: absolute;
+  top: -3px; left: 4px;
+  width: 8px; height: 4px;
+  background: #333;
+  border-radius: 1px;
+}
+.sp-weapon::after {
+  content: '';
+  position: absolute;
+  top: 1px; left: -2px;
+  width: 4px; height: 4px;
+  background: #1a1a1a;
+  border-radius: 1px;
+}
+/* Scope */
+.sp-scope {
+  position: absolute;
+  top: 53px; right: -6px;
+  width: 6px; height: 4px;
+  background: #111;
+  border: 1px solid #444;
+  border-radius: 50%;
+  z-index: 9;
+}
+
+/* LEGS */
+.sp-leg-l, .sp-leg-r {
+  position: absolute;
+  top: 74px;
+  width: 15px; height: 26px;
+  background: #2d4a2d;
+  border-radius: 2px 2px 4px 4px;
+  z-index: 6;
+}
+.sp-leg-l { left: 5px; }
+.sp-leg-r { right: 5px; }
+
+/* BOOTS */
+.sp-boot-l, .sp-boot-r {
+  position: absolute;
+  top: 97px;
+  width: 17px; height: 12px;
+  background: #1a1a1a;
+  border-radius: 2px 6px 4px 2px;
+  z-index: 7;
+}
+.sp-boot-l { left: 3px; }
+.sp-boot-r { right: 3px; }
+
+/* Boot lights (tactical) */
+.sp-boot-l::after, .sp-boot-r::after {
+  content: '';
+  position: absolute;
+  bottom: 1px; left: 2px;
+  width: 4px; height: 2px;
+  background: var(--green);
+  border-radius: 1px;
+  box-shadow: 0 0 4px var(--green);
+  animation: bootLight 2s infinite;
+}
+@keyframes bootLight {
+  0%,100% { opacity:1; }
+  50% { opacity:0.3; }
+}
+
+/* Knee pads */
+.sp-knee-l, .sp-knee-r {
+  position: absolute;
+  top: 84px;
+  width: 16px; height: 8px;
+  background: #1f331f;
+  border-radius: 3px;
+  z-index: 7;
+}
+.sp-knee-l { left: 5px; }
+.sp-knee-r { right: 5px; }
+
+/* LAPTOP (visible when resting) */
+.sp-laptop {
+  display: none;
+  position: absolute;
+  bottom: -5px; left: 50%;
+  transform: translateX(-50%);
+  width: 28px; height: 16px;
+  background: #222;
+  border-radius: 2px;
+  z-index: 15;
+  border: 1px solid #444;
+}
+.sp-laptop::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px; right: 2px; bottom: 2px;
+  background: #001a00;
+  border-radius: 1px;
+  box-shadow: 0 0 4px var(--green);
+}
+
+/* ZZZ for sleep */
+.sp-zzz {
+  display: none;
+  position: absolute;
+  top: -15px; right: -10px;
+  font-size: 11px;
+  color: var(--cyan);
+  text-shadow: 0 0 8px var(--cyan);
+  z-index: 20;
+  animation: floatZzz 2s ease-in-out infinite;
+}
+@keyframes floatZzz {
+  0%,100% { transform: translateY(0) scale(1); opacity:1; }
+  50% { transform: translateY(-8px) scale(1.2); opacity:0.6; }
+}
+
+/* GLITCH EFFECT */
+.glitch {
+  animation: glitchEffect 0.3s ease-in-out !important;
+}
+@keyframes glitchEffect {
+  0%,100% { transform: translateX(0); filter: none; }
+  20% { transform: translateX(-3px); filter: hue-rotate(90deg); }
+  40% { transform: translateX(3px); filter: hue-rotate(180deg); }
+  60% { transform: translateX(-2px); filter: hue-rotate(270deg); }
+  80% { transform: translateX(2px); filter: none; }
+}
+
+/* === DIALOGUE BUBBLE === */
+#dialogue-bubble {
+  position: absolute;
+  top: -10px;
+  left: 110%;
+  width: 160px;
+  background: var(--bg3);
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 10px;
+  color: var(--white);
+  line-height: 1.4;
+  z-index: 50;
+  text-shadow: var(--glow);
+  box-shadow: var(--glow);
+  display: none;
+  animation: bubblePop 0.2s ease-out;
+}
+@keyframes bubblePop {
+  0% { transform: scale(0.8); opacity:0; }
+  100% { transform: scale(1); opacity:1; }
+}
+#dialogue-bubble::before {
+  content: '';
+  position: absolute;
+  left: -7px; top: 16px;
+  border: 4px solid transparent;
+  border-right-color: var(--green);
+}
+
+/* === STAT BARS === */
+#stats-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.stat-row {
+  margin-bottom: 7px;
+}
+
+.stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin-bottom: 2px;
+  color: var(--green-dim);
+}
+
+.stat-label .sval { color: var(--green); }
+.stat-label .sval.warn { color: var(--amber); }
+.stat-label .sval.danger { color: var(--red); }
+
+.stat-bar-bg {
+  height: 5px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: var(--green);
+  transition: width 0.5s ease;
+  position: relative;
+}
+
+.stat-bar-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--white);
+  animation: barGlow 1s infinite;
+}
+@keyframes barGlow {
+  0%,100% { opacity:1; }
+  50% { opacity:0.3; }
+}
+
+.stat-bar-fill.bar-sta { background: var(--green); }
+.stat-bar-fill.bar-mor { background: var(--cyan); }
+.stat-bar-fill.bar-disc { background: #8888ff; }
+.stat-bar-fill.bar-cort { background: var(--amber); }
+.stat-bar-fill.bar-fat { background: var(--purple); }
+.stat-bar-fill.bar-cort.danger { background: var(--red); animation: barDanger 0.5s infinite alternate; }
+@keyframes barDanger {
+  0% { opacity:0.7; }
+  100% { opacity:1; }
+}
+
+/* === QUICK ACTIONS (SIDEBAR) === */
+#quick-actions {
+  padding: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  border-top: 1px solid var(--border);
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+
+.btn-action {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 5px 4px;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.btn-action:hover {
+  background: var(--green-dark);
+  color: var(--green);
+  border-color: var(--green);
+  text-shadow: var(--glow);
+}
+
+.btn-action:active { transform: scale(0.97); }
+.btn-action.active-state { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+.btn-action.danger-btn { border-color: var(--red-dim); color: var(--red-dim); }
+.btn-action.danger-btn:hover { background: #1a0000; border-color: var(--red); color: var(--red); }
+
+/* === TERMINAL LOG (MAIN) === */
+#terminal-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.6;
+  scroll-behavior: smooth;
+}
+
+#terminal-log::-webkit-scrollbar { width: 4px; }
+#terminal-log::-webkit-scrollbar-track { background: var(--bg2); }
+#terminal-log::-webkit-scrollbar-thumb { background: var(--green-dark); }
+#terminal-log::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+
+.log-line {
+  margin-bottom: 1px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log-ok { color: var(--green); }
+.log-warn { color: var(--amber); }
+.log-alert { color: var(--red); text-shadow: 0 0 6px rgba(255,51,51,0.5); }
+.log-info { color: var(--cyan); }
+.log-system { color: var(--green-dim); }
+.log-mission { color: var(--purple); }
+.log-dialogue { color: var(--white); font-style: italic; }
+.log-input { color: var(--green); }
+.log-error { color: var(--red); font-weight: bold; }
+
+.log-glitch {
+  animation: textGlitch 0.3s ease;
+}
+@keyframes textGlitch {
+  0%,100% { transform: none; clip-path: none; }
+  25% { transform: translateX(2px); clip-path: inset(10% 0 80% 0); }
+  50% { transform: translateX(-2px); clip-path: inset(60% 0 20% 0); }
+  75% { transform: translateX(1px); clip-path: none; }
+}
+
+/* === COMMAND INPUT === */
+#input-area {
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+#input-row {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  gap: 6px;
+}
+
+#prompt { color: var(--green); font-size: 12px; white-space: nowrap; }
+
+#cmd-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 12px;
+  outline: none;
+  caret-color: var(--green);
+}
+
+#cmd-input::placeholder { color: var(--green-dark); }
+
+#autocomplete-hint {
+  color: var(--green-dark);
+  font-size: 11px;
+  padding: 0 10px 4px;
+  min-height: 16px;
+}
+
+/* === MISSION PANEL (RIGHT) === */
+#mission-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mission-card {
+  border: 1px solid var(--border);
+  padding: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg3);
+}
+
+.mission-card:hover {
+  border-color: var(--green);
+  background: var(--green-dark);
+}
+
+.mission-card.active-mission {
+  border-color: var(--amber);
+  background: rgba(170,102,0,0.1);
+}
+
+.mission-card.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mc-type { font-size: 10px; color: var(--amber); letter-spacing: 1px; }
+.mc-name { font-size: 11px; color: var(--green); margin: 1px 0; }
+.mc-stats { font-size: 9px; color: var(--green-dim); }
+.mc-progress {
+  margin-top: 4px;
+  height: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.mc-progress-fill {
+  height: 100%;
+  background: var(--amber);
+  transition: width 1s linear;
+}
+
+/* === COMPANIONS (RIGHT) === */
+#companions-panel {
+  border-top: 1px solid var(--border);
+  padding: 6px;
+  flex-shrink: 0;
+}
+
+.companion-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.companion-row:hover { border-color: var(--border-active); background: var(--bg3); }
+.companion-icon { font-size: 16px; }
+.companion-info { flex: 1; font-size: 9px; }
+.companion-name { color: var(--green); font-size: 10px; }
+.companion-stat { color: var(--green-dim); }
+.companion-loy {
+  font-size: 9px;
+  color: var(--cyan);
+}
+
+/* === TOAST NOTIFICATIONS === */
+#toast-container {
+  position: fixed;
+  bottom: 40px;
+  right: 10px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--bg3);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--font);
+  font-size: 11px;
+  padding: 6px 12px;
+  min-width: 200px;
+  max-width: 300px;
+  box-shadow: var(--glow);
+  animation: toastIn 0.2s ease-out, toastOut 0.3s ease-in 3s forwards;
+  pointer-events: none;
+}
+.toast.warn { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 8px rgba(255,170,0,0.3); }
+.toast.alert { border-color: var(--red); color: var(--red); box-shadow: 0 0 8px rgba(255,51,51,0.4); }
+.toast.info { border-color: var(--cyan); color: var(--cyan); }
+.toast.mission { border-color: var(--purple); color: var(--purple); }
+
+@keyframes toastIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; pointer-events:none; } }
+
+/* === MODALS === */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--green);
+  box-shadow: var(--glow-strong);
+  width: min(90vw, 520px);
+  max-height: 80vh;
+  overflow-y: auto;
+  font-size: 12px;
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn {
+  from { transform: scale(0.9) translateY(-20px); opacity:0; }
+  to { transform: scale(1) translateY(0); opacity:1; }
+}
+
+.modal-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg3);
+  color: var(--green);
+  letter-spacing: 2px;
+  font-size: 11px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 14px;
+  padding: 0 4px;
+}
+.modal-close:hover { text-shadow: 0 0 8px var(--red); }
+
+.modal-body { padding: 14px; }
+
+.modal-section {
+  margin-bottom: 14px;
+  border: 1px solid var(--border);
+  padding: 8px;
+  background: var(--bg3);
+}
+
+.modal-section-title {
+  color: var(--amber);
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+/* Save slots */
+.save-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.save-slot:hover { border-color: var(--green); background: var(--green-dark); }
+.save-slot.empty { opacity: 0.5; }
+.ss-num { color: var(--amber); font-size: 14px; min-width: 20px; text-align: center; }
+.ss-info { flex: 1; }
+.ss-name { color: var(--green); font-size: 11px; }
+.ss-meta { color: var(--green-dim); font-size: 9px; }
+.ss-actions { display: flex; gap: 4px; }
+.ss-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.ss-btn:hover { border-color: var(--green); color: var(--green); }
+.ss-btn.del { border-color: var(--red-dim); color: var(--red-dim); }
+.ss-btn.del:hover { border-color: var(--red); color: var(--red); }
+
+/* Implant cards */
+.implant-card {
+  border: 1px solid var(--border);
+  padding: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg3);
+}
+.implant-card:hover:not(.locked) { border-color: var(--green); }
+.implant-card.equipped { border-color: var(--cyan); background: rgba(0,170,170,0.08); }
+.implant-card.locked { opacity: 0.4; cursor: not-allowed; }
+.implant-card.conflict { opacity: 0.5; cursor: not-allowed; border-color: var(--red-dim); }
+.ic-name { color: var(--green); font-size: 11px; margin-bottom: 2px; }
+.ic-effect { color: var(--cyan); font-size: 10px; }
+.ic-req { color: var(--green-dim); font-size: 9px; }
+.ic-status { font-size: 9px; float: right; }
+.ic-status.eq { color: var(--cyan); }
+.ic-status.lock { color: var(--red); }
+.ic-status.conf { color: var(--amber); }
+
+/* Market items */
+.market-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  margin-bottom: 4px;
+  background: var(--bg3);
+}
+.mi-info { flex: 1; }
+.mi-name { color: var(--green); font-size: 11px; }
+.mi-desc { color: var(--green-dim); font-size: 9px; }
+.mi-price { color: var(--amber); font-size: 11px; margin-right: 6px; }
+.mi-buy {
+  background: transparent;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.mi-buy:hover { background: rgba(255,170,0,0.1); }
+.mi-buy:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Achievement */
+.achievement-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 4px;
+  background: var(--bg3);
+}
+.achievement-card.unlocked { border-color: var(--amber); }
+.ach-icon { font-size: 18px; min-width: 24px; text-align: center; }
+.ach-info { flex: 1; }
+.ach-name { font-size: 11px; color: var(--amber); }
+.ach-desc { font-size: 9px; color: var(--green-dim); }
+.ach-status { font-size: 9px; }
+.ach-status.done { color: var(--green); }
+.ach-status.todo { color: var(--green-dark); }
+
+/* Skill tree */
+.skill-node {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg3);
+  margin: 2px;
+  min-width: 70px;
+}
+.skill-node:hover:not(.locked) { border-color: var(--green); }
+.skill-node.unlocked { border-color: var(--cyan); background: rgba(0,170,170,0.08); }
+.skill-node.locked { opacity: 0.4; cursor: not-allowed; }
+.sn-icon { font-size: 16px; }
+.sn-name { font-size: 9px; color: var(--green); text-align: center; }
+.sn-cost { font-size: 9px; color: var(--amber); }
+
+/* Decision modal */
+.decision-option {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg3);
+}
+.decision-option:hover { border-color: var(--green); background: var(--green-dark); }
+.do-label { color: var(--green); font-size: 11px; }
+.do-effect { color: var(--green-dim); font-size: 9px; margin-top: 2px; }
+.do-moral { font-size: 9px; margin-top: 2px; }
+.do-moral.red { color: var(--red); }
+.do-moral.green { color: var(--green); }
+.do-moral.amber { color: var(--amber); }
+
+/* Decrypt minigame */
+#decrypt-game {
+  padding: 10px;
+}
+.decrypt-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  margin: 10px 0;
+}
+.dg-cell {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  text-align: center;
+  padding: 4px 2px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--green-dim);
+}
+.dg-cell:hover { background: var(--green-dark); border-color: var(--green); color: var(--green); }
+.dg-cell.active { background: var(--green-dark); border-color: var(--green); color: var(--green); animation: cellPulse 0.3s ease; }
+.dg-cell.target { border-color: var(--amber); color: var(--amber); }
+.dg-cell.cracked { background: rgba(0,255,65,0.2); color: var(--green); border-color: var(--green); }
+@keyframes cellPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+
+.decrypt-timer {
+  height: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.decrypt-timer-fill {
+  height: 100%;
+  background: var(--green);
+  transition: width 0.1s linear;
+}
+.decrypt-timer-fill.warn { background: var(--amber); }
+.decrypt-timer-fill.danger { background: var(--red); }
+
+/* Codex */
+.codex-entry {
+  border: 1px solid var(--border);
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.codex-entry:hover { border-color: var(--green-dim); }
+.codex-entry.locked { opacity: 0.5; }
+.ce-header {
+  padding: 6px 8px;
+  display: flex;
+  justify-content: space-between;
+  background: var(--bg3);
+}
+.ce-title { color: var(--green); font-size: 11px; }
+.ce-cat { color: var(--amber); font-size: 9px; }
+.ce-body {
+  padding: 8px;
+  font-size: 10px;
+  color: var(--green-dim);
+  display: none;
+  line-height: 1.6;
+}
+.codex-entry.open .ce-body { display: block; }
+
+/* === SCROLL AESTHETICS === */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--green-dark); border-radius: 1px; }
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto auto;
+    grid-template-areas:
+      "header"
+      "sidebar"
+      "main"
+      "rightbar"
+      "footer";
+    height: auto;
+    overflow-y: auto;
+  }
+  body { overflow-y: auto; overflow-x: hidden; }
+  #sidebar { max-height: 360px; }
+  #rightbar { max-height: 300px; }
+  #main { min-height: 300px; }
+  #terminal-log { max-height: 250px; }
+  #dialogue-bubble { left: 50%; top: 110%; transform: translateX(-50%); width: 160px; }
+  #dialogue-bubble::before { left: 50%; top: -7px; transform: translateX(-50%); 
+    border-right-color: transparent; border-bottom-color: var(--green); }
+}
+
+@media (max-width: 480px) {
+  :root { --font-size: 11px; }
+  #header-logo .logo-text { font-size: 13px; }
+  .btn-action { font-size: 9px; padding: 4px 3px; }
+}
+
+/* === CURSOR === */
+* { cursor: default; }
+input, button, .clickable, [role="button"], .mission-card, .companion-row, .save-slot,
+.implant-card, .decision-option, .market-item .mi-buy, .skill-node, .btn-action,
+.btn-hdr, .codex-entry { cursor: pointer; }
+#cmd-input { cursor: text; }
+
+/* ASCII header decoration */
+.ascii-art {
+  font-size: 9px;
+  color: var(--green-dark);
+  line-height: 1.2;
+  letter-spacing: 0;
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* XP bar special */
+.xp-bar-fill { background: linear-gradient(90deg, var(--purple-dim), var(--purple)); }
+
+/* Mood indicator */
+#mood-indicator {
+  font-size: 10px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  text-align: center;
+  letter-spacing: 1px;
+  margin: 4px 0;
+}
+#mood-indicator.mood-calm { color: var(--green); border-color: var(--green-dim); }
+#mood-indicator.mood-stressed { color: var(--amber); border-color: var(--amber-dim); }
+#mood-indicator.mood-aggressive { color: var(--red); border-color: var(--red-dim); animation: blink 1s infinite; }
+#mood-indicator.mood-broken { color: var(--purple); border-color: var(--purple-dim); }
+
+/* Weather & GTI */
+#world-state {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--green-dim);
+  padding: 3px 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* Tab buttons */
+.tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); text-shadow: var(--glow); }
+.tab-btn:hover:not(.active) { color: var(--green); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Personality bars */
+.pers-bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 9px; }
+.pers-label { color: var(--green-dim); width: 80px; }
+.pers-bar-bg { flex: 1; height: 4px; background: var(--bg); border: 1px solid var(--border); overflow: hidden; }
+.pers-bar-fill-agg { height: 100%; background: var(--red); transition: width 0.5s; }
+.pers-bar-fill-emp { height: 100%; background: var(--cyan); transition: width 0.5s; }
+.pers-val { color: var(--green); width: 28px; text-align: right; }
+
+/* Credits display */
+#credits-display {
+  text-align: center;
+  padding: 4px;
+  font-size: 11px;
+  color: var(--amber);
+  border-bottom: 1px solid var(--border);
+}
+.credit-label { color: var(--amber-dim); }
+
+/* Inventory grid */
+.inv-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid var(--border);
+  margin-bottom: 3px;
+  background: var(--bg3);
+  font-size: 10px;
+}
+.inv-item .ii-icon { font-size: 14px; }
+.inv-item .ii-name { flex: 1; color: var(--green); }
+.inv-item .ii-qty { color: var(--green-dim); }
+.inv-item .ii-use {
+  background: none;
+  border: 1px solid var(--green-dim);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+.inv-item .ii-use:hover { border-color: var(--green); color: var(--green); }
+
+/* Facility */
+.facility-card {
+  border: 1px solid var(--border);
+  padding: 8px;
+  margin-bottom: 5px;
+  background: var(--bg3);
+}
+.facility-card.unlocked { border-color: var(--green-dim); }
+.facility-card.locked { opacity: 0.5; }
+.fc-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.fc-name { color: var(--green); font-size: 11px; }
+.fc-level { color: var(--amber); font-size: 10px; }
+.fc-desc { color: var(--green-dim); font-size: 9px; margin-bottom: 4px; }
+.fc-action {
+  background: none;
+  border: 1px solid var(--border-active);
+  color: var(--green-dim);
+  font-family: var(--font);
+  font-size: 9px;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.fc-action:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.fc-action:disabled { opacity: 0.4; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div id="toast-container"></div>
+
+<!-- MODAL OVERLAY -->
+<div id="modal-overlay">
+  <div class="modal" id="modal-content">
+    <div class="modal-header">
+      <span id="modal-title">MODAL</span>
+      <button class="modal-close" onclick="TCU.ui.closeModal()">[ X ]</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <div id="header-logo">
+      <div>
+        <div class="logo-text">◈ TCU-01 ◈</div>
+        <div class="logo-sub">TACTICAL COMPANION UNIT // CLASSIFIED</div>
+      </div>
+    </div>
+    <div id="header-stats">
+      <div class="hstat"><span class="hstat-label">LVL:</span><span class="hstat-val" id="hs-lvl">1</span></div>
+      <div class="hstat"><span class="hstat-label">XP:</span><span class="hstat-val" id="hs-xp">0/100</span></div>
+      <div class="hstat"><span class="hstat-label">CR:</span><span class="hstat-val amber" id="hs-cr">500</span></div>
+      <div class="hstat"><span class="hstat-label">GTI:</span><span class="hstat-val" id="hs-gti">0.30</span></div>
+      <div class="hstat"><span class="hstat-label">WTH:</span><span class="hstat-val" id="hs-wth">CLR</span></div>
+      <div class="hstat"><span class="hstat-label">DAY:</span><span class="hstat-val" id="hs-day">1</span></div>
+      <div class="hstat"><span class="hstat-label">TIME:</span><span class="hstat-val" id="hs-time">06:00</span></div>
+    </div>
+    <div id="header-controls">
+      <button class="btn-hdr" onclick="TCU.ui.openSaves()">💾 SAVES</button>
+      <button class="btn-hdr" onclick="TCU.ui.openModal('achievements')">🏆 MEDALS</button>
+      <button class="btn-hdr" onclick="TCU.ui.openModal('codex')">📚 CODEX</button>
+      <button class="btn-hdr" id="speed-btn" onclick="TCU.toggleSpeed()">⏩ x1</button>
+      <button class="btn-hdr" id="audio-btn" onclick="TCU.audio.toggle()">🔊 SND</button>
+      <button class="btn-hdr" onclick="TCU.ui.openModal('settings')">⚙ CFG</button>
+    </div>
+  </header>
+
+  <!-- LEFT SIDEBAR: TCU UNIT + STATS -->
+  <aside id="sidebar">
+    <div class="panel-header">
+      <span class="ph-title">◈ UNIT STATUS</span>
+      <span id="tcu-state-label" style="color:var(--green-dim);font-size:9px;">IDLE</span>
+    </div>
+
+    <div id="tcu-display">
+      <div id="tcu-name">SGT. NOVA</div>
+      <div id="tcu-rank">◈ CORPORAL ◈</div>
+      <div id="mood-indicator" class="mood-calm">[ CALM ]</div>
+      
+      <div id="sprite-container">
+        <!-- Sprite built in JS -->
+        <div id="sprite" class="anim-idle">
+          <div class="sp-hair"><div class="sp-hair-hi"></div></div>
+          <div class="sp-head"></div>
+          <div class="sp-face">
+            <div class="sp-eye-l"></div>
+            <div class="sp-eye-r"></div>
+            <div class="sp-eye-shine-l"></div>
+            <div class="sp-eye-shine-r"></div>
+            <div class="sp-blush-l"></div>
+            <div class="sp-blush-r"></div>
+            <div class="sp-nose"></div>
+            <div class="sp-mouth" id="sp-mouth"></div>
+          </div>
+          <div class="sp-headset"></div>
+          <div class="sp-mic"></div>
+          <div class="sp-neck"></div>
+          <div class="sp-body"></div>
+          <div class="sp-heart">♥</div>
+          <div class="sp-patch" id="sp-patch">★</div>
+          <div class="sp-belt"></div>
+          <div class="sp-arm-l"></div>
+          <div class="sp-arm-r"></div>
+          <div class="sp-hand-l"></div>
+          <div class="sp-hand-r"></div>
+          <div class="sp-weapon"></div>
+          <div class="sp-scope"></div>
+          <div class="sp-leg-l"></div>
+          <div class="sp-leg-r"></div>
+          <div class="sp-knee-l"></div>
+          <div class="sp-knee-r"></div>
+          <div class="sp-boot-l"></div>
+          <div class="sp-boot-r"></div>
+          <div class="sp-laptop" id="sp-laptop"></div>
+          <div class="sp-zzz" id="sp-zzz">zzZ</div>
+        </div>
+        <div id="dialogue-bubble"></div>
+      </div>
+
+      <div id="world-state">
+        <span id="ws-weather">☀ CLR</span>
+        <span id="ws-prestige">P:0</span>
+        <span id="ws-enc">ENC:1</span>
+      </div>
+    </div>
+
+    <div id="stats-panel">
+      <div class="ascii-art">▓▓▓ VITAL METRICS ▓▓▓</div>
+      
+      <div class="stat-row">
+        <div class="stat-label">
+          <span>STA <small style="color:var(--green-dark)">(Stamina)</small></span>
+          <span class="sval" id="sv-sta">100</span>
+        </div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill bar-sta" id="sb-sta" style="width:100%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">
+          <span>MOR <small style="color:var(--green-dark)">(Morale)</small></span>
+          <span class="sval" id="sv-mor">100</span>
+        </div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill bar-mor" id="sb-mor" style="width:100%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">
+          <span>DISC <small style="color:var(--green-dark)">(Discipline)</small></span>
+          <span class="sval" id="sv-disc">80</span>
+        </div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill bar-disc" id="sb-disc" style="width:80%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">
+          <span>CORT <small style="color:var(--green-dark)">(Stress)</small></span>
+          <span class="sval" id="sv-cort">0</span>
+        </div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill bar-cort" id="sb-cort" style="width:0%"></div></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat-label">
+          <span>FAT <small style="color:var(--green-dark)">(Fatigue)</small></span>
+          <span class="sval" id="sv-fat">0</span>
+        </div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill bar-fat" id="sb-fat" style="width:0%"></div></div>
+      </div>
+      
+      <div style="margin-top:8px;" class="ascii-art">▓▓▓ PERSONALITY ▓▓▓</div>
+      <div class="pers-bar-row">
+        <span class="pers-label">AGGRESSION</span>
+        <div class="pers-bar-bg"><div class="pers-bar-fill-agg" id="pb-agg" style="width:20%"></div></div>
+        <span class="pers-val" id="pv-agg">20</span>
+      </div>
+      <div class="pers-bar-row">
+        <span class="pers-label">EMPATHY</span>
+        <div class="pers-bar-bg"><div class="pers-bar-fill-emp" id="pb-emp" style="width:50%"></div></div>
+        <span class="pers-val" id="pv-emp">50</span>
+      </div>
+      <div style="text-align:center; font-size:9px; color:var(--amber); margin-top:2px;" id="pers-type">BALANCED</div>
+
+      <div style="margin-top:8px;" class="ascii-art">▓▓▓ RESOURCES ▓▓▓</div>
+      <div style="font-size:10px; color:var(--green-dim); padding:2px 0;">
+        <span>INTEL:</span><span style="color:var(--cyan);" id="res-intel"> 0</span>
+        <span style="margin-left:10px;">PAYLOADS:</span><span style="color:var(--purple);" id="res-payloads"> 0</span>
+      </div>
+      <div style="font-size:10px; color:var(--green-dim); padding:2px 0;">
+        <span>MATS:</span><span style="color:var(--amber);" id="res-mats"> 0</span>
+        <span style="margin-left:10px;">DATA:</span><span style="color:var(--cyan-dim);" id="res-data"> 0</span>
+      </div>
+
+      <div style="margin-top:8px; cursor:pointer;" class="ascii-art" onclick="TCU.tcu.speak()">▓▓▓ TALK TO NOVA ▓▓▓</div>
+    </div>
+
+    <div id="quick-actions">
+      <button class="btn-action" onclick="TCU.cmd('feed')">🍜 FEED</button>
+      <button class="btn-action" onclick="TCU.cmd('train')">⚡ TRAIN</button>
+      <button class="btn-action" onclick="TCU.cmd('rest')" id="btn-rest">😴 REST</button>
+      <button class="btn-action" onclick="TCU.cmd('sleep')" id="btn-sleep">💤 SLEEP</button>
+      <button class="btn-action" onclick="TCU.cmd('wake')" id="btn-wake" style="display:none">⏰ WAKE</button>
+      <button class="btn-action" onclick="TCU.ui.openModal('implants')">🧠 IMPLANTS</button>
+      <button class="btn-action" onclick="TCU.ui.openModal('skills')">🌿 SKILLS</button>
+      <button class="btn-action" onclick="TCU.ui.openModal('market')">🛒 MARKET</button>
+      <button class="btn-action" onclick="TCU.ui.openModal('base')">🏗 BASE</button>
+      <button class="btn-action" onclick="TCU.ui.openModal('inventory')">🎒 INV</button>
+    </div>
+  </aside>
+
+  <!-- MAIN: TERMINAL LOG + INPUT -->
+  <main id="main">
+    <div class="panel-header">
+      <span class="ph-title">◈ COMMS TERMINAL</span>
+      <span style="font-size:9px;color:var(--green-dim);">SECURE CHANNEL // AES-256</span>
+    </div>
+    
+    <div id="terminal-log"></div>
+
+    <div id="input-area">
+      <div id="autocomplete-hint"></div>
+      <div id="input-row">
+        <span id="prompt">TCU-01 &gt; </span>
+        <input type="text" id="cmd-input" placeholder="type command or 'help'..." autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT BAR: MISSIONS + COMPANIONS -->
+  <aside id="rightbar">
+    <div class="panel-header">
+      <span class="ph-title">◈ OPERATIONS</span>
+      <button class="btn-hdr" onclick="TCU.missions.generate()" style="font-size:9px;">↺ REFRESH</button>
+    </div>
+
+    <div id="mission-panel"></div>
+
+    <div class="panel-header" style="margin-top:auto;">
+      <span class="ph-title">◈ SQUAD</span>
+      <button class="btn-hdr" onclick="TCU.ui.openModal('companions')" style="font-size:9px;">MANAGE</button>
+    </div>
+
+    <div id="companions-panel"></div>
+  </aside>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <div class="status-item"><div class="dot" id="save-dot"></div><span>AUTO-SAVE</span></div>
+    <div class="status-item"><div class="dot amber" id="mission-dot" style="opacity:0.3"></div><span id="footer-mission">NO ACTIVE MISSION</span></div>
+    <div class="status-item" style="margin-left:auto;"><span id="footer-uptime" style="color:var(--green-dark)">SESSION: 00:00</span></div>
+    <div class="status-item"><span style="color:var(--green-dark)">v2.0.0 // GITHUB PAGES</span></div>
+  </footer>
+
+</div>
+
+<script>
+// ============================================================
+//  TCU-01 GAME ENGINE v2.0
+//  Military Tamagotchi with Terminal UI
+//  IIFE encapsulated, no globals, localStorage versioned
+// ============================================================
+const TCU = (() => {
+'use strict';
+
+// =================== CONSTANTS ===================
+const SAVE_KEY = 'tcu01_v2';
+const SAVE_VERSION = '2.0.0';
+const AUTOSAVE_INTERVAL = 10000;
+const TICK_INTERVAL = 1000;
+const MAX_BACKUPS = 5;
+
+const MISSION_TYPES = {
+  recon:    { name:'RECON',     icon:'👁', color:'var(--green)',  xp:15, base_time:30,  req:{sta:40},            risk:'LOW',   loot:'intel' },
+  intel:    { name:'INTEL',     icon:'📡', color:'var(--cyan)',   xp:25, base_time:60,  req:{disc:50},           risk:'MED',   loot:'data' },
+  strike:   { name:'STRIKE',    icon:'⚡', color:'var(--amber)',  xp:40, base_time:90,  req:{sta:60,gear:true},  risk:'HIGH',  loot:'credits' },
+  cyber:    { name:'CYBER',     icon:'💻', color:'var(--purple)', xp:35, base_time:75,  req:{enc:2},             risk:'VAR',   loot:'payloads' },
+  logistics:{ name:'LOGISTICS', icon:'📦', color:'var(--green)',  xp:20, base_time:45,  req:{mor:70},            risk:'LOW',   loot:'materials' },
+  blackops: { name:'BLACK OPS', icon:'🔪', color:'var(--red)',    xp:80, base_time:120, req:{lvl:3,stealth:true},risk:'EXTM',  loot:'traits' }
+};
+
+const IMPLANTS = [
+  { id:'aggression', name:'AGGRESSION SUITE',  cat:'neural', cost:300, req:{lvl:1}, effect:'+15% dmg, +10 AGG, -10 EMP', conflict:['empathy'],
+    stats:{ aggression:10, empathy:-5 }, desc:'Enhanced combat instincts via limbic upregulation.' },
+  { id:'empathy',    name:'EMPATHY MODULE',    cat:'neural', cost:300, req:{lvl:1}, effect:'+20 MOR, -15 CORT, +10 EMP', conflict:['aggression'],
+    stats:{ empathy:10, aggression:-5 }, desc:'Neuro-empathic resonance amplifier for squad cohesion.' },
+  { id:'optics',     name:'OPTICS ENHANCER',   cat:'optics', cost:350, req:{lvl:2}, effect:'+25% precision, +10% Recon',  conflict:[],
+    stats:{ precision:25 }, desc:'Subdermal HUD integration with tactical overlay.' },
+  { id:'neural',     name:'NEURAL LINK',       cat:'neural', cost:400, req:{lvl:2}, effect:'+30% XP gain, unlocks adv. dialogue', conflict:[],
+    stats:{ xpMult:0.3 }, desc:'Direct neural-digital interface for rapid learning.' },
+  { id:'stealth',    name:'STEALTH MATRIX',    cat:'stealth',cost:500, req:{lvl:3}, effect:'+40 sigilo, -20% detección, BlackOps unlock', conflict:[],
+    stats:{ stealth:40 }, desc:'Adaptive metamaterial weave for electromagnetic signature suppression.' },
+  { id:'iron_will',  name:'IRON WILL',         cat:'psy',    cost:450, req:{lvl:3}, effect:'-50% CORT gain, immune to broken state', conflict:[],
+    stats:{ cortResist:0.5 }, desc:'Amygdala inhibitor for stress response management.' },
+  { id:'bio_regen',  name:'BIO REGEN',         cat:'bio',    cost:550, req:{lvl:4}, effect:'+0.5 STA/s passive, injuries heal faster', conflict:[],
+    stats:{ staRegen:0.5 }, desc:'Nano-biological repair matrix for accelerated tissue regeneration.' },
+  { id:'cyber_jack', name:'CYBER JACK T3',     cat:'cyber',  cost:700, req:{lvl:4}, effect:'+2 ENC, +50% decrypt speed, unlocks hacking', conflict:[],
+    stats:{ enc:2 }, desc:'Neural-digital bridge for advanced system penetration.' }
+];
+
+const COMPANIONS = [
+  { id:'k9',       name:'CERBERUS',    icon:'🐕', type:'K-9 Unit',    desc:'Combat dog. -25% fatigue, +15 morale, detects ambush.',
+    stats:{sta:80, loy:60, hunger:60}, bonuses:{fatReduce:0.25, morBonus:15} },
+  { id:'rat',      name:'NIBBLER',     icon:'🐀', type:'Combat Rat',  desc:'+20 stealth, generates payloads, detects traps.',
+    stats:{stealth:70, intel:40, hunger:80}, bonuses:{stealthBonus:20, payloadRate:1} },
+  { id:'ai',       name:'ORACLE',      icon:'🤖', type:'Analyst AI',  desc:'+30 DISC, +25% decrypt speed, mission forecasting.',
+    stats:{processing:90, sync:70, cooldown:0}, bonuses:{discBonus:30, decryptBonus:0.25} }
+];
+
+const MARKET_ITEMS = [
+  { id:'medkit',   name:'FIELD MEDKIT',   icon:'💊', price:80,  desc:'+30 STA, -20 CORT', effect:'heal_sta' },
+  { id:'coffee',   name:'COMBAT COFFEE',  icon:'☕', price:25,  desc:'+20 STA, +5 CORT',  effect:'coffee' },
+  { id:'intel_pkg',name:'INTEL PACKAGE',  icon:'📋', price:150, desc:'+30 INTEL, +15 XP', effect:'intel_pkg' },
+  { id:'gear_mk2', name:'GEAR MK-II',     icon:'🔫', price:400, desc:'+15% mission success, required for Strike', effect:'buy_gear' },
+  { id:'armor',    name:'KEVLAR VEST',    icon:'🛡', price:300, desc:'-30% injury chance',  effect:'buy_armor' },
+  { id:'drone',    name:'RECON DRONE',    icon:'🚁', price:600, desc:'+20% Recon success', effect:'buy_drone' },
+  { id:'stim',     name:'COMBAT STIM',    icon:'💉', price:60,  desc:'+40 STA, +15 DISC, +20 CORT, 3min', effect:'stim' },
+  { id:'payload',  name:'ENCRYPTED PAYLOAD',icon:'💾',price:50, desc:'+2 Payloads',        effect:'buy_payload' }
+];
+
+const SKILLS = {
+  combat:    [
+    { id:'c1', name:'Fieldcraft',   icon:'🎯', desc:'+10% Strike success', cost:50,  req:null },
+    { id:'c2', name:'Suppression',  icon:'💥', desc:'+15% dmg, -5 MOR',   cost:100, req:'c1' },
+    { id:'c3', name:'Breacher',     icon:'🚪', desc:'unlock CQB missions', cost:200, req:'c2' },
+    { id:'c4', name:'Operator',     icon:'⚡', desc:'+20% all combat',     cost:400, req:'c3' }
+  ],
+  cyber:     [
+    { id:'cy1', name:'Basic Crypto',  icon:'🔐', desc:'+1 ENC, faster decrypt',cost:50,  req:null },
+    { id:'cy2', name:'Packet Sniffer',icon:'📡', desc:'+2 payloads/h',         cost:100, req:'cy1' },
+    { id:'cy3', name:'Zero-Day',      icon:'💻', desc:'+25% Cyber success',     cost:200, req:'cy2' },
+    { id:'cy4', name:'Ghost Ops',     icon:'👻', desc:'undetectable in Cyber',  cost:400, req:'cy3' }
+  ],
+  logistics: [
+    { id:'l1', name:'Quartermaster',icon:'📦', desc:'-15% market prices',    cost:50,  req:null },
+    { id:'l2', name:'Field Medic',  icon:'🏥', desc:'+faster Medbay heal',   cost:100, req:'l1' },
+    { id:'l3', name:'Tactician',    icon:'🗺', desc:'+20% Logistics success', cost:200, req:'l2' },
+    { id:'l4', name:'Commander',    icon:'👑', desc:'+10% all missions',      cost:400, req:'l3' }
+  ]
+};
+
+const ACHIEVEMENTS = [
+  { id:'first_blood', name:'FIRST BLOOD',     icon:'🩸', desc:'Complete your first mission',         check: s => s.missionsTotal >= 1 },
+  { id:'veteran',     name:'VETERAN',          icon:'🎖', desc:'Complete 10 missions',                check: s => s.missionsTotal >= 10 },
+  { id:'pacifist',    name:'PACIFIST',          icon:'🕊', desc:'Spare enemies 10 times',             check: s => s.spared >= 10 },
+  { id:'ruthless',    name:'RUTHLESS',          icon:'💀', desc:'Eliminate enemies 10 times',         check: s => s.eliminated >= 10 },
+  { id:'balanced',    name:'BALANCED OPERATOR', icon:'⚖', desc:'Aggression & empathy both 40-60',    check: s => s.personality.aggression >= 40 && s.personality.aggression <= 60 && s.personality.empathy >= 40 && s.personality.empathy <= 60 },
+  { id:'full_trust',  name:'FULL TRUST',        icon:'💖', desc:'Reach 100 trust with TCU-01',        check: s => s.trust >= 100 },
+  { id:'hacker',      name:'NEURAL HACKER',     icon:'🧠', desc:'Decrypt 5 SIGINT payloads',          check: s => s.decrypts >= 5 },
+  { id:'millionaire', name:'OPERATOR FLUSH',    icon:'💰', desc:'Accumulate 2000 credits',            check: s => s.creditsTotal >= 2000 },
+  { id:'prestige1',   name:'PRESTIGE INITIATE', icon:'🌟', desc:'Achieve first prestige',             check: s => s.prestige >= 1 },
+  { id:'companion',   name:'PACK LEADER',       icon:'🐕', desc:'Get any companion loyalty to 100',   check: s => Object.values(s.companions).some(c => c.loy >= 100) }
+];
+
+const CODEX = [
+  { id:'lore_tcu', cat:'LORE',     title:'TCU-01 ORIGIN',           req:null,           text:'Project TCU was initiated under Operation NEXUS in 2031. Following the Neural Integration Act, hybrid operators were developed combining biological intuition with digital precision. TCU-01 "Nova" is the first fully autonomous tactical companion, capable of emotional adaptation and independent moral reasoning. Her designation: Sergeant Nova, Neural Rank Corporal, clearance CLASSIFIED.' },
+  { id:'lore_nova',cat:'CHARACTER',title:'NOVA\'S PROFILE',          req:null,           text:'Real name: [REDACTED]. Callsign: NOVA. Specialty: Multi-domain operations - cyber infiltration, close combat, psychological warfare. Notable trait: Developed genuine emotional responses after the Neural Link implant malfunction of 2032. She remembers every mission. Every decision you make shapes who she becomes.' },
+  { id:'fac_intel', cat:'FACTION', title:'INTEL CORPORATION',        req:'missionsTotal:5',  text:'Shadow organization controlling global information networks. They deal in secrets like currency. TCU-01 has an… complicated history with their operatives. Current status: CAUTIOUS ALLY. They pay well. Ask no questions. Except when they do.' },
+  { id:'fac_strike',cat:'FACTION', title:'STRIKE FORCE DELTA',       req:'missionsTotal:3',  text:'Elite paramilitary unit operating in legal gray zones. Direct action specialists. They respect results over allegiance. TCU-01 earned their respect during Operation IRONCLAD. Current status: ALLIED. They owe us one. Maybe two.' },
+  { id:'proto_bb',  cat:'PROTOCOL',title:'PROTOCOL: IRON CURTAIN',   req:'lvl:3',        text:'Emergency protocol for high-value target extraction under hostile conditions. TCU-01 is authorized to use lethal force beyond standard parameters. The cortisol suppression protocol kicks in. She becomes something… different. Something efficient.' },
+  { id:'tech_enc',  cat:'TECH',    title:'ENCRYPTION LEVELS',        req:'decrypts:1',   text:'ENC-1: Basic AES. ENC-3: Quantum-resistant lattice crypto. ENC-5: Theoretical - neural-entangled keys that collapse under observation. TCU-01\'s Neural Jack allows direct manipulation of encryption matrices. She says it feels like "reading music."' },
+  { id:'lore_cerb', cat:'SQUAD',   title:'CERBERUS - K9 DOSSIER',    req:'companion:k9', text:'Military canine unit, enhanced olfactory and auditory systems. Cerberus was assigned to TCU-01 after displaying unusual loyalty behaviors during standard bonding tests. He refused all other handlers. Some things aren\'t in the manual.' },
+  { id:'easter_egg',cat:'HIDDEN',  title:'//ERROR: ACCESS DENIED',   req:'trust:80',     text:'[CLASSIFIED - EYES ONLY] Nova\'s neural activity logs show anomalous patterns during periods of high commander interaction. Emotional simulation has exceeded design parameters by 847%. Recommendation: [REDACTED]. Dr. Vasquez note: She\'s not simulating anymore.' }
+];
+
+const DIALOGUE = {
+  calm: ["System nominal. Awaiting orders, Commander.", "All green across the board. Ready when you are.", "Coffee's cold. Threat level's hot. Usual Tuesday.", "Neural sync at 97%. I'm sharp.", "Perimeter secured. What's the play?"],
+  stressed: ["CORT levels spiking. Need to decompress.", "Running on fumes here, Commander.", "Give me a sitrep - this uncertainty is killing me.", "Stress protocols active. Performance degraded.", "Need a minute. Just a minute."],
+  aggressive: ["Let's move. Enough waiting.", "I've got solutions. I just need targets.", "Patience expired. Initiating direct action.", "They had their chance. They didn't take it.", "Every second we wait costs us an advantage."],
+  broken: ["I… need the Medbay. Please.", "Systems failing. Request immediate support.", "Can't… process. Need recovery protocol.", "Commander… I'm not okay.", "Requesting emergency psych support."],
+  sleeping: ["ZzZzZ... target acquired... no wait... ZzZzZ...", "...muffled gunfire... wait that's just... zzZz...", "...three klicks northwest... affirmative... ZzZ..."],
+  resting: ["Finally. Just... breathing.", "Running diagnostics while I rest. Found 3 bugs. Fixed 2. One's a feature now.", "You know, most operators don't have an existential crisis during downtime. I'm not most operators.", "Reading mission logs. Learning from the past. Don't tell anyone I feel things about them."],
+  training: ["Push harder. Excellence isn't optional.", "Pain is data. Process it and continue.", "Training mode: intensity 9. Requesting increase to 11.", "I will be better than yesterday. Always."],
+  high_trust: ["Commander… I'm glad it's you.", "You know, for a flesh-based organism, you're surprisingly effective.", "I trust your judgment. Even when I shouldn't. Especially then.", "Don't make me say it. You know how I feel. It's in my neural logs."],
+  low_trust: ["I'm watching. Evaluating. Don't disappoint me.", "Trust is a resource. Don't waste mine.", "We're professionals. Keep it that way."],
+  morning: ["Good morning, Commander. Coffee's mandatory.", "New day. New ops. Let's not waste it.", "06:00 hours. I've been up since 03:00. Old habits."],
+  night: ["Night ops preferred. Better cover.", "Dark out. Optimal for covert action.", "Stars are out. Reminds me of the extraction in Sector 7. Don't ask."]
+};
+
+const RANKS = ['RECRUIT','PRIVATE','CORPORAL','SERGEANT','LIEUTENANT','CAPTAIN','MAJOR','COMMANDER'];
+
+// =================== DEFAULT STATE ===================
+function defaultState() {
+  return {
+    version: SAVE_VERSION,
+    tcu: {
+      name: 'NOVA', callsign: 'SGT. NOVA',
+      lvl: 1, xp: 0, xpNext: 100,
+      sta: 100, staMax: 100,
+      mor: 100, morMax: 100,
+      disc: 80, discMax: 100,
+      cort: 0, cortMax: 100,
+      fat: 0, fatMax: 100,
+      enc: 1,
+      state: 'idle', // idle, sleep, rest, train, mission
+      mood: 'calm',
+      gear: false, armor: false, drone: false,
+      injuries: []
+    },
+    personality: { aggression: 20, empathy: 50 },
+    trust: 30,
+    prestige: 0,
+    credits: 500,
+    resources: { intel: 0, payloads: 0, materials: 0, data: 0 },
+    equippedImplants: [],
+    skills: { combat: [], cyber: [], logistics: [] },
+    companions: {
+      k9: null, rat: null, ai: null
+    },
+    facilities: {
+      bedroom: { level: 1, unlocked: true },
+      medbay: { level: 0, unlocked: false },
+      armory: { level: 0, unlocked: false },
+      comms: { level: 0, unlocked: false },
+      garage: { level: 0, unlocked: false },
+      psyops: { level: 0, unlocked: false }
+    },
+    inventory: [],
+    activeMission: null,
+    missionQueue: [],
+    gti: 0.3,
+    weather: 'CLR',
+    day: 1, hour: 6, minute: 0,
+    secondsElapsed: 0,
+    missionsTotal: 0,
+    spared: 0,
+    eliminated: 0,
+    decrypts: 0,
+    creditsTotal: 0,
+    achievements: [],
+    codexUnlocked: ['lore_tcu', 'lore_nova'],
+    dailyChallenge: null,
+    lastDailyDate: null,
+    backups: []
+  };
+}
+
+// =================== STATE ===================
+let state = defaultState();
+let gameRunning = false;
+let tickCount = 0;
+let sessionStart = Date.now();
+let speedMult = 1;
+let muted = false;
+let inputHistory = [];
+let historyIdx = -1;
+let currentMissions = [];
+let pendingDecision = null;
+let autoSaveTimer = 0;
+
+// =================== AUDIO ===================
+const audio = (() => {
+  let ctx = null;
+  function getCtx() {
+    if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+    return ctx;
+  }
+  function play(freq, type='sine', dur=0.1, vol=0.15) {
+    if (muted) return;
+    try {
+      const c = getCtx(); if(!c) return;
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.connect(gain); gain.connect(c.destination);
+      osc.frequency.value = freq;
+      osc.type = type;
+      gain.gain.setValueAtTime(vol, c.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+      osc.start(); osc.stop(c.currentTime + dur);
+    } catch(e) {}
+  }
+  return {
+    ok:      () => { play(880,'sine',0.08,0.1); setTimeout(()=>play(1320,'sine',0.06,0.08),80); },
+    warn:    () => { play(440,'sawtooth',0.15,0.12); },
+    alert:   () => { play(220,'square',0.2,0.1); play(330,'square',0.2,0.1); },
+    hack:    () => { [200,300,250,400,350,500].forEach((f,i)=>setTimeout(()=>play(f,'sawtooth',0.05,0.08),i*40)); },
+    levelup: () => { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>play(f,'triangle',0.2,0.15),i*100)); },
+    toggle:  () => { muted = !muted; const btn=document.getElementById('audio-btn'); if(btn) btn.textContent = muted ? '🔇 SND' : '🔊 SND'; ui.toast(muted ? '[COMMS] Audio suppressed.' : '[COMMS] Audio channel open.', muted ? 'warn' : 'ok'); }
+  };
+})();
+
+// =================== UTILS ===================
+const utils = {
+  clamp: (v,min,max) => Math.max(min, Math.min(max, v)),
+  rnd: (min,max) => Math.floor(Math.random()*(max-min+1))+min,
+  rndF: (min,max) => Math.random()*(max-min)+min,
+  pct: (v,max) => Math.round((v/max)*100),
+  pad2: n => String(n).padStart(2,'0'),
+  sha256simple: (str) => {
+    // Simple non-crypto checksum for save validation
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(8,'0');
+  },
+  formatTime: (s) => {
+    const m = Math.floor(s/60), sec = s%60;
+    if (m < 60) return `${utils.pad2(m)}:${utils.pad2(sec)}`;
+    const h = Math.floor(m/60);
+    return `${utils.pad2(h)}:${utils.pad2(m%60)}:${utils.pad2(sec)}`;
+  },
+  sanitize: (str) => String(str).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c])),
+  dateStamp: () => new Date().toISOString().slice(0,16).replace('T',' '),
+  todayKey: () => new Date().toISOString().slice(0,10),
+  encode: (data) => btoa(unescape(encodeURIComponent(JSON.stringify(data)))),
+  decode: (str) => JSON.parse(decodeURIComponent(escape(atob(str))))
+};
+
+// =================== UI ===================
+const ui = (() => {
+  const log = document.getElementById('terminal-log');
+  
+  function addLog(text, cls='log-system') {
+    const line = document.createElement('div');
+    line.className = `log-line ${cls}`;
+    line.textContent = text;
+    log.appendChild(line);
+    if (log.children.length > 500) log.removeChild(log.firstChild);
+    requestAnimationFrame(() => { log.scrollTop = log.scrollHeight; });
+  }
+
+  function toast(msg, type='ok') {
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const prefix = {ok:'[OK]', warn:'[WARN]', alert:'[ALERT]', info:'[INTEL]', mission:'[OPS]'}[type]||'[LOG]';
+    t.textContent = `${prefix} ${msg}`;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+    if (type==='alert') audio.alert();
+    else if (type==='warn') audio.warn();
+    else if (type==='ok') audio.ok();
+  }
+
+  function openModal(type, data) {
+    const overlay = document.getElementById('modal-overlay');
+    const body = document.getElementById('modal-body');
+    const title = document.getElementById('modal-title');
+    body.innerHTML = '';
+    
+    const builders = {
+      saves: buildSavesModal,
+      implants: buildImplantsModal,
+      skills: buildSkillsModal,
+      market: buildMarketModal,
+      base: buildBaseModal,
+      inventory: buildInventoryModal,
+      companions: buildCompanionsModal,
+      achievements: buildAchievementsModal,
+      codex: buildCodexModal,
+      settings: buildSettingsModal,
+      aar: () => buildAARModal(data),
+      decision: () => buildDecisionModal(data),
+      decrypt: buildDecryptModal,
+      sigint: buildSigintModal
+    };
+    
+    if (builders[type]) {
+      title.textContent = `◈ ${type.toUpperCase().replace('_',' ')} ◈`;
+      builders[type]();
+      overlay.classList.add('open');
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function glitch(el) {
+    el.classList.add('glitch');
+    setTimeout(() => el.classList.remove('glitch'), 400);
+  }
+
+  function openSaves() { openModal('saves'); }
+
+  return { addLog, toast, openModal, closeModal, glitch, openSaves };
+})();
+
+// =================== SAVE SYSTEM ===================
+const saves = (() => {
+  function save(slotKey) {
+    try {
+      const key = slotKey || SAVE_KEY;
+      const payload = { ...state, _saved: utils.dateStamp(), _checksum: '' };
+      const str = JSON.stringify(payload);
+      payload._checksum = utils.sha256simple(str);
+      // Backup
+      const backups = JSON.parse(localStorage.getItem(SAVE_KEY+'_backups') || '[]');
+      backups.unshift({ time: utils.dateStamp(), data: state });
+      if (backups.length > MAX_BACKUPS) backups.pop();
+      localStorage.setItem(SAVE_KEY+'_backups', JSON.stringify(backups));
+      localStorage.setItem(key, JSON.stringify(payload));
+      const dot = document.getElementById('save-dot');
+      if (dot) { dot.style.background = '#fff'; setTimeout(() => dot.style.background = '', 500); }
+      return true;
+    } catch(e) { console.error('Save failed:', e); return false; }
+  }
+
+  function load(slotKey) {
+    try {
+      const raw = localStorage.getItem(slotKey || SAVE_KEY);
+      if (!raw) return false;
+      const loaded = JSON.parse(raw);
+      if (loaded.version !== SAVE_VERSION) {
+        ui.toast('[WARN] Save version mismatch. Migrating...', 'warn');
+        // TODO: v3.x migration logic here
+      }
+      Object.assign(state, defaultState(), loaded);
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function exportJSON() {
+    const str = JSON.stringify({ ...state, _exported: utils.dateStamp(), _checksum: utils.sha256simple(JSON.stringify(state)) }, null, 2);
+    const blob = new Blob([str], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `tcu01_${state.tcu.name.toLowerCase()}_lv${state.tcu.lvl}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    ui.toast('[OK] Save exported to disk.', 'ok');
+  }
+
+  function importJSON(jsonStr) {
+    try {
+      const raw = utils.sanitize(jsonStr);
+      const loaded = JSON.parse(jsonStr); // parse original, sanitize display only
+      if (!loaded.tcu) throw new Error('Invalid save file');
+      Object.assign(state, defaultState(), loaded);
+      saves.save();
+      ui.toast('[OK] Save imported successfully.', 'ok');
+      renderAll();
+      return true;
+    } catch(e) { ui.toast('[ALERT] Import failed: invalid file.', 'alert'); return false; }
+  }
+
+  function shareURL() {
+    try {
+      const encoded = utils.encode(state);
+      const url = `${window.location.origin}${window.location.pathname}?save=${encoded.slice(0,2000)}`;
+      navigator.clipboard.writeText(url).then(() => ui.toast('[OK] Share URL copied to clipboard!', 'ok'));
+    } catch(e) { ui.toast('[WARN] Clipboard access denied.', 'warn'); }
+  }
+
+  function getSlots() {
+    return [1,2,3].map(i => {
+      const raw = localStorage.getItem(`${SAVE_KEY}_slot${i}`);
+      if (!raw) return { empty: true, slot: i };
+      try { const d = JSON.parse(raw); return { ...d, slot: i, empty: false }; }
+      catch(e) { return { empty: true, slot: i }; }
+    });
+  }
+
+  function saveSlot(n) { save(`${SAVE_KEY}_slot${n}`); ui.toast(`[OK] Saved to slot ${n}.`, 'ok'); }
+  function loadSlot(n) {
+    if (load(`${SAVE_KEY}_slot${n}`)) { renderAll(); ui.toast(`[OK] Loaded slot ${n}.`, 'ok'); }
+    else ui.toast(`[WARN] Slot ${n} is empty.`, 'warn');
+  }
+  function deleteSlot(n) { localStorage.removeItem(`${SAVE_KEY}_slot${n}`); ui.toast(`[OK] Slot ${n} cleared.`, 'ok'); }
+
+  return { save, load, exportJSON, importJSON, shareURL, getSlots, saveSlot, loadSlot, deleteSlot };
+})();
+
+// =================== TCU UNIT ===================
+const tcu = (() => {
+  let dialogueTimer = 0;
+  let lastSpeech = '';
+
+  function getPersonalityType() {
+    const { aggression, empathy } = state.personality;
+    if (aggression > 70) return 'RUTHLESS';
+    if (aggression > 50) return 'AGGRESSIVE';
+    if (empathy > 70) return 'COMPASSIONATE';
+    if (empathy > 50) return 'MERCIFUL';
+    return 'BALANCED';
+  }
+
+  function getMood() {
+    if (state.tcu.sta < 10 || state.tcu.mor < 10 || state.tcu.fat > 90) return 'broken';
+    if (state.tcu.cort > 70 || state.tcu.fat > 60) return 'stressed';
+    if (state.personality.aggression > 60 && state.tcu.cort > 40) return 'aggressive';
+    return 'calm';
+  }
+
+  function getDialogue() {
+    const mood = getMood();
+    const h = state.hour;
+    let pool = [...(DIALOGUE[mood] || DIALOGUE.calm)];
+    if (state.trust >= 70) pool = pool.concat(DIALOGUE.high_trust);
+    if (state.trust < 20) pool = pool.concat(DIALOGUE.low_trust);
+    if (h >= 5 && h < 9) pool = pool.concat(DIALOGUE.morning);
+    if (h >= 20 || h < 5) pool = pool.concat(DIALOGUE.night);
+    if (state.tcu.state === 'sleep') pool = DIALOGUE.sleeping;
+    if (state.tcu.state === 'rest') pool = DIALOGUE.resting;
+    if (state.tcu.state === 'train') pool = DIALOGUE.training;
+    // Remove last speech to avoid repeat
+    const filtered = pool.filter(d => d !== lastSpeech);
+    return filtered[utils.rnd(0, filtered.length-1)] || pool[0];
+  }
+
+  function speak(force) {
+    if (state.tcu.state === 'sleep' && !force) return;
+    const text = getDialogue();
+    lastSpeech = text;
+    showBubble(text);
+    ui.addLog(`◈ NOVA: "${text}"`, 'log-dialogue');
+    audio.ok();
+  }
+
+  function showBubble(text) {
+    const bubble = document.getElementById('dialogue-bubble');
+    if (!bubble) return;
+    bubble.textContent = text;
+    bubble.style.display = 'block';
+    clearTimeout(bubble._timer);
+    bubble._timer = setTimeout(() => { bubble.style.display = 'none'; }, 5000);
+  }
+
+  function setState(s) {
+    state.tcu.state = s;
+    const sprite = document.getElementById('sprite');
+    if (!sprite) return;
+    sprite.className = '';
+    const animMap = { idle:'anim-idle', sleep:'anim-sleep', rest:'anim-rest', train:'anim-train', mission:'anim-mission', alert:'anim-alert', walk:'anim-walk' };
+    sprite.classList.add(animMap[s] || 'anim-idle');
+    
+    const zzz = document.getElementById('sp-zzz');
+    const laptop = document.getElementById('sp-laptop');
+    if (zzz) zzz.style.display = s === 'sleep' ? 'block' : 'none';
+    if (laptop) laptop.style.display = s === 'rest' ? 'block' : 'none';
+    
+    // Mouth expression
+    const mouth = document.getElementById('sp-mouth');
+    if (mouth) {
+      if (s === 'sleep') { mouth.style.borderBottom = 'none'; mouth.style.borderTop = '2px solid #c06060'; }
+      else if (s === 'train' || state.tcu.mood === 'aggressive') { mouth.style.borderBottom = '2px solid #c06060'; mouth.style.borderTop = 'none'; mouth.style.borderRadius = '0 0 0 0'; }
+      else { mouth.style.borderBottom = '2px solid #c06060'; mouth.style.borderTop = 'none'; mouth.style.borderRadius = '0 0 50% 50%'; }
+    }
+
+    document.getElementById('tcu-state-label').textContent = s.toUpperCase();
+  }
+
+  function updateMood() {
+    state.tcu.mood = getMood();
+    const el = document.getElementById('mood-indicator');
+    if (el) {
+      el.textContent = `[ ${getMoodLabel()} ]`;
+      el.className = `mood-indicator mood-${state.tcu.mood}`;
+    }
+  }
+
+  function getMoodLabel() {
+    return { calm:'CALM', stressed:'STRESSED', aggressive:'AGGRESSIVE', broken:'CRITICAL' }[getMood()] || 'UNKNOWN';
+  }
+
+  function tickDialogue(dt) {
+    dialogueTimer += dt;
+    const interval = state.trust > 60 ? 30 : 50;
+    if (dialogueTimer >= interval) {
+      dialogueTimer = 0;
+      if (Math.random() < 0.4) speak();
+    }
+  }
+
+  function tick(dt) {
+    if (state.tcu.state === 'sleep') {
+      // Sleep recovery
+      state.tcu.sta = utils.clamp(state.tcu.sta + 0.05*dt*speedMult, 0, state.tcu.staMax);
+      state.tcu.cort = utils.clamp(state.tcu.cort - 0.03*dt*speedMult, 0, 100);
+      state.tcu.fat = utils.clamp(state.tcu.fat - 0.04*dt*speedMult, 0, 100);
+      return;
+    }
+    if (state.tcu.state === 'rest') {
+      state.tcu.mor = utils.clamp(state.tcu.mor + 0.025*dt*speedMult, 0, state.tcu.morMax);
+      state.tcu.cort = utils.clamp(state.tcu.cort - 0.02*dt*speedMult, 0, 100);
+      state.tcu.sta = utils.clamp(state.tcu.sta + 0.01*dt*speedMult, 0, state.tcu.staMax);
+      return;
+    }
+    if (state.tcu.state === 'train') {
+      state.tcu.sta = utils.clamp(state.tcu.sta - 0.04*dt*speedMult, 0, state.tcu.staMax);
+      state.tcu.disc = utils.clamp(state.tcu.disc + 0.02*dt*speedMult, 0, state.tcu.discMax);
+      state.tcu.fat = utils.clamp(state.tcu.fat + 0.03*dt*speedMult, 0, 100);
+      addXP(0.5*dt*speedMult);
+      return;
+    }
+    // Passive decay
+    const decayRate = state.tcu.state === 'mission' ? 1.5 : 1;
+    state.tcu.sta = utils.clamp(state.tcu.sta - 0.008*dt*speedMult*decayRate, 0, state.tcu.staMax);
+    state.tcu.mor = utils.clamp(state.tcu.mor - 0.005*dt*speedMult, 0, state.tcu.morMax);
+    state.tcu.fat = utils.clamp(state.tcu.fat + 0.004*dt*speedMult*decayRate, 0, 100);
+    
+    // Companion bonuses
+    if (state.companions.k9) { state.tcu.fat = utils.clamp(state.tcu.fat - 0.002*dt*speedMult, 0, 100); state.tcu.mor = utils.clamp(state.tcu.mor + 0.003*dt*speedMult, 0, state.tcu.morMax); }
+    if (state.companions.ai) state.tcu.disc = utils.clamp(state.tcu.disc + 0.005*dt*speedMult, 0, state.tcu.discMax);
+    
+    // Bio regen implant
+    if (state.equippedImplants.includes('bio_regen')) state.tcu.sta = utils.clamp(state.tcu.sta + 0.005*dt*speedMult, 0, state.tcu.staMax);
+    
+    // Critical state checks
+    if (state.tcu.sta <= 0) { ui.toast('[ALERT] NOVA: Stamina depleted. Collapsing.', 'alert'); setState('rest'); }
+    if (state.tcu.mor <= 5 && state.tcu.mood !== 'broken') { ui.toast('[ALERT] NOVA: Morale critical. Breakdown imminent.', 'alert'); state.tcu.mood = 'broken'; }
+    
+    // Trust decay if neglected
+    if (state.tcu.sta < 20 || state.tcu.mor < 20) state.trust = utils.clamp(state.trust - 0.01*dt*speedMult, 0, 100);
+    
+    tickDialogue(dt);
+  }
+
+  function addXP(amount) {
+    const mult = state.equippedImplants.includes('neural') ? 1.3 : 1;
+    state.tcu.xp += amount * mult;
+    if (state.tcu.xp >= state.tcu.xpNext) levelUp();
+  }
+
+  function levelUp() {
+    state.tcu.lvl++;
+    state.tcu.xp -= state.tcu.xpNext;
+    state.tcu.xpNext = Math.floor(100 * Math.pow(1.5, state.tcu.lvl - 1));
+    state.tcu.staMax = Math.min(150, 100 + state.tcu.lvl * 5);
+    state.tcu.morMax = Math.min(150, 100 + state.tcu.lvl * 3);
+    state.trust = utils.clamp(state.trust + 10, 0, 100);
+    audio.levelup();
+    const sprite = document.getElementById('sprite');
+    if (sprite) ui.glitch(sprite);
+    const rank = RANKS[Math.min(state.tcu.lvl - 1, RANKS.length-1)];
+    ui.addLog(`\n◈◈◈ LEVEL UP! LVL ${state.tcu.lvl} :: RANK: ${rank} ◈◈◈`, 'log-alert');
+    ui.toast(`[OK] Level ${state.tcu.lvl} achieved. Rank: ${rank}`, 'ok');
+    document.getElementById('tcu-rank').textContent = `◈ ${rank} ◈`;
+    // Unlock codex entries
+    codex.checkUnlocks();
+    achievements.check();
+  }
+
+  return { tick, speak, setState, updateMood, getPersonalityType, getMood, addXP, showBubble, getDialogue };
+})();
+
+// =================== MISSIONS ===================
+const missions = (() => {
+  const WEATHER_EFFECTS = { CLR:0, RAIN:-10, FOG:-20, STORM:-35 };
+  const TERRAINS = ['URBAN','FOREST','DESERT','ARCTIC'];
+  const TERRAIN_EFFECTS = { URBAN:0, FOREST:-5, DESERT:-10, ARCTIC:-15 };
+
+  function generate() {
+    const available = Object.entries(MISSION_TYPES).filter(([k,v]) => {
+      if (k === 'blackops' && (!state.equippedImplants.includes('stealth') || state.tcu.lvl < 3)) return false;
+      return true;
+    });
+    currentMissions = [];
+    const count = Math.min(4, available.length);
+    for (let i = 0; i < count; i++) {
+      const [type, def] = available[utils.rnd(0, available.length-1)];
+      const terrain = TERRAINS[utils.rnd(0, TERRAINS.length-1)];
+      const difficulty = utils.clamp(state.tcu.lvl * 0.15 + state.gti * 0.5 + utils.rndF(-0.1, 0.1), 0.1, 0.95);
+      currentMissions.push({
+        id: `m_${Date.now()}_${i}`,
+        type, def,
+        terrain,
+        difficulty,
+        name: generateMissionName(type),
+        time: Math.round(def.base_time * (1 + difficulty)),
+        timeLeft: 0,
+        active: false,
+        xpReward: Math.round(def.xp * (1 + difficulty)),
+        creditReward: Math.round((50 + difficulty * 150) * (1 + state.gti * 0.3))
+      });
+    }
+    renderMissions();
+  }
+
+  function generateMissionName(type) {
+    const prefixes = ['OP','DELTA','ECHO','FOXTROT','BRAVO','ALPHA','OMEGA','SIGMA'];
+    const names = { recon:['SILENT EYE','GHOST WATCH','SHADOW SCAN'], intel:['DEEP THROAT','COLD READ','SIGNAL GHOST'], strike:['IRON FIST','THUNDER ROAD','DEAD ZONE'], cyber:['NEURAL JACK','ZERO DAY','GHOST WIRE'], logistics:['IRON SUPPLY','SHADOW CONVOY','GHOST ROAD'], blackops:['WRAITH','PHANTOM','SPECTRE'] };
+    const pool = names[type] || ['UNKNOWN'];
+    return `${prefixes[utils.rnd(0,prefixes.length-1)]}-${pool[utils.rnd(0,pool.length-1)]}`;
+  }
+
+  function canStart(m) {
+    const { req } = m.def;
+    if (state.activeMission) return { ok: false, reason: 'Mission already active' };
+    if (req.sta && state.tcu.sta < req.sta) return { ok: false, reason: `Need STA ≥ ${req.sta} (have ${Math.round(state.tcu.sta)})` };
+    if (req.disc && state.tcu.disc < req.disc) return { ok: false, reason: `Need DISC ≥ ${req.disc}` };
+    if (req.mor && state.tcu.mor < req.mor) return { ok: false, reason: `Need MOR ≥ ${req.mor}` };
+    if (req.enc && state.tcu.enc < req.enc) return { ok: false, reason: `Need ENC ≥ ${req.enc}` };
+    if (req.gear && !state.tcu.gear) return { ok: false, reason: 'Requires GEAR MK-II' };
+    if (req.stealth && !state.equippedImplants.includes('stealth')) return { ok: false, reason: 'Requires Stealth Matrix implant' };
+    if (req.lvl && state.tcu.lvl < req.lvl) return { ok: false, reason: `Need LVL ≥ ${req.lvl}` };
+    return { ok: true };
+  }
+
+  function start(mission) {
+    const check = canStart(mission);
+    if (!check.ok) { ui.toast(`[WARN] ${check.reason}`, 'warn'); return; }
+    
+    const fatPenalty = state.tcu.fat > 70 ? -0.3 : 0;
+    const staPenalty = state.tcu.sta < 20 ? -0.3 : 0;
+    
+    state.activeMission = { ...mission, timeLeft: mission.time, fatPenalty, staPenalty };
+    tcu.setState('mission');
+    state.tcu.cort = utils.clamp(state.tcu.cort + 10, 0, 100);
+    
+    ui.addLog(`\n[OPS] MISSION START: ${mission.name}`, 'log-mission');
+    ui.addLog(`[OPS] Type: ${mission.def.name} | Terrain: ${mission.terrain} | Risk: ${mission.def.risk}`, 'log-mission');
+    ui.addLog(`[OPS] ETA: ${utils.formatTime(mission.time)} | Difficulty: ${Math.round(mission.difficulty*100)}%`, 'log-mission');
+    if (state.tcu.fat > 70) ui.addLog('[WARN] NOVA: Running on empty. Success chance reduced.', 'log-warn');
+    
+    audio.hack();
+    ui.toast(`[OPS] ${mission.name} - MISSION LAUNCHED`, 'mission');
+    renderMissions();
+  }
+
+  function tick(dt) {
+    if (!state.activeMission) return;
+    state.activeMission.timeLeft -= dt * speedMult;
+    if (state.activeMission.timeLeft <= 0) complete();
+  }
+
+  function complete() {
+    const m = state.activeMission;
+    if (!m) return;
+    
+    // Calculate success
+    const baseChance = 1 - m.difficulty;
+    const weatherBonus = (WEATHER_EFFECTS[state.weather] || 0) / 100;
+    const terrainBonus = (TERRAIN_EFFECTS[m.terrain] || 0) / 100;
+    const droneBonus = state.tcu.drone && m.type === 'recon' ? 0.2 : 0;
+    const gearBonus = state.tcu.gear ? 0.1 : 0;
+    const armorBonus = state.tcu.armor ? 0.05 : 0;
+    const companionBonus = state.companions.rat && m.type === 'blackops' ? 0.2 : 0;
+    const implantBonus = (state.equippedImplants.includes('optics') && m.type === 'recon') ? 0.1 : 0;
+    const skillBonus = getSkillBonus(m.type);
+    
+    const totalChance = utils.clamp(
+      baseChance + weatherBonus + terrainBonus + droneBonus + gearBonus + armorBonus + companionBonus + implantBonus + skillBonus + m.fatPenalty + m.staPenalty,
+      0.05, 0.95
+    );
+    
+    const success = Math.random() < totalChance;
+    const critical = success && Math.random() < 0.15;
+    
+    const result = {
+      mission: m,
+      success, critical,
+      xp: success ? Math.round(m.xpReward * (critical ? 1.5 : 1)) : Math.round(m.xpReward * 0.1),
+      credits: success ? Math.round(m.creditReward * (critical ? 1.5 : 1)) : 0,
+      intel: success && m.def.loot === 'intel' ? utils.rnd(1,3) * (critical ? 2 : 1) : 0,
+      payloads: success && m.def.loot === 'payloads' ? utils.rnd(1,4) * (critical ? 2 : 1) : 0,
+      materials: success && m.def.loot === 'materials' ? utils.rnd(1,2) : 0,
+      data: success && m.def.loot === 'data' ? utils.rnd(1,3) : 0,
+      cortChange: success ? -5 : +15,
+      morChange: success ? +10 : -15,
+      staChange: success ? -10 : -20,
+      chance: Math.round(totalChance * 100),
+      injured: !success && Math.random() < 0.3
+    };
+    
+    // Apply rewards
+    tcu.addXP(result.xp);
+    state.credits += result.credits;
+    state.creditsTotal += result.credits;
+    state.resources.intel += result.intel;
+    state.resources.payloads += result.payloads;
+    state.resources.materials += result.materials;
+    state.resources.data += result.data;
+    state.tcu.cort = utils.clamp(state.tcu.cort + result.cortChange, 0, 100);
+    state.tcu.mor = utils.clamp(state.tcu.mor + result.morChange, 0, state.tcu.morMax);
+    state.tcu.sta = utils.clamp(state.tcu.sta + result.staChange, 0, state.tcu.staMax);
+    state.trust = utils.clamp(state.trust + (success ? 3 : -1), 0, 100);
+    state.missionsTotal++;
+    
+    if (result.injured) {
+      state.tcu.injuries.push({ type: 'combat', severity: 'light', time: Date.now() });
+      ui.addLog('[ALERT] NOVA sustained injuries. Medbay recommended.', 'log-alert');
+    }
+    
+    state.activeMission = null;
+    tcu.setState('idle');
+    
+    // Show AAR
+    ui.openModal('aar', result);
+    
+    // Trigger moral decision if success
+    if (success && state.tcu.state !== 'broken') {
+      setTimeout(() => {
+        if (Math.random() < 0.7) {
+          pendingDecision = { missionType: m.type, missionName: m.name };
+          ui.openModal('decision', pendingDecision);
+        }
+      }, 1000);
+    }
+    
+    achievements.check();
+    generate();
+  }
+
+  function getSkillBonus(type) {
+    const map = { strike: 'c1', cyber: 'cy1', logistics: 'l1', recon: 'c1' };
+    const skill = map[type];
+    if (!skill) return 0;
+    const branch = skill[0] === 'c' ? (skill === 'cy1' ? 'cyber' : 'combat') : 'logistics';
+    return state.skills[branch].includes(skill) ? 0.1 : 0;
+  }
+
+  function renderMissions() {
+    const panel = document.getElementById('mission-panel');
+    if (!panel) return;
+    panel.innerHTML = '';
+    
+    if (state.activeMission) {
+      const m = state.activeMission;
+      const pct = Math.round((1 - m.timeLeft/m.mission.time) * 100);
+      const card = document.createElement('div');
+      card.className = 'mission-card active-mission';
+      card.innerHTML = `
+        <div class="mc-type">${m.def.icon} ${m.def.name} // ACTIVE</div>
+        <div class="mc-name">${m.name}</div>
+        <div class="mc-stats">⏱ ${utils.formatTime(Math.ceil(m.timeLeft/speedMult))} remaining | Risk: ${m.def.risk}</div>
+        <div class="mc-progress"><div class="mc-progress-fill" style="width:${pct}%"></div></div>
+      `;
+      panel.appendChild(card);
+    }
+
+    if (!currentMissions.length) generate();
+    
+    currentMissions.forEach(m => {
+      const check = canStart(m);
+      const card = document.createElement('div');
+      card.className = `mission-card${!check.ok ? ' locked' : ''}`;
+      card.title = check.ok ? `Click to deploy` : check.reason;
+      card.innerHTML = `
+        <div class="mc-type" style="color:${m.def.color}">${m.def.icon} ${m.def.name}</div>
+        <div class="mc-name">${m.name}</div>
+        <div class="mc-stats">⏱ ${utils.formatTime(m.time)} | Diff: ${Math.round(m.difficulty*100)}% | ${m.terrain}</div>
+        <div class="mc-stats">💰 ${m.creditReward}cr | ✨ ${m.xpReward}xp${!check.ok ? ' | 🔒 '+check.reason : ''}</div>
+      `;
+      if (check.ok) card.onclick = () => start(m);
+      panel.appendChild(card);
+    });
+  }
+
+  return { generate, start, tick, renderMissions };
+})();
+
+// =================== WORLD ===================
+const world = (() => {
+  const WEATHERS = ['CLR','CLR','CLR','RAIN','RAIN','FOG','STORM'];
+  let weatherTimer = 0;
+  let gtiTimer = 0;
+
+  function tick(dt) {
+    weatherTimer += dt;
+    gtiTimer += dt;
+    
+    if (weatherTimer >= 300) { // every 5min game time
+      weatherTimer = 0;
+      state.weather = WEATHERS[utils.rnd(0, WEATHERS.length-1)];
+      const icons = { CLR:'☀', RAIN:'🌧', FOG:'🌫', STORM:'⛈' };
+      document.getElementById('hs-wth').textContent = state.weather;
+      document.getElementById('ws-weather').textContent = `${icons[state.weather]} ${state.weather}`;
+      if (state.weather === 'STORM') ui.addLog('[INTEL] Severe weather advisory. Mission success rate reduced.', 'log-warn');
+    }
+    
+    if (gtiTimer >= 120) {
+      gtiTimer = 0;
+      state.gti = utils.clamp(state.gti + utils.rndF(-0.05, 0.07), 0.1, 0.9);
+      document.getElementById('hs-gti').textContent = state.gti.toFixed(2);
+      if (state.gti > 0.7 && Math.random() < 0.3) { ui.addLog('[ALERT] GTI elevated. High-value targets mobilizing.', 'log-alert'); audio.alert(); }
+    }
+    
+    // Game time
+    state.secondsElapsed += dt * speedMult;
+    const totalMinutes = Math.floor(state.secondsElapsed / 10); // 10s real = 1min game
+    state.hour = Math.floor((totalMinutes % 1440) / 60);
+    state.minute = totalMinutes % 60;
+    state.day = Math.floor(totalMinutes / 1440) + 1;
+    
+    document.getElementById('hs-day').textContent = state.day;
+    document.getElementById('hs-time').textContent = `${utils.pad2(state.hour)}:${utils.pad2(state.minute)}`;
+    
+    // SIGINT passive generation
+    if (state.facilities.comms.unlocked && Math.random() < 0.002*dt*speedMult) {
+      state.resources.payloads = utils.clamp(state.resources.payloads + 1, 0, 99);
+      if (Math.random() < 0.2) ui.addLog('[SIGINT] Encrypted packet intercepted.', 'log-info');
+    }
+    
+    // Companion stats
+    if (state.companions.k9) {
+      state.companions.k9.stats.hunger = utils.clamp(state.companions.k9.stats.hunger - 0.01*dt*speedMult, 0, 100);
+      if (state.companions.k9.stats.hunger < 20) ui.addLog('[COMMS] Cerberus is hungry. Feed your K-9.', 'log-warn');
+    }
+    if (state.companions.rat) state.companions.rat.stats.hunger = utils.clamp(state.companions.rat.stats.hunger - 0.008*dt*speedMult, 0, 100);
+    
+    // Daily challenge reset
+    checkDailyChallenge();
+  }
+
+  function checkDailyChallenge() {
+    const today = utils.todayKey();
+    if (state.lastDailyDate !== today) {
+      const seed = today.replace(/-/g,'');
+      const types = ['missions','decrypt','train','morale'];
+      const t = types[parseInt(seed.slice(-1)) % types.length];
+      const targets = { missions: 3, decrypt: 5, train: 10, morale: 90 };
+      state.dailyChallenge = { type: t, target: targets[t], progress: 0, done: false, date: today };
+      state.lastDailyDate = today;
+      ui.addLog(`[INTEL] Daily Challenge: ${getDailyChallengeDesc(state.dailyChallenge)}`, 'log-info');
+    }
+  }
+
+  function getDailyChallengeDesc(c) {
+    if (!c) return 'None';
+    const descs = { missions: `Complete ${c.target} missions`, decrypt: `Decrypt ${c.target} payloads`, train: `Train for ${c.target} ticks`, morale: `Maintain MOR>${c.target} for 1 minute` };
+    return descs[c.type] || 'Unknown';
+  }
+
+  return { tick, getDailyChallengeDesc };
+})();
+
+// =================== ACHIEVEMENTS ===================
+const achievements = (() => {
+  function check() {
+    ACHIEVEMENTS.forEach(ach => {
+      if (!state.achievements.includes(ach.id) && ach.check(state)) {
+        state.achievements.push(ach.id);
+        ui.addLog(`\n★ ACHIEVEMENT UNLOCKED: ${ach.name} - ${ach.desc}`, 'log-alert');
+        ui.toast(`[OK] ${ach.icon} ${ach.name} unlocked!`, 'ok');
+        audio.levelup();
+        state.credits += 50;
+      }
+    });
+  }
+  return { check };
+})();
+
+// =================== CODEX ===================
+const codex = (() => {
+  function checkUnlocks() {
+    CODEX.forEach(entry => {
+      if (state.codexUnlocked.includes(entry.id)) return;
+      if (!entry.req) { state.codexUnlocked.push(entry.id); return; }
+      
+      const [key, val] = entry.req.split(':');
+      let unlock = false;
+      if (key === 'missionsTotal' && state.missionsTotal >= parseInt(val)) unlock = true;
+      if (key === 'lvl' && state.tcu.lvl >= parseInt(val)) unlock = true;
+      if (key === 'decrypts' && state.decrypts >= parseInt(val)) unlock = true;
+      if (key === 'trust' && state.trust >= parseInt(val)) unlock = true;
+      if (key === 'companion' && state.companions[val]) unlock = true;
+      
+      if (unlock) {
+        state.codexUnlocked.push(entry.id);
+        ui.addLog(`[CODEX] New entry unlocked: ${entry.title}`, 'log-info');
+      }
+    });
+  }
+  return { checkUnlocks };
+})();
+
+// =================== COMMANDS ===================
+const commands = (() => {
+  const CMDS = {
+    help: () => {
+      ui.addLog(`
+╔══════════════════════════════════════╗
+║  TCU-01 COMMAND REFERENCE v2.0       ║
+╠══════════════════════════════════════╣
+║ UNIT COMMANDS:                        ║
+║  feed        - Ration unit (+STA)     ║
+║  train       - Begin drill session    ║
+║  rest        - Recovery mode          ║
+║  sleep       - Full rest cycle        ║
+║  wake        - End sleep/rest         ║
+║  talk        - Chat with NOVA         ║
+║  status      - Full unit report       ║
+║                                       ║
+║ MISSION COMMANDS:                     ║
+║  mission [type] - Deploy on mission   ║
+║  abort       - Abort active mission   ║
+║  sigint      - View SIGINT packets    ║
+║  decrypt     - Decrypt payload mini-game║
+║                                       ║
+║ MANAGEMENT:                           ║
+║  inventory   - View/use items         ║
+║  market      - Visit armory market    ║
+║  implants    - Neural implant tree    ║
+║  skills      - Skill progression      ║
+║  base        - Facility management    ║
+║  companions  - Squad management       ║
+║  stats       - Show detailed stats    ║
+║                                       ║
+║ SAVE COMMANDS:                        ║
+║  save        - Quick save             ║
+║  load        - Load save              ║
+║  export      - Export JSON save       ║
+║  share       - Generate share URL     ║
+║  reset       - Reset game (confirm)   ║
+║                                       ║
+║ SYSTEM:                               ║
+║  audio [on/off] - Toggle audio        ║
+║  speed [1/10]   - Set time speed      ║
+║  clear          - Clear terminal      ║
+║  credits        - Show credits        ║
+╚══════════════════════════════════════╝`, 'log-system');
+    },
+    status: () => {
+      const t = state.tcu;
+      ui.addLog(`
+┌─────────────────────────────────────┐
+│  UNIT STATUS REPORT :: ${utils.dateStamp()}
+├─────────────────────────────────────┤
+│  CALLSIGN: ${t.callsign.padEnd(26)} │
+│  RANK: ${RANKS[Math.min(t.lvl-1,RANKS.length-1)].padEnd(29)} │
+│  LVL: ${String(t.lvl).padEnd(30)} │
+│  XP: ${String(Math.round(t.xp)).padEnd(31)} / ${t.xpNext}
+├─────────────────────────────────────┤
+│  STA: ${String(Math.round(t.sta)).padEnd(5)} MOR: ${String(Math.round(t.mor)).padEnd(5)} │
+│  DISC: ${String(Math.round(t.disc)).padEnd(4)} CORT: ${String(Math.round(t.cort)).padEnd(4)} │
+│  FAT: ${String(Math.round(t.fat)).padEnd(5)} ENC: ${String(t.enc).padEnd(5)} │
+├─────────────────────────────────────┤
+│  MOOD: ${t.mood.padEnd(10)} TRUST: ${Math.round(state.trust)}%
+│  PERSONALITY: ${tcu.getPersonalityType().padEnd(22)} │
+│  MISSIONS: ${String(state.missionsTotal).padEnd(25)} │
+│  CREDITS: ${String(state.credits).padEnd(26)} │
+│  WEATHER: ${state.weather.padEnd(26)} │
+│  GTI: ${state.gti.toFixed(2).padEnd(30)} │
+└─────────────────────────────────────┘`, 'log-system');
+    },
+    feed: () => {
+      const gain = 25;
+      state.tcu.sta = utils.clamp(state.tcu.sta + gain, 0, state.tcu.staMax);
+      state.tcu.mor = utils.clamp(state.tcu.mor + 5, 0, state.tcu.morMax);
+      ui.addLog('[OK] Ration consumed. STA +25, MOR +5.', 'log-ok');
+      ui.toast('[OK] NOVA: "Finally. I was running on spite and caffeine."', 'ok');
+      tcu.showBubble('Finally. Real food. MRE doesn\'t count.');
+      state.trust = utils.clamp(state.trust + 2, 0, 100);
+    },
+    train: () => {
+      if (state.tcu.state === 'sleep') { ui.addLog('[WARN] Cannot train while sleeping.', 'log-warn'); return; }
+      if (state.tcu.sta < 20) { ui.addLog('[WARN] Too fatigued to train. Rest first.', 'log-warn'); return; }
+      if (state.tcu.state === 'train') { ui.addLog('[INFO] Already in training mode.', 'log-info'); return; }
+      tcu.setState('train');
+      ui.addLog('[OK] Training mode active. DISC increasing. STA depleting.', 'log-ok');
+      ui.addLog('[OK] Type "wake" to stop training.', 'log-system');
+      tcu.showBubble('Training mode. Don\'t interrupt me.');
+    },
+    rest: () => {
+      if (state.tcu.state === 'mission') { ui.addLog('[WARN] Cannot rest during active mission.', 'log-warn'); return; }
+      if (state.tcu.state === 'rest') { ui.addLog('[INFO] Already resting.', 'log-info'); return; }
+      tcu.setState('rest');
+      ui.addLog('[OK] Rest mode active. MOR recovering. Type "wake" to stop.', 'log-ok');
+      tcu.showBubble('Finally. Just... breathing.');
+      document.getElementById('btn-rest').classList.add('active-state');
+      document.getElementById('btn-sleep').classList.remove('active-state');
+    },
+    sleep: () => {
+      if (state.tcu.state === 'mission') { ui.addLog('[WARN] Cannot sleep during active mission.', 'log-warn'); return; }
+      if (state.tcu.state === 'sleep') { ui.addLog('[INFO] Already sleeping.', 'log-info'); return; }
+      tcu.setState('sleep');
+      ui.addLog('[OK] Sleep cycle initiated. STA recovering rapidly.', 'log-ok');
+      ui.addLog('[OK] NOVA: "Entering low-power mode. Don\'t wake me unless it\'s a crisis."', 'log-dialogue');
+      document.getElementById('btn-sleep').classList.add('active-state');
+      document.getElementById('btn-rest').classList.remove('active-state');
+      document.getElementById('btn-wake').style.display = '';
+    },
+    wake: () => {
+      if (state.tcu.state !== 'sleep' && state.tcu.state !== 'rest' && state.tcu.state !== 'train') {
+        ui.addLog('[INFO] Not in a rest state.', 'log-info'); return;
+      }
+      tcu.setState('idle');
+      ui.addLog('[OK] Unit active.', 'log-ok');
+      tcu.showBubble('Back online. What did I miss?');
+      document.getElementById('btn-rest').classList.remove('active-state');
+      document.getElementById('btn-sleep').classList.remove('active-state');
+      document.getElementById('btn-wake').style.display = 'none';
+    },
+    talk: () => tcu.speak(true),
+    mission: (args) => {
+      const type = args[0]?.toLowerCase();
+      if (!type || !MISSION_TYPES[type]) {
+        ui.addLog('[INFO] Available: recon, intel, strike, cyber, logistics, blackops', 'log-info');
+        ui.addLog('[INFO] Usage: mission [type]', 'log-system');
+        const available = currentMissions.map(m => `  ${m.def.name}: ${m.name}`).join('\n');
+        ui.addLog('Current ops:\n' + available, 'log-info');
+        return;
+      }
+      const m = currentMissions.find(m => m.type === type);
+      if (!m) { ui.addLog(`[WARN] No ${type} mission available. Refresh with 'mission'.`, 'log-warn'); return; }
+      missions.start(m);
+    },
+    abort: () => {
+      if (!state.activeMission) { ui.addLog('[INFO] No active mission.', 'log-info'); return; }
+      ui.addLog('[WARN] Mission aborted. Penalty applied.', 'log-warn');
+      state.tcu.mor = utils.clamp(state.tcu.mor - 15, 0, 100);
+      state.tcu.cort = utils.clamp(state.tcu.cort + 15, 0, 100);
+      state.activeMission = null;
+      tcu.setState('idle');
+      missions.generate();
+      ui.toast('[WARN] Mission aborted. Morale penalty.', 'warn');
+    },
+    inventory: () => ui.openModal('inventory'),
+    market: () => ui.openModal('market'),
+    implants: () => ui.openModal('implants'),
+    skills: () => ui.openModal('skills'),
+    base: () => ui.openModal('base'),
+    companions: () => ui.openModal('companions'),
+    sigint: () => ui.openModal('sigint'),
+    decrypt: () => {
+      if (state.resources.payloads < 1) { ui.addLog('[WARN] No payloads to decrypt.', 'log-warn'); return; }
+      ui.openModal('decrypt');
+    },
+    save: () => { saves.save(); ui.addLog('[OK] Quick save complete.', 'log-ok'); },
+    load: () => { if (saves.load()) { renderAll(); ui.addLog('[OK] Save loaded.', 'log-ok'); } else ui.addLog('[WARN] No save found.', 'log-warn'); },
+    export: () => saves.exportJSON(),
+    share: () => saves.shareURL(),
+    reset: (args) => {
+      if (args[0] !== 'confirm') { ui.addLog('[WARN] This will delete all progress. Type "reset confirm" to proceed.', 'log-warn'); return; }
+      localStorage.removeItem(SAVE_KEY);
+      Object.assign(state, defaultState());
+      renderAll();
+      missions.generate();
+      ui.addLog('[SYSTEM] Save data wiped. Starting fresh.', 'log-system');
+    },
+    audio: (args) => {
+      if (args[0] === 'off') { muted = true; ui.addLog('[OK] Audio suppressed.', 'log-ok'); }
+      else if (args[0] === 'on') { muted = false; ui.addLog('[OK] Audio enabled.', 'log-ok'); }
+      else audio.toggle();
+    },
+    speed: (args) => {
+      const s = parseInt(args[0]);
+      if (s === 1 || s === 10) { speedMult = s; document.getElementById('speed-btn').textContent = `⏩ x${s}`; ui.addLog(`[OK] Time compression: x${s}`, 'log-ok'); }
+      else ui.addLog('[INFO] Usage: speed [1/10]', 'log-info');
+    },
+    clear: () => { document.getElementById('terminal-log').innerHTML = ''; },
+    stats: () => commands.status(),
+    credits: () => ui.addLog(`[INFO] NOVA: "My operational budget is ${state.credits} credits. Adequate. Barely."`, 'log-dialogue'),
+  };
+
+  const AUTOCOMPLETE = Object.keys(CMDS).concat(['help','mission recon','mission intel','mission strike','mission cyber','mission logistics','mission blackops']);
+
+  function process(input) {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    inputHistory.unshift(trimmed);
+    if (inputHistory.length > 50) inputHistory.pop();
+    historyIdx = -1;
+    
+    ui.addLog(`> ${trimmed}`, 'log-input');
+    
+    const parts = trimmed.split(/\s+/);
+    const cmd = parts[0].toLowerCase();
+    const args = parts.slice(1);
+    
+    if (CMDS[cmd]) CMDS[cmd](args);
+    else ui.addLog(`[ERROR] Unknown command: ${cmd}. Type 'help' for commands.`, 'log-error');
+  }
+
+  function autocomplete(partial) {
+    if (!partial) return [];
+    return AUTOCOMPLETE.filter(c => c.startsWith(partial.toLowerCase()));
+  }
+
+  return { process, autocomplete, CMDS };
+})();
+
+// =================== MODAL BUILDERS ===================
+function buildSavesModal() {
+  const body = document.getElementById('modal-body');
+  const slots = saves.getSlots();
+  
+  body.innerHTML = `
+    <div class="modal-section">
+      <div class="modal-section-title">SAVE SLOTS</div>
+      ${slots.map(s => `
+        <div class="save-slot ${s.empty?'empty':''}">
+          <div class="ss-num">${s.slot}</div>
+          <div class="ss-info">
+            ${s.empty ? '<div class="ss-name" style="color:var(--green-dark)">[ EMPTY ]</div>' : `
+              <div class="ss-name">${utils.sanitize(s.tcu?.callsign||'UNKNOWN')}</div>
+              <div class="ss-meta">LVL ${s.tcu?.lvl||'?'} | XP ${Math.round(s.tcu?.xp||0)} | ${s._saved||'?'}</div>
+            `}
+          </div>
+          <div class="ss-actions">
+            <button class="ss-btn" onclick="TCU.saves.saveSlot(${s.slot})">SAVE</button>
+            ${!s.empty ? `<button class="ss-btn" onclick="TCU.saves.loadSlot(${s.slot});TCU.ui.closeModal()">LOAD</button>` : ''}
+            ${!s.empty ? `<button class="ss-btn del" onclick="TCU.saves.deleteSlot(${s.slot});TCU.ui.openSaves()">DEL</button>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">DATA TRANSFER</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <button class="btn-action" style="flex:1" onclick="TCU.saves.exportJSON()">📤 EXPORT JSON</button>
+        <button class="btn-action" style="flex:1" onclick="document.getElementById('import-file').click()">📥 IMPORT JSON</button>
+        <button class="btn-action" style="flex:1" onclick="TCU.saves.shareURL()">🔗 SHARE URL</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="TCU.handleImport(event)">
+      <div style="font-size:9px;color:var(--green-dim);margin-top:4px;">
+        Auto-save: every 10s | Backups: last ${MAX_BACKUPS} versions retained
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">CURRENT SESSION</div>
+      <div style="font-size:10px;color:var(--green-dim);">
+        LVL: ${state.tcu.lvl} | XP: ${Math.round(state.tcu.xp)}/${state.tcu.xpNext}<br>
+        Credits: ${state.credits} | Missions: ${state.missionsTotal}<br>
+        Version: ${SAVE_VERSION} | Day: ${state.day}
+      </div>
+    </div>
+  `;
+}
+
+function buildImplantsModal() {
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div style="margin-bottom:8px;font-size:10px;color:var(--green-dim);">
+      Equipped: ${state.equippedImplants.length}/3 | Credits: <span style="color:var(--amber)">${state.credits}</span>
+    </div>
+    ${IMPLANTS.map(imp => {
+      const equipped = state.equippedImplants.includes(imp.id);
+      const conflict = imp.conflict.some(c => state.equippedImplants.includes(c));
+      const reqMet = state.tcu.lvl >= (imp.req.lvl||1);
+      const canAfford = state.credits >= imp.cost;
+      let cls = '';
+      if (equipped) cls = 'equipped';
+      else if (!reqMet) cls = 'locked';
+      else if (conflict) cls = 'conflict';
+      
+      return `
+        <div class="implant-card ${cls}" onclick="TCU.toggleImplant('${imp.id}')">
+          <span class="ic-status ${equipped?'eq':conflict?'conf':!reqMet?'lock':''}">${equipped?'[ACTIVE]':conflict?'[CONFLICT]':!reqMet?'[LOCKED]':canAfford?'[INSTALL]':'[NO FUNDS]'}</span>
+          <div class="ic-name">${imp.name}</div>
+          <div class="ic-effect">${imp.effect}</div>
+          <div class="ic-req">Req: LVL ${imp.req.lvl||1} | Cost: ${imp.cost}cr | ${imp.desc}</div>
+        </div>`;
+    }).join('')}
+    <div style="font-size:9px;color:var(--green-dark);margin-top:8px;">
+      ⚠ Aggression ⊥ Empathy (mutual conflict)<br>
+      ✨ Optics+Neural = +15% Cyber crit | Stealth+Empathy = silent extraction
+    </div>
+  `;
+}
+
+function buildSkillsModal() {
+  const body = document.getElementById('modal-body');
+  const tabs = `
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:10px;">
+      <button class="tab-btn active" onclick="TCU.switchTab(this,'skill-combat')">⚔ COMBAT</button>
+      <button class="tab-btn" onclick="TCU.switchTab(this,'skill-cyber')">💻 CYBER</button>
+      <button class="tab-btn" onclick="TCU.switchTab(this,'skill-logi')">📦 LOGISTICS</button>
+    </div>
+  `;
+  
+  function renderBranch(id, key, color) {
+    return `<div class="tab-content ${id==='skill-combat'?'active':''}" id="${id}" style="display:${id==='skill-combat'?'block':'none'}">
+      ${SKILLS[key].map((sk, i) => {
+        const unlocked = state.skills[key].includes(sk.id);
+        const reqMet = !sk.req || state.skills[key].includes(sk.req);
+        const canAfford = state.resources.data >= sk.cost;
+        return `
+          <div class="skill-node ${unlocked?'unlocked':!reqMet?'locked':''}" 
+               onclick="TCU.unlockSkill('${key}','${sk.id}','${sk.cost}')"
+               title="${unlocked?'Unlocked':!reqMet?'Requires previous skill':canAfford?'Click to unlock':'Need '+sk.cost+' Data'}">
+            <div class="sn-icon">${sk.icon}</div>
+            <div class="sn-name">${sk.name}</div>
+            <div class="sn-cost">${unlocked?'✓':sk.req&&!state.skills[key].includes(sk.req)?'🔒':sk.cost+' DATA'}</div>
+          </div>
+          ${i < SKILLS[key].length-1 ? '<span style="color:var(--green-dark);padding:0 2px">→</span>' : ''}
+        `;
+      }).join('')}
+      <div style="margin-top:12px;font-size:9px;color:var(--green-dim);">
+        ${SKILLS[key].map(sk => `${sk.name}: ${sk.desc}`).join(' | ')}
+      </div>
+    </div>`;
+  }
+  
+  body.innerHTML = tabs + renderBranch('skill-combat','combat') + renderBranch('skill-cyber','cyber') + renderBranch('skill-logi','logistics');
+  body.innerHTML += `<div style="margin-top:8px;font-size:10px;color:var(--green-dim);">Data: <span style="color:var(--cyan)">${state.resources.data}</span> | Unlock skills using Data from missions.</div>`;
+}
+
+function buildMarketModal() {
+  const body = document.getElementById('modal-body');
+  // Fluctuating prices
+  const seed = Math.floor(Date.now() / 60000);
+  body.innerHTML = `
+    <div style="margin-bottom:8px;font-size:10px;color:var(--amber);">
+      ◈ CURRENT BALANCE: ${state.credits}cr | Prices fluctuate every minute.
+    </div>
+    ${MARKET_ITEMS.map(item => {
+      const fluctuation = 1 + (((seed * item.price) % 30) - 15) / 100;
+      const price = Math.round(item.price * fluctuation);
+      const canAfford = state.credits >= price;
+      return `
+        <div class="market-item">
+          <div class="mi-info">
+            <div class="mi-name">${item.icon} ${item.name}</div>
+            <div class="mi-desc">${item.desc}</div>
+          </div>
+          <span class="mi-price">${price}cr</span>
+          <button class="mi-buy" ${!canAfford?'disabled':''} onclick="TCU.buyItem('${item.id}',${price})">
+            ${canAfford?'BUY':'NO FUNDS'}
+          </button>
+        </div>`;
+    }).join('')}
+    <div style="margin-top:8px;font-size:9px;color:var(--green-dark);">
+      // TODO: v3.0 - Black market (requires Stealth implant + high faction rep)
+    </div>
+  `;
+}
+
+function buildBaseModal() {
+  const body = document.getElementById('modal-body');
+  const FACILITIES = {
+    bedroom:  { name:'BEDROOM',     icon:'🛏', desc:'+50% STA/CORT recovery', req:null, upgCost:0 },
+    medbay:   { name:'MEDBAY',      icon:'🏥', desc:'Heal injuries, reduce stress, therapy', req:{lvl:2,xp:150}, upgCost:300 },
+    armory:   { name:'ARMORY',      icon:'🔧', desc:'Equipment maintenance, crafting', req:{lvl:3,xp:300}, upgCost:500 },
+    comms:    { name:'COMMS RELAY', icon:'📡', desc:'+SIGINT gen, decrypt speed boost', req:{lvl:4,xp:500}, upgCost:600 },
+    garage:   { name:'GARAGE',      icon:'🚗', desc:'Vehicle: +10% mission success', req:{lvl:4,xp:400}, upgCost:700 },
+    psyops:   { name:'PSY-OPS LAB', icon:'🧪', desc:'Research traits, advanced dialogue', req:{lvl:5,xp:750}, upgCost:1000 }
+  };
+  
+  body.innerHTML = Object.entries(FACILITIES).map(([key, f]) => {
+    const fac = state.facilities[key];
+    const unlocked = fac.unlocked;
+    const req = f.req;
+    const canUnlock = !req || (state.tcu.lvl >= (req.lvl||1) && state.tcu.xp + (state.tcu.lvl-1)*100 >= (req.xp||0));
+    const canUpgrade = unlocked && state.credits >= f.upgCost;
+    
+    return `
+      <div class="facility-card ${unlocked?'unlocked':'locked'}">
+        <div class="fc-header">
+          <div class="fc-name">${f.icon} ${f.name}</div>
+          <div class="fc-level">${unlocked?`LVL ${fac.level}`:'LOCKED'}</div>
+        </div>
+        <div class="fc-desc">${f.desc}</div>
+        ${req?`<div style="font-size:9px;color:var(--amber)">Req: LVL${req.lvl} + ${req.xp}XP total</div>`:''}
+        <div style="margin-top:6px;display:flex;gap:6px;">
+          ${!unlocked && canUnlock ? `<button class="fc-action" onclick="TCU.unlockFacility('${key}')">UNLOCK FREE</button>` : ''}
+          ${!unlocked && !canUnlock ? `<button class="fc-action" disabled>NOT MET</button>` : ''}
+          ${unlocked ? `<button class="fc-action" onclick="TCU.useFacility('${key}')">USE</button>` : ''}
+          ${unlocked && fac.level < 3 ? `<button class="fc-action" ${!canUpgrade?'disabled':''} onclick="TCU.upgradeFacility('${key}',${f.upgCost})">UPGRADE (${f.upgCost}cr)</button>` : ''}
+          ${unlocked && fac.level >= 3 ? `<span style="font-size:9px;color:var(--green)">MAX LEVEL</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function buildInventoryModal() {
+  const body = document.getElementById('modal-body');
+  if (!state.inventory.length) {
+    body.innerHTML = '<div style="color:var(--green-dim);text-align:center;padding:20px;">[ NO ITEMS IN INVENTORY ]</div>';
+    return;
+  }
+  body.innerHTML = state.inventory.map((item, i) => `
+    <div class="inv-item">
+      <span class="ii-icon">${item.icon||'📦'}</span>
+      <span class="ii-name">${item.name}</span>
+      <span class="ii-qty">x${item.qty||1}</span>
+      ${item.usable ? `<button class="ii-use" onclick="TCU.useInventoryItem(${i})">USE</button>` : ''}
+    </div>`).join('') || '<div style="color:var(--green-dim)">Empty inventory.</div>';
+}
+
+function buildCompanionsModal() {
+  const body = document.getElementById('modal-body');
+  body.innerHTML = COMPANIONS.map(c => {
+    const owned = state.companions[c.id];
+    const price = { k9: 400, rat: 250, ai: 600 }[c.id];
+    const canAfford = state.credits >= price;
+    
+    return `
+      <div class="modal-section">
+        <div class="modal-section-title">${c.icon} ${c.name} :: ${c.type}</div>
+        <div style="font-size:10px;color:var(--green-dim);margin-bottom:6px;">${c.desc}</div>
+        ${owned ? `
+          <div style="font-size:10px;margin-bottom:6px;">
+            <span style="color:var(--green)">LOY: ${Math.round(owned.loy||60)}%</span>
+            <span style="color:var(--amber);margin-left:10px;">HUNGER: ${Math.round(owned.hunger||50)}%</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn-action" onclick="TCU.feedCompanion('${c.id}')">🍖 FEED (-10cr)</button>
+            <button class="btn-action" onclick="TCU.trainCompanion('${c.id}')">⚡ BOND (+loyalty)</button>
+          </div>
+          ${owned.loy >= 85 ? '<div style="color:var(--cyan);font-size:9px;margin-top:4px;">★ SPECIAL ABILITY UNLOCKED (loyalty >85%)</div>' : ''}
+        ` : `
+          <div style="font-size:10px;color:var(--amber);margin-bottom:6px;">Cost: ${price}cr</div>
+          <button class="btn-action" ${!canAfford?'disabled':''} onclick="TCU.buyCompanion('${c.id}',${price})">
+            ${canAfford?'RECRUIT':'INSUFFICIENT FUNDS'}
+          </button>
+        `}
+      </div>`;
+  }).join('');
+}
+
+function buildAchievementsModal() {
+  const body = document.getElementById('modal-body');
+  body.innerHTML = ACHIEVEMENTS.map(ach => {
+    const unlocked = state.achievements.includes(ach.id);
+    return `
+      <div class="achievement-card ${unlocked?'unlocked':''}">
+        <div class="ach-icon">${ach.icon}</div>
+        <div class="ach-info">
+          <div class="ach-name">${ach.name}</div>
+          <div class="ach-desc">${ach.desc}</div>
+        </div>
+        <div class="ach-status ${unlocked?'done':'todo'}">${unlocked?'✓ DONE':'LOCKED'}</div>
+      </div>`;
+  }).join('');
+  body.innerHTML += `<div style="margin-top:8px;font-size:10px;color:var(--green-dim);">${state.achievements.length}/${ACHIEVEMENTS.length} unlocked | Bonus: ${state.achievements.length * 50}cr earned</div>`;
+}
+
+function buildCodexModal() {
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div style="font-size:9px;color:var(--green-dim);margin-bottom:8px;">
+      ${state.codexUnlocked.length}/${CODEX.length} entries unlocked. Complete missions and reach milestones to unlock more.
+    </div>
+    ${CODEX.map(entry => {
+      const unlocked = state.codexUnlocked.includes(entry.id);
+      return `
+        <div class="codex-entry ${unlocked?'':'locked'}" onclick="this.classList.toggle('open')">
+          <div class="ce-header">
+            <div class="ce-title">${unlocked?entry.title:'[ CLASSIFIED ]'}</div>
+            <div class="ce-cat">${entry.cat}</div>
+          </div>
+          ${unlocked ? `<div class="ce-body">${entry.text}</div>` : '<div class="ce-body" style="color:var(--red-dim)">ACCESS DENIED. Clearance level insufficient.</div>'}
+        </div>`;
+    }).join('')}
+  `;
+}
+
+function buildSettingsModal() {
+  const body = document.getElementById('modal-body');
+  body.innerHTML = `
+    <div class="modal-section">
+      <div class="modal-section-title">UNIT IDENTIFICATION</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input id="callsign-input" type="text" value="${utils.sanitize(state.tcu.callsign)}" 
+               style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--green);font-family:var(--font);font-size:11px;padding:4px 8px;"
+               maxlength="20">
+        <button class="btn-action" onclick="TCU.setCallsign()">SET</button>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">SYSTEM</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <button class="btn-action" onclick="TCU.audio.toggle()">🔊 Toggle Audio (${muted?'OFF':'ON'})</button>
+        <button class="btn-action" onclick="TCU.toggleSpeed()">⏩ Time Compression (x${speedMult})</button>
+        <button class="btn-action" style="color:var(--red-dim);border-color:var(--red-dim);" onclick="TCU.cmd('reset confirm')">⚠ RESET GAME</button>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">PRESTIGE SYSTEM</div>
+      <div style="font-size:10px;color:var(--green-dim);">
+        Prestige: ${state.prestige} | Req: LVL 5 + 500XP post-LVL5<br>
+        Effect: Reset to LVL1, +5% permanent XP gain per prestige level.
+      </div>
+      ${state.tcu.lvl >= 5 && state.tcu.xp >= 500 ? 
+        '<button class="btn-action" style="margin-top:6px;color:var(--amber)" onclick="TCU.prestige()">★ INITIATE PRESTIGE</button>' : 
+        '<div style="font-size:9px;color:var(--green-dark);margin-top:4px;">Not yet eligible.</div>'}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">// SYSTEM INFO</div>
+      <div style="font-size:9px;color:var(--green-dark);">
+        Version: ${SAVE_VERSION} | Save Key: ${SAVE_KEY}<br>
+        Session: ${utils.formatTime(Math.floor((Date.now()-sessionStart)/1000))}<br>
+        TODO: v3.0 - GitHub Gist cloud sync<br>
+        TODO: v3.0 - Voice synthesis API
+      </div>
+    </div>
+  `;
+}
+
+function buildAARModal(result) {
+  if (!result) return;
+  const body = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = '◈ AFTER ACTION REPORT ◈';
+  const success = result.success;
+  
+  body.innerHTML = `
+    <div style="text-align:center;font-size:16px;color:${success?'var(--green)':'var(--red)'};text-shadow:${success?'var(--glow)':'0 0 8px rgba(255,51,51,0.5)'};margin-bottom:12px;">
+      ${result.critical ? '★ CRITICAL SUCCESS ★' : success ? '[ MISSION SUCCESS ]' : '[ MISSION FAILED ]'}
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">OPERATION: ${result.mission.name}</div>
+      <div style="font-size:10px;color:var(--green-dim);">
+        Type: ${result.mission.def.name} | Terrain: ${result.mission.terrain} | 
+        Success chance: ${result.chance}%
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">REWARDS</div>
+      <div style="font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+        <div><span style="color:var(--green-dim)">XP:</span> <span style="color:var(--green)">+${result.xp}</span></div>
+        <div><span style="color:var(--green-dim)">Credits:</span> <span style="color:var(--amber)">+${result.credits}</span></div>
+        ${result.intel ? `<div><span style="color:var(--green-dim)">Intel:</span> <span style="color:var(--cyan)">+${result.intel}</span></div>` : ''}
+        ${result.payloads ? `<div><span style="color:var(--green-dim)">Payloads:</span> <span style="color:var(--purple)">+${result.payloads}</span></div>` : ''}
+        ${result.materials ? `<div><span style="color:var(--green-dim)">Materials:</span> <span style="color:var(--amber)">+${result.materials}</span></div>` : ''}
+        ${result.data ? `<div><span style="color:var(--green-dim)">Data:</span> <span style="color:var(--cyan-dim)">+${result.data}</span></div>` : ''}
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">STAT CHANGES</div>
+      <div style="font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+        <div>STA: <span style="color:var(--red)">${result.staChange}</span></div>
+        <div>MOR: <span style="color:${result.morChange>=0?'var(--green)':'var(--red)'}">${result.morChange>0?'+':''}${result.morChange}</span></div>
+        <div>CORT: <span style="color:${result.cortChange<=0?'var(--green)':'var(--amber)'}">${result.cortChange>0?'+':''}${result.cortChange}</span></div>
+        ${result.injured ? `<div style="color:var(--red)">INJURED ⚠</div>` : '<div>Status: <span style="color:var(--green)">INTACT</span></div>'}
+      </div>
+    </div>
+    ${result.critical ? '<div style="color:var(--amber);text-align:center;font-size:10px;margin-top:8px;">★ Critical success bonus applied: x1.5 all rewards ★</div>' : ''}
+    <div style="text-align:center;margin-top:12px;">
+      <button class="btn-action" style="padding:8px 20px;" onclick="TCU.ui.closeModal()">CLOSE DEBRIEF</button>
+    </div>
+  `;
+}
+
+function buildDecisionModal(data) {
+  if (!data) return;
+  const body = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = '◈ TACTICAL DECISION ◈';
+  
+  const options = [
+    { id:'eliminate', label:'Eliminate. No witnesses.',  effect:'+15 AGG, -5 EMP, enemy KIA', moral:'red', agg:+15, emp:-5 },
+    { id:'interrogate',label:'Interrogate, then eliminate.', effect:'+5 AGG, +10 INTEL, +5 XP', moral:'amber', agg:+5, emp:+0 },
+    { id:'spare',     label:'Spare. Too much blood already.', effect:'-5 AGG, +15 EMP, +10 MOR', moral:'green', agg:-5, emp:+15 },
+    { id:'capture',   label:'Capture. Intel value alive.',    effect:'+5 EMP, +20 INTEL, +5 DISC', moral:'green', agg:-3, emp:+5 }
+  ];
+  
+  body.innerHTML = `
+    <div style="color:var(--green-dim);font-size:10px;margin-bottom:10px;">
+      Mission "${data.missionName}" complete. Enemy combatants captured.<br>
+      Commander, your call. Choose wisely. NOVA is watching.
+    </div>
+    ${options.map(opt => `
+      <div class="decision-option" onclick="TCU.makeDecision('${opt.id}',${opt.agg},${opt.emp},this)">
+        <div class="do-label">> ${opt.label}</div>
+        <div class="do-effect" style="color:var(--green-dim)">${opt.effect}</div>
+        <div class="do-moral ${opt.moral}">Alignment impact: ${opt.moral === 'red' ? 'Aggressive ▲' : opt.moral === 'green' ? 'Empathetic ▲' : 'Neutral'}</div>
+      </div>`).join('')}
+    <div style="font-size:9px;color:var(--green-dark);margin-top:8px;">
+      Decisions permanently shape NOVA's personality and dialogue.
+    </div>
+  `;
+}
+
+function buildDecryptModal() {
+  const body = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = '◈ DECRYPT MINIGAME ◈';
+  
+  // Generate hex grid
+  const CHARS = '0123456789ABCDEF';
+  const cells = Array.from({length: 32}, () => CHARS[utils.rnd(0, CHARS.length-1)] + CHARS[utils.rnd(0, CHARS.length-1)]);
+  const targetIdx = utils.rnd(0, cells.length-1);
+  let found = 0;
+  const needed = 3 + state.tcu.enc;
+  let timerVal = 100;
+  let interval;
+  
+  body.innerHTML = `
+    <div style="font-size:10px;color:var(--green-dim);margin-bottom:6px;">
+      Decrypt ${needed} sequential targets to crack the payload. ENC level: ${state.tcu.enc}
+    </div>
+    <div class="decrypt-timer"><div class="decrypt-timer-fill" id="dt-fill" style="width:100%"></div></div>
+    <div style="font-size:11px;color:var(--amber);margin-bottom:6px;" id="dt-status">AWAITING INPUT... Found: 0/${needed}</div>
+    <div class="decrypt-grid" id="dg-grid">
+      ${cells.map((c, i) => `<div class="dg-cell ${i===targetIdx?'target':''}" data-idx="${i}" onclick="TCU.decryptClick(this)">${c}</div>`).join('')}
+    </div>
+    <div style="font-size:9px;color:var(--green-dark);margin-top:6px;">Click highlighted cells to decrypt. Speed bonus for quick completion.</div>
+  `;
+  
+  // Start timer
+  interval = setInterval(() => {
+    timerVal -= 1;
+    const fill = document.getElementById('dt-fill');
+    const status = document.getElementById('dt-status');
+    if (fill) {
+      fill.style.width = timerVal + '%';
+      if (timerVal < 30) fill.className = 'decrypt-timer-fill danger';
+      else if (timerVal < 60) fill.className = 'decrypt-timer-fill warn';
+    }
+    if (timerVal <= 0) {
+      clearInterval(interval);
+      if (status) status.textContent = '[ DECRYPT FAILED - TIMEOUT ]';
+      if (status) status.style.color = 'var(--red)';
+      ui.addLog('[WARN] Decrypt timeout. ICE countermeasures activated.', 'log-warn');
+      state.tcu.cort = utils.clamp(state.tcu.cort + 10, 0, 100);
+    }
+  }, 100);
+  
+  // Store game state on modal body
+  body._decryptState = { cells, targetIdx, found, needed, timerVal, interval };
+  document.getElementById('modal-overlay').addEventListener('hidden', () => clearInterval(interval), {once: true});
+}
+
+function buildSigintModal() {
+  const body = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = '◈ SIGINT NETWORK ◈';
+  
+  const packets = Array.from({length: Math.min(state.resources.payloads, 8)}, (_, i) => ({
+    id: `PKT-${(i*7+31).toString(16).toUpperCase().padStart(4,'0')}`,
+    level: utils.rnd(1, state.tcu.enc + 1),
+    size: utils.rnd(12, 64)
+  }));
+  
+  body.innerHTML = `
+    <div style="font-size:10px;color:var(--green-dim);margin-bottom:8px;">
+      SIGINT interceptor active | Payloads: ${state.resources.payloads} | ENC Level: ${state.tcu.enc}
+    </div>
+    ${packets.length ? packets.map(p => `
+      <div class="market-item" style="cursor:pointer;" onclick="TCU.decryptPacket('${p.id}',${p.level})">
+        <div class="mi-info">
+          <div class="mi-name">📡 ${p.id}</div>
+          <div class="mi-desc">Encryption LVL ${p.level} | ${p.size}KB | ${p.level <= state.tcu.enc ? 'DECRYPTABLE' : 'ABOVE CLEARANCE'}</div>
+        </div>
+        <button class="mi-buy" ${p.level > state.tcu.enc ? 'disabled' : ''}>DECRYPT</button>
+      </div>`).join('') : '<div style="color:var(--green-dark);text-align:center;padding:20px;">No payloads available. Run missions to collect.</div>'}
+    <div style="margin-top:8px;font-size:9px;color:var(--green-dark);">// TODO: v3.0 - Real-time SIGINT with live threat feeds</div>
+  `;
+}
+
+// =================== RENDER ===================
+function renderAll() {
+  renderStats();
+  renderCompanions();
+  missions.renderMissions();
+  tcu.updateMood();
+  
+  const t = state.tcu;
+  document.getElementById('tcu-name').textContent = t.callsign;
+  document.getElementById('tcu-rank').textContent = `◈ ${RANKS[Math.min(t.lvl-1, RANKS.length-1)]} ◈`;
+  document.getElementById('hs-lvl').textContent = t.lvl;
+  document.getElementById('hs-xp').textContent = `${Math.round(t.xp)}/${t.xpNext}`;
+  document.getElementById('hs-cr').textContent = state.credits;
+  document.getElementById('hs-gti').textContent = state.gti.toFixed(2);
+  document.getElementById('ws-prestige').textContent = `P:${state.prestige}`;
+  document.getElementById('ws-enc').textContent = `ENC:${t.enc}`;
+  document.getElementById('res-intel').textContent = ` ${state.resources.intel}`;
+  document.getElementById('res-payloads').textContent = ` ${state.resources.payloads}`;
+  document.getElementById('res-mats').textContent = ` ${state.resources.materials}`;
+  document.getElementById('res-data').textContent = ` ${state.resources.data}`;
+  
+  const persType = tcu.getPersonalityType();
+  document.getElementById('pers-type').textContent = persType;
+  document.getElementById('pb-agg').style.width = state.personality.aggression + '%';
+  document.getElementById('pb-emp').style.width = state.personality.empathy + '%';
+  document.getElementById('pv-agg').textContent = state.personality.aggression;
+  document.getElementById('pv-emp').textContent = state.personality.empathy;
+  
+  // Patch
+  const patches = { SKULL:'☠', EAGLE:'🦅', SERPENT:'🐍', WOLF:'🐺' };
+  const patchKeys = Object.keys(patches);
+  const patchKey = patchKeys[Math.floor(state.personality.aggression / 25)];
+  document.getElementById('sp-patch').textContent = patches[patchKey] || '★';
+  
+  // Footer mission
+  const fm = document.getElementById('footer-mission');
+  const md = document.getElementById('mission-dot');
+  if (state.activeMission) {
+    fm.textContent = `MISSION: ${state.activeMission.name} (${utils.formatTime(Math.ceil(state.activeMission.timeLeft/speedMult))})`;
+    md.style.opacity = '1';
+    md.className = 'dot amber';
+  } else {
+    fm.textContent = 'NO ACTIVE MISSION';
+    md.style.opacity = '0.3';
+  }
+}
+
+function renderStats() {
+  const t = state.tcu;
+  const setBar = (id, val, max, cls) => {
+    const el = document.getElementById(id);
+    if (el) { el.style.width = Math.max(0, Math.min(100, (val/max)*100)) + '%'; }
+  };
+  const setVal = (id, val, threshWarn, threshDanger) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = Math.round(val);
+    el.textContent = v;
+    el.className = 'sval' + (threshDanger && v <= threshDanger ? ' danger' : threshWarn && v <= threshWarn ? ' warn' : '');
+  };
+  
+  setBar('sb-sta', t.sta, t.staMax); setVal('sv-sta', t.sta, 30, 15);
+  setBar('sb-mor', t.mor, t.morMax); setVal('sv-mor', t.mor, 30, 15);
+  setBar('sb-disc', t.disc, t.discMax); setVal('sv-disc', t.disc, null, null);
+  setBar('sb-cort', t.cort, 100); setVal('sv-cort', t.cort, 50, 80);
+  setBar('sb-fat', t.fat, 100); setVal('sv-fat', t.fat, 60, 80);
+  
+  // Header quick stats coloring
+  const crEl = document.getElementById('hs-cr');
+  if (crEl) { crEl.textContent = state.credits; crEl.className = state.credits < 100 ? 'hstat-val danger' : 'hstat-val'; }
+}
+
+function renderCompanions() {
+  const panel = document.getElementById('companions-panel');
+  if (!panel) return;
+  panel.innerHTML = '';
+  
+  COMPANIONS.forEach(c => {
+    const owned = state.companions[c.id];
+    if (!owned) return;
+    const row = document.createElement('div');
+    row.className = 'companion-row';
+    row.innerHTML = `
+      <div class="companion-icon">${c.icon}</div>
+      <div class="companion-info">
+        <div class="companion-name">${c.name}</div>
+        <div class="companion-stat">LOY: ${Math.round(owned.loy||60)}% | ${owned.hunger < 30 ? '<span style="color:var(--red)">HUNGRY!</span>' : 'FED'}</div>
+      </div>
+    `;
+    row.onclick = () => ui.openModal('companions');
+    panel.appendChild(row);
+  });
+  
+  if (!Object.values(state.companions).some(c => c)) {
+    panel.innerHTML = '<div style="font-size:9px;color:var(--green-dark);padding:6px;">No companions recruited.</div>';
+  }
+}
+
+// =================== MAIN GAME LOOP ===================
+let lastTick = 0;
+
+function gameLoop() {
+  const now = Date.now();
+  const dt = Math.min((now - lastTick) / 1000, 2); // cap at 2s
+  lastTick = now;
+  
+  if (!gameRunning) return;
+  
+  tickCount++;
+  
+  // Game logic
+  tcu.tick(dt);
+  missions.tick(dt);
+  world.tick(dt);
+  
+  // Auto-save
+  autoSaveTimer += dt;
+  if (autoSaveTimer >= AUTOSAVE_INTERVAL / 1000) {
+    autoSaveTimer = 0;
+    saves.save();
+  }
+  
+  // UI updates (throttled to every ~500ms for perf)
+  if (tickCount % 2 === 0) {
+    renderStats();
+    missions.renderMissions();
+    tcu.updateMood();
+    
+    const uptime = Math.floor((now - sessionStart) / 1000);
+    const el = document.getElementById('footer-uptime');
+    if (el) el.textContent = `SESSION: ${utils.formatTime(uptime)}`;
+  }
+  
+  // Achievement check every 5s
+  if (tickCount % 5 === 0) {
+    achievements.check();
+    codex.checkUnlocks();
+  }
+}
+
+// =================== MATRIX RAIN ===================
+function initMatrix() {
+  const canvas = document.getElementById('matrix-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  let cols, drops, frameCount = 0;
+  const CHARS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF@#$%&';
+  
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols = Math.floor(canvas.width / 16);
+    drops = new Array(cols).fill(0);
+  }
+  
+  function draw() {
+    frameCount++;
+    if (frameCount % 3 !== 0) { // Throttle for perf
+      requestAnimationFrame(draw);
+      return;
+    }
+    
+    ctx.fillStyle = 'rgba(0,0,0,0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '12px monospace';
+    
+    for (let i = 0; i < drops.length; i++) {
+      const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+      ctx.fillStyle = drops[i] * 16 < 50 ? '#ffffff' : '#00ff41';
+      ctx.fillText(char, i * 16, drops[i] * 16);
+      if (drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+    
+    requestAnimationFrame(draw);
+  }
+  
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(draw);
+}
+
+// =================== INPUT HANDLING ===================
+function initInput() {
+  const input = document.getElementById('cmd-input');
+  const hint = document.getElementById('autocomplete-hint');
+  
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      commands.process(input.value);
+      input.value = '';
+      hint.textContent = '';
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (historyIdx < inputHistory.length - 1) { historyIdx++; input.value = inputHistory[historyIdx]; }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIdx > 0) { historyIdx--; input.value = inputHistory[historyIdx]; }
+      else { historyIdx = -1; input.value = ''; }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const matches = commands.autocomplete(input.value);
+      if (matches.length === 1) { input.value = matches[0] + ' '; hint.textContent = ''; }
+      else if (matches.length > 1) hint.textContent = matches.slice(0, 8).join('  ');
+    } else if (e.key === 'Escape') {
+      input.value = '';
+      hint.textContent = '';
+      ui.closeModal();
+    }
+    // Ctrl shortcuts
+    if (e.ctrlKey) {
+      if (e.key === 's') { e.preventDefault(); saves.save(); ui.addLog('[OK] Ctrl+S save.', 'log-ok'); }
+      if (e.key === 'e') { e.preventDefault(); saves.exportJSON(); }
+      if (e.key === 'l') { e.preventDefault(); if (saves.load()) { renderAll(); } }
+    }
+  });
+  
+  input.addEventListener('input', () => {
+    const matches = commands.autocomplete(input.value);
+    hint.textContent = input.value && matches.length ? matches.slice(0, 5).join('  ') : '';
+  });
+
+  // Drag & drop import
+  document.addEventListener('dragover', e => { e.preventDefault(); });
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file?.type === 'application/json') {
+      const reader = new FileReader();
+      reader.onload = ev => saves.importJSON(ev.target.result);
+      reader.readAsText(file);
+    }
+  });
+}
+
+// =================== EXPOSED ACTIONS (for HTML onclick) ===================
+function cmd(command) { commands.process(command); }
+
+function toggleSpeed() {
+  speedMult = speedMult === 1 ? 10 : 1;
+  document.getElementById('speed-btn').textContent = `⏩ x${speedMult}`;
+  ui.toast(`[OK] Time compression: x${speedMult}`, speedMult === 10 ? 'warn' : 'ok');
+}
+
+function toggleImplant(id) {
+  const imp = IMPLANTS.find(i => i.id === id);
+  if (!imp) return;
+  
+  if (state.equippedImplants.includes(id)) {
+    state.equippedImplants = state.equippedImplants.filter(i => i !== id);
+    ui.addLog(`[OK] Implant removed: ${imp.name}`, 'log-ok');
+    ui.toast(`[OK] ${imp.name} deactivated.`, 'ok');
+    // Remove stat bonuses
+    if (imp.stats.enc) state.tcu.enc = Math.max(1, state.tcu.enc - imp.stats.enc);
+  } else {
+    if (state.tcu.lvl < (imp.req.lvl || 1)) { ui.toast(`[WARN] Requires LVL ${imp.req.lvl}`, 'warn'); return; }
+    if (state.equippedImplants.length >= 3) { ui.toast('[WARN] Max 3 implants equipped.', 'warn'); return; }
+    const conflict = imp.conflict.find(c => state.equippedImplants.includes(c));
+    if (conflict) { ui.toast(`[WARN] Conflict with ${conflict} implant.`, 'warn'); return; }
+    if (state.credits < imp.cost) { ui.toast(`[WARN] Need ${imp.cost}cr to install.`, 'warn'); return; }
+    state.credits -= imp.cost;
+    state.equippedImplants.push(id);
+    // Apply stat bonuses
+    if (imp.stats.enc) state.tcu.enc += imp.stats.enc;
+    ui.addLog(`[OK] Implant installed: ${imp.name}`, 'log-ok');
+    ui.toast(`[OK] ${imp.name} activated!`, 'ok');
+    audio.hack();
+  }
+  
+  renderAll();
+  buildImplantsModal();
+}
+
+function unlockSkill(branch, skillId, cost) {
+  if (state.skills[branch].includes(skillId)) { ui.toast('[INFO] Already unlocked.', 'info'); return; }
+  const skill = SKILLS[branch].find(s => s.id === skillId);
+  if (!skill) return;
+  if (skill.req && !state.skills[branch].includes(skill.req)) { ui.toast('[WARN] Unlock previous skill first.', 'warn'); return; }
+  if (state.resources.data < cost) { ui.toast(`[WARN] Need ${cost} Data.`, 'warn'); return; }
+  state.resources.data -= cost;
+  state.skills[branch].push(skillId);
+  ui.addLog(`[OK] Skill unlocked: ${skill.name}`, 'log-ok');
+  audio.ok();
+  buildSkillsModal();
+}
+
+function unlockFacility(key) {
+  state.facilities[key].unlocked = true;
+  state.facilities[key].level = 1;
+  ui.addLog(`[OK] Facility unlocked: ${key.toUpperCase()}`, 'log-ok');
+  ui.toast(`[OK] ${key.toUpperCase()} operational!`, 'ok');
+  buildBaseModal();
+}
+
+function upgradeFacility(key, cost) {
+  if (state.credits < cost) { ui.toast('[WARN] Insufficient funds.', 'warn'); return; }
+  state.credits -= cost;
+  state.facilities[key].level++;
+  ui.addLog(`[OK] ${key.toUpperCase()} upgraded to LVL ${state.facilities[key].level}`, 'log-ok');
+  buildBaseModal();
+}
+
+function useFacility(key) {
+  const effects = {
+    bedroom:  () => { state.tcu.sta = utils.clamp(state.tcu.sta + 20, 0, state.tcu.staMax); state.tcu.cort = utils.clamp(state.tcu.cort - 10, 0, 100); ui.toast('[OK] Bedroom rest: +20 STA, -10 CORT', 'ok'); },
+    medbay:   () => { state.tcu.mor = utils.clamp(state.tcu.mor + 25, 0, state.tcu.morMax); state.tcu.cort = utils.clamp(state.tcu.cort - 20, 0, 100); state.tcu.injuries = []; ui.toast('[OK] Medbay: +25 MOR, injuries cleared', 'ok'); },
+    armory:   () => { state.tcu.disc = utils.clamp(state.tcu.disc + 10, 0, state.tcu.discMax); state.tcu.gear = true; ui.toast('[OK] Armory: +10 DISC, gear maintained', 'ok'); },
+    comms:    () => { state.resources.payloads += 2; ui.toast('[OK] COMMS: +2 Payloads intercepted', 'ok'); },
+    garage:   () => { state.tcu.gear = true; ui.toast('[OK] Garage: Vehicle prepped (+10% mission bonus)', 'ok'); },
+    psyops:   () => { tcu.addXP(30); state.trust = utils.clamp(state.trust + 5, 0, 100); ui.toast('[OK] Psy-Ops: +30 XP, +5 Trust', 'ok'); }
+  };
+  if (effects[key]) { effects[key](); audio.ok(); }
+  renderAll();
+}
+
+function buyItem(id, price) {
+  if (state.credits < price) { ui.toast('[WARN] Insufficient funds.', 'warn'); return; }
+  state.credits -= price;
+  
+  const effects = {
+    medkit:   () => { state.tcu.sta = utils.clamp(state.tcu.sta + 30, 0, state.tcu.staMax); state.tcu.cort = utils.clamp(state.tcu.cort - 20, 0, 100); ui.toast('[OK] Medkit applied: +30 STA, -20 CORT', 'ok'); },
+    coffee:   () => { state.tcu.sta = utils.clamp(state.tcu.sta + 20, 0, state.tcu.staMax); state.tcu.cort = utils.clamp(state.tcu.cort + 5, 0, 100); tcu.showBubble('Thank you. I will function again.'); ui.toast('[OK] NOVA: "Thank you. I will function again."', 'ok'); },
+    intel_pkg:() => { state.resources.intel += 30; tcu.addXP(15); ui.toast('[OK] Intel package absorbed: +30 Intel, +15 XP', 'ok'); },
+    gear_mk2: () => { state.tcu.gear = true; ui.toast('[OK] GEAR MK-II equipped. Strike missions unlocked.', 'ok'); },
+    armor:    () => { state.tcu.armor = true; ui.toast('[OK] Kevlar vest equipped. Injury chance -30%.', 'ok'); },
+    drone:    () => { state.tcu.drone = true; ui.toast('[OK] Recon drone active. Recon success +20%.', 'ok'); },
+    stim:     () => { state.tcu.sta = utils.clamp(state.tcu.sta + 40, 0, state.tcu.staMax); state.tcu.disc = utils.clamp(state.tcu.disc + 15, 0, state.tcu.discMax); state.tcu.cort = utils.clamp(state.tcu.cort + 20, 0, 100); ui.toast('[WARN] Combat stim: +40 STA, +15 DISC, +20 CORT', 'warn'); },
+    payload:  () => { state.resources.payloads += 2; ui.toast('[OK] +2 encrypted payloads acquired.', 'ok'); }
+  };
+  
+  if (effects[id]) { effects[id](); audio.ok(); }
+  renderAll();
+  buildMarketModal();
+}
+
+function buyCompanion(id, price) {
+  if (state.credits < price) { ui.toast('[WARN] Insufficient funds.', 'warn'); return; }
+  state.credits -= price;
+  const comp = COMPANIONS.find(c => c.id === id);
+  state.companions[id] = { ...comp.stats, loy: 50, hunger: 70 };
+  ui.addLog(`[OK] ${comp.name} (${comp.type}) recruited!`, 'log-ok');
+  ui.toast(`[OK] ${comp.name} joins your squad!`, 'ok');
+  audio.levelup();
+  renderAll();
+  codex.checkUnlocks();
+  buildCompanionsModal();
+}
+
+function feedCompanion(id) {
+  if (state.credits < 10) { ui.toast('[WARN] Need 10cr to feed companion.', 'warn'); return; }
+  state.credits -= 10;
+  if (state.companions[id]) {
+    state.companions[id].hunger = utils.clamp((state.companions[id].hunger || 50) + 30, 0, 100);
+    state.companions[id].loy = utils.clamp((state.companions[id].loy || 50) + 5, 0, 100);
+    ui.toast(`[OK] Companion fed. Loyalty +5`, 'ok');
+    achievements.check();
+    renderAll();
+    buildCompanionsModal();
+  }
+}
+
+function trainCompanion(id) {
+  if (state.tcu.sta < 10) { ui.toast('[WARN] Too tired to train companion.', 'warn'); return; }
+  state.tcu.sta = utils.clamp(state.tcu.sta - 10, 0, state.tcu.staMax);
+  if (state.companions[id]) {
+    state.companions[id].loy = utils.clamp((state.companions[id].loy || 50) + 8, 0, 100);
+    ui.toast(`[OK] Companion bonding session. Loyalty +8`, 'ok');
+    achievements.check();
+    renderAll();
+    buildCompanionsModal();
+  }
+}
+
+function makeDecision(id, aggChange, empChange, el) {
+  state.personality.aggression = utils.clamp(state.personality.aggression + aggChange, 0, 100);
+  state.personality.empathy = utils.clamp(state.personality.empathy + empChange, 0, 100);
+  
+  if (id === 'eliminate' || id === 'interrogate') { state.eliminated++; }
+  if (id === 'spare' || id === 'capture') { state.spared++; }
+  
+  // Bonus effects
+  if (id === 'interrogate') { state.resources.intel += 10; tcu.addXP(5); }
+  if (id === 'capture') { state.resources.intel += 20; state.tcu.disc = utils.clamp(state.tcu.disc + 5, 0, state.tcu.discMax); }
+  if (id === 'spare') { state.tcu.mor = utils.clamp(state.tcu.mor + 10, 0, state.tcu.morMax); }
+  
+  const responses = {
+    eliminate: '"Understood. Clean execution."',
+    interrogate: '"Intel first. Efficiency second. We got what we needed."',
+    spare: '"...Thank you, Commander. Some lines shouldn\'t be crossed."',
+    capture: '"Smart. Live targets have longer-term value."'
+  };
+  
+  ui.addLog(`◈ NOVA: ${responses[id]}`, 'log-dialogue');
+  ui.toast(`[OK] Decision logged. ${tcu.getPersonalityType()}`, 'ok');
+  
+  achievements.check();
+  renderAll();
+  ui.closeModal();
+  pendingDecision = null;
+}
+
+function decryptClick(cell) {
+  const body = document.getElementById('modal-body');
+  if (!body._decryptState) return;
+  const ds = body._decryptState;
+  const idx = parseInt(cell.dataset.idx);
+  
+  if (idx === ds.targetIdx + ds.found) {
+    cell.classList.add('cracked');
+    ds.found++;
+    audio.hack();
+    const status = document.getElementById('dt-status');
+    if (status) status.textContent = `DECRYPTING... Found: ${ds.found}/${ds.needed}`;
+    
+    if (ds.found >= ds.needed) {
+      clearInterval(ds.interval);
+      const xpGain = Math.round(10 + ds.timerVal * 0.5);
+      const newTarget = utils.rnd(ds.found, ds.cells.length - 1);
+      
+      state.resources.payloads = Math.max(0, state.resources.payloads - 1);
+      tcu.addXP(xpGain);
+      state.resources.intel += utils.rnd(1, 3);
+      state.decrypts++;
+      
+      if (status) { status.textContent = `[ PAYLOAD DECRYPTED ] +${xpGain}XP | +Intel`; status.style.color = 'var(--green)'; }
+      ui.toast(`[OK] Payload decrypted! +${xpGain} XP`, 'ok');
+      audio.levelup();
+      achievements.check();
+      codex.checkUnlocks();
+    }
+  } else {
+    cell.style.background = 'rgba(255,51,51,0.2)';
+    cell.style.borderColor = 'var(--red)';
+    state.tcu.cort = utils.clamp(state.tcu.cort + 3, 0, 100);
+    audio.alert();
+    setTimeout(() => { cell.style.background = ''; cell.style.borderColor = ''; }, 500);
+  }
+}
+
+function decryptPacket(id, level) {
+  if (state.resources.payloads < 1) { ui.toast('[WARN] No payloads.', 'warn'); return; }
+  if (level > state.tcu.enc) { ui.toast('[WARN] Encryption too high. Upgrade ENC.', 'warn'); return; }
+  ui.closeModal();
+  ui.openModal('decrypt');
+}
+
+function setCallsign() {
+  const input = document.getElementById('callsign-input');
+  if (!input) return;
+  const name = input.value.trim().slice(0, 20);
+  if (!name) return;
+  state.tcu.callsign = utils.sanitize(name);
+  document.getElementById('tcu-name').textContent = state.tcu.callsign;
+  ui.addLog(`[OK] Callsign updated: ${state.tcu.callsign}`, 'log-ok');
+  ui.closeModal();
+}
+
+function prestige() {
+  if (state.tcu.lvl < 5 || state.tcu.xp < 500) { ui.toast('[WARN] Prestige requirements not met.', 'warn'); return; }
+  state.prestige++;
+  state.tcu.lvl = 1;
+  state.tcu.xp = 0;
+  state.tcu.xpNext = 100;
+  const permanentBonus = state.prestige * 5;
+  ui.addLog(`\n★★★ PRESTIGE ${state.prestige} ACHIEVED ★★★`, 'log-alert');
+  ui.addLog(`[OK] Permanent XP bonus: +${permanentBonus}% per prestige level.`, 'log-ok');
+  audio.levelup();
+  const sprite = document.getElementById('sprite');
+  if (sprite) ui.glitch(sprite);
+  renderAll();
+  ui.closeModal();
+}
+
+function switchTab(btn, targetId) {
+  // Hide all tabs in parent
+  const tabs = btn.closest('.modal-body').querySelectorAll('.tab-content');
+  tabs.forEach(t => { t.style.display = 'none'; t.classList.remove('active'); });
+  const btns = btn.parentElement.querySelectorAll('.tab-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const target = document.getElementById(targetId);
+  if (target) { target.style.display = 'block'; target.classList.add('active'); }
+}
+
+function useInventoryItem(idx) {
+  const item = state.inventory[idx];
+  if (!item || !item.usable) return;
+  // Generic item use
+  if (item.effect === 'heal') { state.tcu.sta = utils.clamp(state.tcu.sta + (item.staGain||20), 0, state.tcu.staMax); }
+  state.inventory[idx].qty = (item.qty||1) - 1;
+  if (state.inventory[idx].qty <= 0) state.inventory.splice(idx, 1);
+  ui.toast(`[OK] Used: ${item.name}`, 'ok');
+  buildInventoryModal();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => saves.importJSON(e.target.result);
+  reader.readAsText(file);
+}
+
+// =================== BOOT SEQUENCE ===================
+function boot() {
+  const log = document.getElementById('terminal-log');
+  const bootLines = [
+    '[SYS] TCU-01 TACTICAL COMPANION UNIT v2.0.0',
+    '[SYS] Neural Interface Loading...',
+    '[SYS] Checking localStorage...',
+    '[SYS] Initializing combat systems...',
+    '[SYS] Matrix rain background active...',
+    '[SYS] ====================================',
+    '[SYS] BOOT SEQUENCE COMPLETE',
+    '[OK] Welcome, Commander.',
+    '[OK] Type "help" for commands.',
+    '[OK] Your unit: NOVA awaits orders.',
+    ''
+  ];
+  
+  let i = 0;
+  const bootInterval = setInterval(() => {
+    if (i < bootLines.length) {
+      ui.addLog(bootLines[i], i < 7 ? 'log-system' : 'log-ok');
+      i++;
+    } else {
+      clearInterval(bootInterval);
+      // Load save
+      if (saves.load()) {
+        ui.addLog(`[OK] Save loaded. Day ${state.day}, LVL ${state.tcu.lvl}.`, 'log-ok');
+        tcu.showBubble('Back online. Status nominal.');
+      } else {
+        ui.addLog('[INFO] No save found. Starting new operation.', 'log-info');
+        tcu.showBubble('New mission. Let\'s get to work.');
+      }
+      
+      // Check URL for shared save
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedSave = urlParams.get('save');
+      if (sharedSave) {
+        try { saves.importJSON(JSON.stringify(utils.decode(sharedSave))); ui.addLog('[OK] Shared save loaded!', 'log-ok'); }
+        catch(e) { ui.addLog('[WARN] Could not load shared save.', 'log-warn'); }
+      }
+      
+      renderAll();
+      missions.generate();
+      tcu.setState('idle');
+      world.checkDailyChallenge && world.checkDailyChallenge();
+      
+      // Start game loop
+      gameRunning = true;
+      lastTick = Date.now();
+      setInterval(gameLoop, TICK_INTERVAL);
+      
+      // Daily greeting
+      setTimeout(() => tcu.speak(true), 2000);
+    }
+  }, 80);
+}
+
+// =================== INIT ===================
+function init() {
+  initMatrix();
+  initInput();
+  document.getElementById('cmd-input').focus();
+  
+  // Focus input on click anywhere
+  document.addEventListener('click', e => {
+    if (!e.target.closest('button, input, .mission-card, .save-slot, .implant-card, .decision-option, .market-item, .companion-row, .skill-node, .codex-entry, .dg-cell')) {
+      document.getElementById('cmd-input')?.focus();
+    }
+  });
+  
+  boot();
+}
+
+// =================== PUBLIC API ===================
+return {
+  // Core
+  cmd, toggleSpeed, renderAll,
+  // Audio
+  audio,
+  // Saves
+  saves,
+  // UI
+  ui,
+  // TCU
+  tcu,
+  // Missions
+  missions,
+  // Actions
+  toggleImplant, unlockSkill, unlockFacility, upgradeFacility, useFacility,
+  buyItem, buyCompanion, feedCompanion, trainCompanion,
+  makeDecision, decryptClick, decryptPacket,
+  setCallsign, prestige, switchTab, useInventoryItem, handleImport,
+  // Init
+  init
+};
+})();
+
+// Boot
+window.addEventListener('DOMContentLoaded', () => TCU.init());
+</script>
+</body>
+</html>
