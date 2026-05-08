@@ -1,0 +1,15 @@
+import { create } from 'zustand';
+import { api } from '../api/client';
+export type Game = { igdbId: string; title: string; avgRating: number };
+interface Store { games: Game[]; q: string; loading: boolean; fetch: (q?: string, p?: number) => void; setQ: (q: string) => void; }
+export const useStore = create<Store>((set, get) => ({
+  games: [], q: '', loading: false,
+  setQ: q => set({ q, games: [] }),
+  fetch: async (q = '', p = 0) => {
+    set({ loading: true });
+    try {
+      const { data } = await api.get(`/api/v1/games?q=${q}&page=${p}&size=20`);
+      set({ games: data.content, loading: false });
+    } catch { set({ loading: false }); }
+  }
+}));
