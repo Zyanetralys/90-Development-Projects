@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>C4ISR-GOTCHI // NEXUS PROTOCOL | TCU-01</title>
+  <meta name="description" content="Unidad Táctica de Compañía - Simulador de cuidado militar">
+  <style>
+    :root {
+      --bg: #0a0f1a; --panel: rgba(20,30,50,0.85); --border: #2a4a7a;
+      --text: #c8e6ff; --accent: #00ff9d; --warn: #ff6b6b; --info: #4dabf7;
+      --glass: blur(10px) saturate(180%); --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --font: 'Segoe UI', system-ui, monospace;
+    }
+    [data-theme="night"] {
+      --bg: #1a1a2e; --panel: rgba(10,15,30,0.9); --text: #e6f1ff;
+      --accent: #00cc88; --border: #3a5a8a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+      padding: 10px; transition: background 0.3s;
+    }
+    .header {
+      width: 100%; max-width: 800px; display: flex; justify-content: space-between;
+      align-items: center; padding: 12px 16px; background: var(--panel);
+      border: 1px solid var(--border); border-radius: 12px; margin-bottom: 12px;
+      backdrop-filter: var(--glass); box-shadow: var(--shadow);
+    }
+    .title { font-weight: 700; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.5px; }
+    .controls { display: flex; gap: 8px; }
+    .btn {
+      background: rgba(40,60,90,0.7); border: 1px solid var(--border); color: var(--text);
+      padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+      transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+    }
+    .btn:hover { background: rgba(60,90,130,0.9); border-color: var(--accent); }
+    .btn:active { transform: scale(0.98); }
+    .btn.accent { background: rgba(0,100,70,0.8); border-color: var(--accent); color: #fff; }
+    .btn.warn { border-color: var(--warn); color: var(--warn); }
+    .main {
+      width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) { .main { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; backdrop-filter: var(--glass); box-shadow: var(--shadow);
+    }
+    .unit-display {
+      grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center;
+      min-height: 220px; position: relative; overflow: hidden;
+    }
+    /* PIXEL ART SOLDIER - CSS BOX-SHADOW ONLY */
+    .soldier {
+      width: 4px; height: 4px; position: relative; margin: 20px 0;
+      image-rendering: pixelated; transform: scale(12);
+      box-shadow:
+        /* Casco verde */
+        0 0 0 2px #2d5a27, 1px -1px 0 #2d5a27, -1px -1px 0 #2d5a27,
+        2px -2px 0 #2d5a27, -2px -2px 0 #2d5a27,
+        /* Rostro */
+        0 2px 0 #f5d0a9, 1px 2px 0 #f5d0a9, -1px 2px 0 #f5d0a9,
+        /* Uniforme militar */
+        -2px 4px 0 #3a5a3a, -1px 4px 0 #3a5a3a, 0 4px 0 #3a5a3a, 1px 4px 0 #3a5a3a, 2px 4px 0 #3a5a3a,
+        -2px 5px 0 #2a4a2a, -1px 5px 0 #2a4a2a, 0 5px 0 #2a4a2a, 1px 5px 0 #2a4a2a, 2px 5px 0 #2a4a2a,
+        /* Arma */
+        3px 3px 0 #4a4a4a, 4px 3px 0 #4a4a4a, 3px 4px 0 #4a4a4a,
+        /* Botas */
+        -1px 7px 0 #1a1a1a, 0 7px 0 #1a1a1a, 1px 7px 0 #1a1a1a,
+        -1px 8px 0 #0a0a0a, 0 8px 0 #0a0a0a, 1px 8px 0 #0a0a0a;
+      transition: transform 0.3s;
+    }
+    .soldier.idle { animation: idle 2s infinite ease-in-out; }
+    .soldier.walking { animation: walk 0.6s infinite steps(2); }
+    .soldier.mission { animation: shake 0.1s infinite; }
+    .soldier.couch { transform: scale(10) rotate(5deg); opacity: 0.9; }
+    .soldier.sleeping { opacity: 0.7; animation: breathe 3s infinite ease-in-out; }
+    @keyframes idle { 0%,100%{transform:scale(12) translateY(0)} 50%{transform:scale(12) translateY(-2px)} }
+    @keyframes walk { 0%{transform:scale(12) translateX(0)} 50%{transform:scale(12) translateX(2px)} 100%{transform:scale(12) translateX(0)} }
+    @keyframes shake { 0%{transform:scale(12) rotate(0)} 25%{rotate(-2deg)} 50%{rotate(2deg)} 75%{rotate(-1deg)} 100%{rotate(0)} }
+    @keyframes breathe { 0%,100%{opacity:0.7} 50%{opacity:0.9} }
+    
+    .status-bar {
+      width: 100%; margin: 8px 0; display: flex; align-items: center; gap: 8px;
+    }
+    .bar-label { width: 40px; font-size: 0.8rem; font-weight: 600; }
+    .bar-track {
+      flex: 1; height: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .bar-fill {
+      height: 100%; background: var(--accent); border-radius: 5px; transition: width 0.3s;
+      position: relative;
+    }
+    .bar-fill.warn { background: var(--warn); }
+    .bar-fill::after {
+      content: attr(data-val); position: absolute; right: 6px; top: 50%;
+      transform: translateY(-50%); font-size: 0.7rem; color: #fff; text-shadow: 0 0 2px #000;
+    }
+    
+    .dialogue {
+      min-height: 60px; padding: 12px; background: rgba(0,0,0,0.2);
+      border-radius: 8px; font-size: 0.95rem; line-height: 1.4; margin-top: 8px;
+      border-left: 3px solid var(--accent);
+    }
+    
+    .actions { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
+    @media (max-width: 600px) { .actions { grid-template-columns: repeat(2,1fr); } }
+    
+    .log {
+      grid-column: 1 / -1; max-height: 150px; overflow-y: auto; font-size: 0.8rem;
+      background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;
+      border: 1px solid var(--border);
+    }
+    .log-entry { padding: 4px 0; border-bottom: 1px dashed rgba(100,150,200,0.2); }
+    .log-entry:last-child { border-bottom: none; }
+    .log-time { color: var(--info); margin-right: 6px; }
+    
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); z-index: 100; justify-content: center; align-items: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--panel); border: 2px solid var(--accent); border-radius: 16px;
+      padding: 20px; max-width: 90%; width: 500px; max-height: 90vh; overflow-y: auto;
+      backdrop-filter: var(--glass); box-shadow: 0 0 40px rgba(0,255,157,0.2);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .modal-title { font-weight: 700; color: var(--accent); }
+    .modal-close { background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
+    
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; background: var(--panel);
+      border-left: 4px solid var(--accent); padding: 12px 20px; border-radius: 8px;
+      box-shadow: var(--shadow); z-index: 200; animation: slideIn 0.3s ease;
+      max-width: 300px; font-size: 0.9rem;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    
+    .hidden { display: none !important; }
+    .flex { display: flex; } .flex-col { flex-direction: column; }
+    .gap-8 { gap: 8px; } .mt-8 { margin-top: 8px; } .text-center { text-align: center; }
+    .text-accent { color: var(--accent); } .text-warn { color: var(--warn); }
+    
+    /* Companion badges */
+    .companion {
+      display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px;
+      background: rgba(0,100,70,0.3); border-radius: 20px; font-size: 0.8rem; margin: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">C4ISR-GOTCHI // <span class="text-accent">NEXUS PROTOCOL</span></div>
+    <div class="controls">
+      <button class="btn" id="toggleTheme">🌙</button>
+      <button class="btn" id="toggleAudio">🔊</button>
+      <button class="btn" id="btnExport">💾</button>
+      <button class="btn" id="btnImport">📤</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="panel unit-display">
+      <div id="callsignDisplay" class="text-accent" style="font-weight:600;margin-bottom:8px;">TCU-01 "VALKYRIE"</div>
+      <div id="soldier" class="soldier idle" aria-label="Unidad táctica visual"></div>
+      <div id="companionBadges" style="display:flex;gap:4px;margin:8px 0;flex-wrap:wrap;"></div>
+      <div class="status-bar"><span class="bar-label">STA</span><div class="bar-track"><div id="staBar" class="bar-fill" style="width:100%" data-val="100"></div></div></div>
+      <div class="status-bar"><span class="bar-label">DISC</span><div class="bar-track"><div id="discBar" class="bar-fill" style="width:100%" data-val="100"></div></div></div>
+      <div class="status-bar"><span class="bar-label">CORT</span><div class="bar-track"><div id="cortBar" class="bar-fill warn" style="width:0%" data-val="0"></div></div></div>
+      <div class="status-bar"><span class="bar-label">MOR</span><div class="bar-track"><div id="morBar" class="bar-fill" style="width:100%" data-val="100"></div></div></div>
+      <div class="status-bar"><span class="bar-label">XP</span><div class="bar-track"><div id="xpBar" class="bar-fill" style="width:0%" data-val="0/100"></div></div></div>
+      <div id="dialogue" class="dialogue">[COMMS] Unidad TCU-01 en línea. Esperando órdenes, comandante.</div>
+    </div>
+
+    <div class="panel">
+      <div style="font-weight:600;margin-bottom:12px;">🎮 ÓRDENES</div>
+      <div class="actions">
+        <button class="btn accent" data-action="feed">🍽️ Alimentar</button>
+        <button class="btn" data-action="train">💪 Entrenar</button>
+        <button class="btn" data-action="rest">🛋️ Descansar</button>
+        <button class="btn" data-action="sleep">😴 Dormir</button>
+        <button class="btn" data-action="mission">🎯 Misión</button>
+        <button class="btn" data-action="implant">🧠 Implantes</button>
+        <button class="btn" data-action="inventory">🎒 Inventario</button>
+        <button class="btn" data-action="base">🏗️ Base</button>
+        <button class="btn" data-action="market">💰 Mercado</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="font-weight:600;margin-bottom:8px;">📊 ESTADO</div>
+      <div style="font-size:0.9rem;line-height:1.6;">
+        <div>Nivel: <span id="lvlDisplay" class="text-accent">1</span> | XP: <span id="xpDisplay">0/100</span></div>
+        <div>Mood: <span id="moodDisplay" class="text-accent">calm</span></div>
+        <div>Misión: <span id="missionStatus">Ninguna</span></div>
+        <div>Clima: <span id="weatherDisplay">CLR</span> | GTI: <span id="gtiDisplay">BAJO</span></div>
+        <div class="mt-8">Compañeros: <span id="companionsList">Ninguno</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div style="font-weight:600;margin-bottom:8px;">⚙️ CONFIG</div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:0.9rem;">
+        <label><input type="checkbox" id="timeCompress"> Compresión x10</label>
+        <label><input type="checkbox" id="audioToggle" checked> Audio táctico</label>
+        <label>Callsign: <input type="text" id="callsignInput" value="VALKYRIE" style="background:rgba(0,0,0,0.3);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:4px;width:120px;"></label>
+        <button class="btn" id="btnPrestige" style="margin-top:8px;">🏆 Prestigio (LVL 5+)</button>
+      </div>
+    </div>
+
+    <div id="gameLog" class="log">
+      <div class="log-entry"><span class="log-time">[00:00]</span> Sistema iniciado. TCU-01 operativa.</div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Modal</div>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toastContainer"></div>
+
+  <!-- AUDIO CONTEXT (lazy init) -->
+  <script>
+    // ==================== C4ISR-GOTCHI // NEXUS PROTOCOL v1.0 ====================
+    // Deploy: Subir este archivo como index.html a tu repo de GitHub Pages
+    // Save: Auto-guardado cada 10s en localStorage + export/import JSON
+    // ============================================================================
+
+    (function() {
+      'use strict';
+
+      // ===== CONFIG & STATE =====
+      const CONFIG = {
+        version: '1.0.0',
+        saveKey: 'c4isr_gotchi_save_v1',
+        loopInterval: 1000,
+        autoSaveInterval: 10000,
+        maxLogEntries: 50,
+        audioEnabled: true,
+        timeCompress: false
+      };
+
+      const STATE = {
+        unit: {
+          callsign: 'VALKYRIE',
+          lvl: 1, xp: 0, xpToNext: 100,
+          sta: 100, disc: 100, cort: 0, mor: 100,
+          mood: 'calm', // calm, stressed, aggressive
+          state: 'idle', // idle, walking, sleeping, couch, mission
+          implants: [], traits: [],
+          inventory: { credits: 100, gear: [], materials: [] },
+          companions: [], facilities: { bedroom: true },
+          mission: null, lastSave: Date.now()
+        },
+        meta: {
+          theme: 'dark', audio: true, timeCompress: false,
+          gtIndex: 0.3, weather: 'CLR', facReputation: { intel: 50, strike: 50 }
+        },
+        log: [], audioCtx: null
+      };
+
+      // ===== DIALOGUE POOLS =====
+      const DIALOGUE = {
+        calm: [
+          "Comandante, sistemas estables. ¿Próxima orden?",
+          "Moral óptima. Lista para operar.",
+          "¿Necesita análisis de inteligencia, señor?"
+        ],
+        stressed: [
+          "Cortisol elevado... recomiendo pausa táctica.",
+          "Sobrecarga de datos. Necesito recalibrar.",
+          "Comandante, sugiero rotación de personal."
+        ],
+        aggressive: [
+          "Objetivos identificados. Autorice engagement.",
+          "Eficiencia al 110%. ¿Blanco confirmado?",
+          "Protocolo de fuerza letal: ¿autorizado?"
+        ],
+        sleep: ["Sistemas en hibernación... Zzz...", "Recuperando stamina..."],
+        couch: ["Descanso táctico activado. Monitorizando...", "Modo baja energía: operativo."],
+        mission: {
+          start: ["Desplegando. Comms en silencio.", "En ruta. ETA 3 minutos."],
+          success: ["Objetivo neutralizado. Extrayendo.", "Misión cumplida. Botín asegurado."],
+          fail: ["Comprometidos. Retirada táctica.", "Fallos en equipo. Reevaluando."]
+        }
+      };
+
+      // ===== AUDIO SYSTEM (WebAudio - procedural tones) =====
+      const AudioSys = {
+        init() {
+          if (!CONFIG.audioEnabled || STATE.meta.audio === false) return;
+          try {
+            STATE.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          } catch(e) { console.warn('Audio no disponible'); }
+        },
+        play(type) {
+          if (!STATE.audioCtx || !STATE.meta.audio) return;
+          const ctx = STATE.audioCtx;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          
+          const now = ctx.currentTime;
+          switch(type) {
+            case 'ok': 
+              osc.frequency.setValueAtTime(880, now);
+              osc.frequency.exponentialRampToValueAtTime(440, now + 0.1);
+              gain.gain.setValueAtTime(0.1, now);
+              gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+              osc.start(now); osc.stop(now + 0.15);
+              break;
+            case 'warn':
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(220, now);
+              gain.gain.setValueAtTime(0.08, now);
+              gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+              osc.start(now); osc.stop(now + 0.3);
+              break;
+            case 'com':
+              osc.frequency.setValueAtTime(660, now);
+              osc.frequency.linearRampToValueAtTime(740, now + 0.05);
+              gain.gain.setValueAtTime(0.05, now);
+              gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+              osc.start(now); osc.stop(now + 0.1);
+              break;
+          }
+        }
+      };
+
+      // ===== CORE UTILS =====
+      const Utils = {
+        now() { return new Date().toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit'}); },
+        rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; },
+        clamp(v, min, max) { return Math.max(min, Math.min(max, v)); },
+        log(msg, type='info') {
+          const entry = `[${Utils.now()}] ${msg}`;
+          STATE.log.unshift(entry);
+          if (STATE.log.length > CONFIG.maxLogEntries) STATE.log.pop();
+          UI.updateLog();
+          if (type === 'warn') AudioSys.play('warn');
+          else if (type === 'ok') AudioSys.play('ok');
+        },
+        toast(msg, type='info') {
+          const el = document.createElement('div');
+          el.className = 'toast';
+          el.style.borderLeftColor = type === 'warn' ? 'var(--warn)' : 'var(--accent)';
+          el.textContent = msg;
+          document.getElementById('toastContainer').appendChild(el);
+          setTimeout(() => el.remove(), 3000);
+        },
+        save() {
+          STATE.unit.lastSave = Date.now();
+          const data = { v: CONFIG.version, state: JSON.parse(JSON.stringify(STATE)), ts: Date.now() };
+          localStorage.setItem(CONFIG.saveKey, JSON.stringify(data));
+          Utils.log('Progreso guardado automáticamente.', 'ok');
+        },
+        load() {
+          const raw = localStorage.getItem(CONFIG.saveKey);
+          if (!raw) return false;
+          try {
+            const data = JSON.parse(raw);
+            if (data.v !== CONFIG.version) {
+              Utils.log(`Migrando save v${data.v} → v${CONFIG.version}`, 'warn');
+              // TODO: migración de versiones
+            }
+            Object.assign(STATE, data.state);
+            UI.syncAll();
+            Utils.log('Progreso cargado.', 'ok');
+            return true;
+          } catch(e) {
+            Utils.log('Error cargando save. Iniciando nuevo.', 'warn');
+            return false;
+          }
+        },
+        exportSave() {
+          const data = JSON.stringify({ v: CONFIG.version, state: STATE, ts: Date.now() });
+          const blob = new Blob([data], {type:'application/json'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `c4isr_gotchi_${STATE.unit.callsign}_${Date.now()}.json`;
+          a.click(); URL.revokeObjectURL(url);
+          Utils.toast('Save exportado ✅');
+        },
+        importSave(file) {
+          const reader = new FileReader();
+          reader.onload = e => {
+            try {
+              const data = JSON.parse(e.target.result);
+              if (!data.state || !data.v) throw new Error('Formato inválido');
+              Object.assign(STATE, data.state);
+              UI.syncAll();
+              Utils.save();
+              Utils.toast('Save importado ✅');
+              Utils.log('Progreso importado desde archivo.', 'ok');
+            } catch(err) {
+              Utils.toast('Error importando ❌', 'warn');
+            }
+          };
+          reader.readAsText(file);
+        }
+      };
+
+      // ===== GAME LOGIC =====
+      const Game = {
+        init() {
+          if (!Utils.load()) Game.resetUnit();
+          UI.syncAll();
+          AudioSys.init();
+          Game.startLoop();
+          Utils.log(`TCU-01 "${STATE.unit.callsign}" operativa. CLR: UC`, 'ok');
+        },
+        resetUnit() {
+          STATE.unit = {
+            callsign: 'VALKYRIE', lvl: 1, xp: 0, xpToNext: 100,
+            sta: 100, disc: 100, cort: 0, mor: 100,
+            mood: 'calm', state: 'idle', implants: [], traits: [],
+            inventory: { credits: 100, gear: [], materials: [] },
+            companions: [], facilities: { bedroom: true },
+            mission: null, lastSave: Date.now()
+          };
+          STATE.meta = { theme: 'dark', audio: true, timeCompress: false, gtIndex: 0.3, weather: 'CLR', facReputation: { intel: 50, strike: 50 } };
+          STATE.log = [];
+        },
+        loop() {
+          const mult = STATE.meta.timeCompress ? 10 : 1;
+          // Decaimiento pasivo
+          if (STATE.unit.state !== 'sleeping') {
+            STATE.unit.sta = Utils.clamp(STATE.unit.sta - 0.1 * mult, 0, 100);
+            STATE.unit.mor = Utils.clamp(STATE.unit.mor - 0.05 * mult, 0, 100);
+          }
+          // Recuperación por estado
+          if (STATE.unit.state === 'sleeping' && STATE.unit.facilities.bedroom) {
+            STATE.unit.sta = Utils.clamp(STATE.unit.sta + 0.5 * mult, 0, 100);
+            STATE.unit.cort = Utils.clamp(STATE.unit.cort - 0.2 * mult, 0, 100);
+          }
+          if (STATE.unit.state === 'couch') {
+            STATE.unit.mor = Utils.clamp(STATE.unit.mor + 0.1 * mult, 0, 100);
+          }
+          // Mood dinámico
+          if (STATE.unit.cort > 70) STATE.unit.mood = 'aggressive';
+          else if (STATE.unit.cort > 40 || STATE.unit.sta < 30) STATE.unit.mood = 'stressed';
+          else STATE.unit.mood = 'calm';
+          
+          // Misiones activas
+          if (STATE.unit.mission) {
+            STATE.unit.mission.timer -= 1 * mult;
+            if (STATE.unit.mission.timer <= 0) Game.resolveMission();
+          }
+          
+          // Auto-save
+          if (Date.now() - STATE.unit.lastSave > CONFIG.autoSaveInterval) Utils.save();
+          
+          UI.updateBars();
+          UI.updateDialogue();
+          setTimeout(Game.loop, CONFIG.loopInterval);
+        },
+        startLoop() { setTimeout(Game.loop, CONFIG.loopInterval); },
+        
+        // ACCIONES
+        feed() {
+          if (STATE.unit.sta >= 100) return Utils.toast('Stamina al máximo', 'warn');
+          STATE.unit.sta = Utils.clamp(STATE.unit.sta + 15, 0, 100);
+          STATE.unit.mor = Utils.clamp(STATE.unit.mor + 5, 0, 100);
+          Utils.log('Ración táctica consumida. +STA +MOR', 'ok');
+          AudioSys.play('ok'); UI.syncAll();
+        },
+        train() {
+          if (STATE.unit.sta < 20) return Utils.toast('Stamina insuficiente', 'warn');
+          STATE.unit.sta = Utils.clamp(STATE.unit.sta - 10, 0, 100);
+          STATE.unit.disc = Utils.clamp(STATE.unit.disc + 8, 0, 100);
+          Game.gainXP(5);
+          Utils.log('Entrenamiento de combate completado. +DISC +XP', 'ok');
+          UI.syncAll();
+        },
+        rest() {
+          Game.setState('couch');
+          Utils.log('Unidad en descanso táctico. Recuperación de moral.', 'ok');
+          UI.syncAll();
+        },
+        sleep() {
+          Game.setState('sleeping');
+          Utils.log('Sistemas en hibernación. Recuperación acelerada.', 'ok');
+          UI.syncAll();
+        },
+        wake() {
+          Game.setState('idle');
+          Utils.log('Unidad reactivada. Lista para órdenes.', 'ok');
+          UI.syncAll();
+        },
+        setState(newState) {
+          STATE.unit.state = newState;
+          document.getElementById('soldier').className = `soldier ${newState}`;
+        },
+        startMission() {
+          if (STATE.unit.mission) return Utils.toast('Misión en progreso', 'warn');
+          if (STATE.unit.sta < 30) return Utils.toast('Stamina insuficiente para misión', 'warn');
+          
+          const types = ['Recon', 'Intel', 'Strike', 'Cyber', 'Logistics'];
+          const type = types[Utils.rand(0, types.length-1)];
+          const diff = Utils.rand(1, Math.min(5, STATE.unit.lvl + 1));
+          const duration = Utils.rand(30, 120) * (STATE.meta.timeCompress ? 0.1 : 1);
+          
+          STATE.unit.mission = {
+            type, diff, duration, timer: duration,
+            req: { sta: 20 + diff*5, disc: 30 + diff*3 },
+            reward: { xp: 15*diff, credits: 10*diff, loot: Utils.rand(0,2) }
+          };
+          Game.setState('mission');
+          Utils.log(`Misión ${type} iniciada. Dificultad: ${diff}. ETA: ${Math.ceil(duration/60)}min`, 'ok');
+          AudioSys.play('com'); UI.syncAll();
+        },
+        resolveMission() {
+          const m = STATE.unit.mission;
+          const baseSuccess = 70 + STATE.unit.disc * 0.3 - m.diff * 8;
+          const roll = Utils.rand(0, 100);
+          const success = roll < baseSuccess;
+          
+          if (success) {
+            Game.gainXP(m.reward.xp);
+            STATE.unit.inventory.credits += m.reward.credits;
+            Utils.log(`✅ Misión ${m.type} completada. +${m.reward.xp}XP +${m.reward.credits}cr`, 'ok');
+            AudioSys.play('ok');
+            UI.showModal('AAR - Misión Exitosa', `
+              <p><strong>Resultado:</strong> Éxito táctico</p>
+              <p><strong>Botín:</strong> ${m.reward.credits} créditos, ${m.reward.loot}x Material</p>
+              <p><strong>Rendimiento:</strong> Disciplina: ${STATE.unit.disc.toFixed(1)} | Eficiencia: ${Math.min(100, baseSuccess).toFixed(0)}%</p>
+              <button class="btn accent mt-8" onclick="document.getElementById('modalClose').click()">Cerrar</button>
+            `);
+          } else {
+            const loss = Utils.rand(5, 15);
+            STATE.unit.sta = Utils.clamp(STATE.unit.sta - loss, 0, 100);
+            STATE.unit.cort = Utils.clamp(STATE.unit.cort + 10, 0, 100);
+            Utils.log(`❌ Misión ${m.type} fallida. -${loss}STA +CORT`, 'warn');
+            AudioSys.play('warn');
+            UI.showModal('AAR - Fallo Operativo', `
+              <p><strong>Resultado:</strong> Retirada táctica</p>
+              <p><strong>Penalización:</strong> -${loss} Stamina, +10 Cortisol</p>
+              <p><strong>Análisis:</strong> Dificultad excedió parámetros operativos.</p>
+              <button class="btn accent mt-8" onclick="document.getElementById('modalClose').click()">Cerrar</button>
+            `);
+          }
+          STATE.unit.mission = null;
+          Game.setState('idle');
+          UI.syncAll();
+        },
+        gainXP(amount) {
+          STATE.unit.xp += amount;
+          if (STATE.unit.xp >= STATE.unit.xpToNext) {
+            STATE.unit.lvl++;
+            STATE.unit.xp -= STATE.unit.xpToNext;
+            STATE.unit.xpToNext = Math.floor(STATE.unit.xpToNext * 1.25);
+            Utils.log(`🎖️ ¡ASCENSO! Nivel ${STATE.unit.lvl} alcanzado.`, 'ok');
+            AudioSys.play('ok');
+            UI.toast(`¡Nivel ${STATE.unit.lvl}!`, 'ok');
+          }
+        }
+      };
+
+      // ===== UI MANAGER =====
+      const UI = {
+        syncAll() {
+          // Stats
+          document.getElementById('callsignDisplay').textContent = `TCU-01 "${STATE.unit.callsign}"`;
+          document.getElementById('callsignInput').value = STATE.unit.callsign;
+          document.getElementById('lvlDisplay').textContent = STATE.unit.lvl;
+          document.getElementById('xpDisplay').textContent = `${Math.floor(STATE.unit.xp)}/${STATE.unit.xpToNext}`;
+          document.getElementById('moodDisplay').textContent = STATE.unit.mood;
+          document.getElementById('missionStatus').textContent = STATE.unit.mission ? `${STATE.unit.mission.type} (${Math.ceil(STATE.unit.mission.timer/60)}min)` : 'Ninguna';
+          document.getElementById('weatherDisplay').textContent = STATE.meta.weather;
+          document.getElementById('gtiDisplay').textContent = STATE.meta.gtIndex < 0.4 ? 'BAJO' : STATE.meta.gtIndex < 0.7 ? 'MEDIO' : 'ALTO';
+          
+          // Companions
+          const compBadges = document.getElementById('companionBadges');
+          compBadges.innerHTML = STATE.unit.companions.map(c => 
+            `<span class="companion">${c.icon} ${c.name}</span>`
+          ).join('') || 'Ninguno';
+          document.getElementById('companionsList').textContent = STATE.unit.companions.map(c=>c.name).join(', ') || 'Ninguno';
+          
+          // Config
+          document.getElementById('timeCompress').checked = STATE.meta.timeCompress;
+          document.getElementById('audioToggle').checked = STATE.meta.audio;
+          
+          this.updateBars();
+          this.updateDialogue();
+          this.updateLog();
+        },
+        updateBars() {
+          const setBar = (id, val, max=100, warnAt=30) => {
+            const el = document.getElementById(id);
+            const pct = (val/max)*100;
+            el.style.width = `${pct}%`;
+            el.setAttribute('data-val', Math.floor(val));
+            el.className = `bar-fill ${val <= warnAt ? 'warn' : ''}`;
+          };
+          setBar('staBar', STATE.unit.sta);
+          setBar('discBar', STATE.unit.disc);
+          setBar('cortBar', STATE.unit.cort, 100, 70);
+          setBar('morBar', STATE.unit.mor);
+          setBar('xpBar', STATE.unit.xp, STATE.unit.xpToNext, 20);
+        },
+        updateDialogue() {
+          const el = document.getElementById('dialogue');
+          let pool = DIALOGUE[STATE.unit.mood];
+          if (STATE.unit.state === 'sleeping') pool = DIALOGUE.sleep;
+          else if (STATE.unit.state === 'couch') pool = DIALOGUE.couch;
+          else if (STATE.unit.mission) {
+            pool = STATE.unit.mission.timer > STATE.unit.mission.duration * 0.5 ? 
+              DIALOGUE.mission.start : DIALOGUE.mission.success;
+          }
+          // 5% chance to change dialogue per tick
+          if (Utils.rand(1,100) <= 5) {
+            el.textContent = `[COMMS] ${pool[Utils.rand(0, pool.length-1)]}`;
+          }
+        },
+        updateLog() {
+          const logEl = document.getElementById('gameLog');
+          logEl.innerHTML = STATE.log.map(entry => 
+            `<div class="log-entry"><span class="log-time">${entry.slice(0,7)}</span>${entry.slice(8)}</div>`
+          ).join('');
+        },
+        showModal(title, content) {
+          document.getElementById('modalTitle').textContent = title;
+          document.getElementById('modalBody').innerHTML = content;
+          document.getElementById('modal').classList.add('active');
+        },
+        toggleTheme() {
+          STATE.meta.theme = STATE.meta.theme === 'dark' ? 'night' : 'dark';
+          document.body.setAttribute('data-theme', STATE.meta.theme === 'night' ? 'night' : '');
+          Utils.save();
+        },
+        toggleAudio() {
+          STATE.meta.audio = !STATE.meta.audio;
+          document.getElementById('toggleAudio').textContent = STATE.meta.audio ? '🔊' : '🔇';
+          if (STATE.meta.audio && !STATE.audioCtx) AudioSys.init();
+          Utils.save();
+        }
+      };
+
+      // ===== EVENT BINDINGS =====
+      function bindEvents() {
+        // Action buttons
+        document.querySelectorAll('[data-action]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            if (Game[action]) Game[action]();
+            else if (action === 'implant') UI.showModal('🧠 Implantes Neurales', '<p><em>Sistema de implantes: Próximamente en v1.1</em></p><button class="btn accent mt-8" onclick="document.getElementById(\'modalClose\').click()">Cerrar</button>');
+            else if (action === 'inventory') UI.showModal('🎒 Inventario', `<p>Créditos: ${STATE.unit.inventory.credits}</p><p>Equipo: ${STATE.unit.inventory.gear.length || 'Ninguno'}</p><button class="btn accent mt-8" onclick="document.getElementById('modalClose').click()">Cerrar</button>`);
+            else if (action === 'base') UI.showModal('🏗️ Base Operativa', '<p>Facilidades: <strong>Bedroom</strong> ✅</p><p><em>Medbay, Armory, Garage: Desbloquear con XP</em></p><button class="btn accent mt-8" onclick="document.getElementById(\'modalClose\').click()">Cerrar</button>');
+            else if (action === 'market') UI.showModal('💰 Mercado Dinámico', '<p>Precios fluctuantes (simulados)</p><p>• Ración táctica: 15cr</p><p>• Implante básico: 200cr</p><button class="btn accent mt-8" onclick="document.getElementById(\'modalClose\').click()">Cerrar</button>');
+          });
+        });
+        
+        // Config
+        document.getElementById('toggleTheme').onclick = UI.toggleTheme;
+        document.getElementById('toggleAudio').onclick = UI.toggleAudio;
+        document.getElementById('btnExport').onclick = Utils.exportSave;
+        document.getElementById('btnImport').onclick = () => {
+          const input = document.createElement('input');
+          input.type = 'file'; input.accept = '.json';
+          input.onchange = e => Utils.importSave(e.target.files[0]);
+          input.click();
+        };
+        document.getElementById('timeCompress').onchange = e => {
+          STATE.meta.timeCompress = e.target.checked;
+          Utils.save();
+        };
+        document.getElementById('audioToggle').onchange = e => {
+          STATE.meta.audio = e.target.checked;
+          if (!STATE.meta.audio && STATE.audioCtx) STATE.audioCtx.close();
+          Utils.save();
+        };
+        document.getElementById('callsignInput').onchange = e => {
+          STATE.unit.callsign = e.target.value.toUpperCase().slice(0,12);
+          Utils.save(); UI.syncAll();
+        };
+        document.getElementById('btnPrestige').onclick = () => {
+          if (STATE.unit.lvl < 5 || STATE.unit.xp < 500) {
+            return Utils.toast('Requisitos: LVL 5 + 500 XP', 'warn');
+          }
+          if (confirm('¿Reiniciar con bono de prestigio permanente? +5% XP por nivel')) {
+            STATE.unit.lvl = 1; STATE.unit.xp = 0; STATE.unit.xpToNext = 100;
+            STATE.unit.traits.push('prestige_1');
+            Utils.log('🏆 PRESTIGIO ACTIVADO. Bono permanente: +5% XP', 'ok');
+            UI.toast('¡Prestigio alcanzado! 🏆', 'ok');
+            Utils.save(); UI.syncAll();
+          }
+        };
+        
+        // Modal
+        document.getElementById('modalClose').onclick = () => {
+          document.getElementById('modal').classList.remove('active');
+        };
+        document.getElementById('modal').onclick = e => {
+          if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
+        };
+        
+        // Wake on click when sleeping
+        document.getElementById('soldier').onclick = () => {
+          if (STATE.unit.state === 'sleeping' || STATE.unit.state === 'couch') Game.wake();
+        };
+      }
+
+      // ===== INIT =====
+      window.addEventListener('DOMContentLoaded', () => {
+        bindEvents();
+        Game.init();
+        // Prevent context menu for immersive feel
+        document.addEventListener('contextmenu', e => e.preventDefault());
+      });
+
+      // Expose for modal buttons
+      window.UI = UI;
+    })();
+  </script>
+</body>
+</html>
